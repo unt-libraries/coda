@@ -1,0 +1,84 @@
+{% extends 'mdstore/base.html' %}
+{% load humanize %}
+{% block head-extra %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1.1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn({ type: 'string', id: 'status' });
+        dataTable.addColumn({ type: 'number', id: 'num' });
+        dataTable.addRows([
+            ['Unverified', {{ unverified.count }}],
+            ['Passed', {{ passed.count }}],
+            ['Failed', {{ failed.count }}],
+        ]);
+        var options = {
+            width: 300,
+            height: 300,
+            colors:['#FFAA00', 'green', 'red',],
+            backgroundColor: {fill:'transparent'},
+            chartArea: {width: '100%', height: '80%'},
+            legend: {position: 'bottom'},
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(dataTable, options);
+    }
+</script>
+<script type="text/javascript">
+    google.load("visualization", "1.1", {packages:["calendar"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn({ type: 'date', id: 'Date' });
+        dataTable.addColumn({ type: 'number', id: 'Won/Loss' });
+        dataTable.addRows([
+            // add rows like this:
+            // [ new Date(2012, 3, 13), 125123 ],
+            {% for k, v in sums_by_date.items %}
+                [ new Date({{ k }}), {{ v }} ],
+            {% endfor %}
+        ]);
+        var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+        var options = {
+            height: 250,
+        };
+        chart.draw(dataTable, options);
+    }
+</script>
+{% endblock %}
+{% block content %}
+    {% if not validations %}
+        <div class="container text-center">
+            There are no validate entries. The system will show a graph on this page after adding validate entries.
+        </div>
+    {% else %}
+        <h1>Statistics</h1>
+        <div class='row'>
+            <div class='span4'>
+                <dl class="dl-horizontal">
+                    <dt>Total Validations</dt>
+                    <dd><span class="label">{{ validations.count|intcomma }}</span></dd>
+                    <dt>Past {{ validation_period }}</dt>
+                    <dd><span class="label">{{ last_vp.count|intcomma }}</span></dd>
+                    <dt>Past 24 hrs</dt>
+                    <dd><span class="label">{{ last_24h.count|intcomma }}</span></dd>
+                    <dt>This month</dt>
+                    <dd><span class="label">{{ this_month.count|intcomma }}</span></dd>
+                    <dt>Unverified in Queue</dt>
+                    <dd><span class="label">{{ unverified.count|intcomma }}</span></dd>
+                </dl>
+            </div>
+            <div class='span8'>
+                <div id="piechart" style="width: 300px; height: 300px;"></div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='span12 hero-unit'>
+                <h3>Validations By Date</h3>
+                <div id="calendar_basic" style="width: 1000px; height: 200px;"></div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

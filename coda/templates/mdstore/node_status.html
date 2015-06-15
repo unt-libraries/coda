@@ -1,0 +1,55 @@
+{% extends 'mdstore/base.html' %}
+{% block body_class %}Storage Node Stats{% endblock %}
+{% block title %}Storage Node Stats{% endblock %}
+{% block content %}
+{% load humanize %}
+	<h3>
+		Storage Node Status
+	</h3>
+	<table id="results" class="table table-striped table-hover">
+        <thead><tr>
+            <th>
+                Name
+            </th>
+            <th>
+                URL
+            </th>
+            <th>
+                Capacity
+            </th>
+            <th>
+                Used
+            </th>
+            <th>
+                Available
+            </th>
+            <th>
+                Full
+            </th>
+            <th>
+                Last Updated
+            </th>
+        </tr></thead>
+		{% for status in status_list %}
+			<tr>
+				<td> <i class="icon-tag"></i> <a href='{{ status.node.node_name }}'>{{ status.node.node_name }}</td>
+				<td> <i class="icon-globe"></i> <a href='{{ status.node.node_url }}'>{{ status.node.node_url }}</a> </td>
+				<td> <i class="icon-hdd"></i> {{ status.node.node_capacity|filesizeformat }} </td>
+				<td> <i class="icon-hdd"></i> {{ status.node.node_size|filesizeformat }} </td>
+				<td> <i class="icon-hdd"></i> {{ status.available|filesizeformat }} </td>
+				<td> <i class="icon-dashboard"></i> {{ status.filled }}% </td>
+				<td> <i class="icon-calendar"></i> {{ status.node.last_checked }} </td>
+			</tr>
+		{% endfor %}
+		<tr/>
+		<tr>
+			<td>&nbsp;</td>
+			<td style='text-align: right'><strong>TOTALS:</strong></td>
+			<td> <i class="icon-large icon-hdd"></i> <b>{{ total_capacity|filesizeformat }}</b></td>
+			<td> <i class="icon-large icon-hdd"></i> <b>{{ total_size|filesizeformat }}</b></td>
+			<td> <i class="icon-large icon-hdd"></i> <b>{{ total_available|filesizeformat }}</b></td>
+			<td> <i class="icon-large icon-dashboard"></i> <b>{{ total_filled }}%</b></td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+{% endblock %}

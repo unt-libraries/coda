@@ -1,0 +1,80 @@
+/* CSS Document */
+body {
+	background-image:url(coda-back.png);
+	background-repeat:repeat;
+}
+.brand {
+	padding-left:0!important;
+}
+.brand img {margin-right:9px; position:relative; top:-3px;}
+.dashboard-search .input-xxlarge,
+.dashboard-search .add-on,
+.dashboard-search i {
+	font-size:17.5px;
+	padding:11px 19px;
+}
+
+.dashboard-search {
+	margin:36px 0;
+	text-align:center;
+	background-color: #58807D;
+}
+
+.section {
+	border-bottom: 1px solid #CCC;
+	margin-bottom:1em;
+}
+
+p.describe {
+	color:#666;
+	font-style:italic;
+	font-size:.9em;
+}
+.dashboard-count {
+	font-size:1.8em;
+}
+.dashboard-box {
+	margin:18px 0;
+	padding:36px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+.dashboard-box i {
+	font-size:40px;
+}
+.dashboard-box a { color:#FFF;}
+
+.dashboard-bags{
+	background-color:#00B230;
+
+}
+.dashboard-disk{
+	background-color:#E8B85A;
+}
+.dashboard-files{
+	background-color:#FF2F35;
+}
+.dashboard-events{
+	background-color:#4C23E8;
+}
+.dashboard-queue {
+	background-color:#885499;
+
+}
+.dashboard-agents {
+	background-color:#402E0C;
+}
+
+td, th {background-color: #F2F2F2;}
+
+h1.main { margin:.5em 0;}
+
+.hero-unit {border:1px solid #CCC;}
+
+.navbar .nav > li > a {
+    color:  #d1d1d1;
+}
+.navbar .brand {
+    color:  #d1d1d1;
+}

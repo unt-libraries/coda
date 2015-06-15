@@ -1,0 +1,39 @@
+{% extends 'mdstore/base.html' %}
+{% block body_class %}Storage Node Stats{% endblock %}
+{% block title %}{{ node.node_name }}{% endblock %}
+{% block content %}
+{% load humanize %}
+	<h3 class="main">
+		Storage Node Status
+	</h3>
+	<table id="results" class="table table-striped info">
+	    <tr>
+			<th>Name</th>
+			<td> <i class="icon-tag"></i> {{ node.node_name }}</td>
+        </tr>
+	    <tr>
+			<th>URL</th>
+			<td> <i class="icon-globe"></i> {{ node.node_url }}</td>
+        </tr>
+        <tr>
+        	<th>Capacity</th>
+        	<td> <i class="icon-hdd"></i> {{ node.node_capacity|filesizeformat }}</td>
+        </tr>	
+        <tr>
+            <th>Used</th>
+            <td> <i class="icon-hdd"></i> {{ node.node_size|filesizeformat }}</td>
+        </tr>
+        <tr>
+            <th>Available</th>
+            <td> <i class="icon-hdd"></i> {{ available|filesizeformat }}</td>
+        </tr>
+        <tr>
+            <th>Full</th>
+            <td> <i class="icon-dashboard"></i> {{ filled }}</td>
+        </tr>
+        <tr>
+            <th>Last Updated</th>
+            <td> <i class="icon-calendar"></i> {{ node.last_checked }}</td>
+        </tr>
+	</table>
+{% endblock %}

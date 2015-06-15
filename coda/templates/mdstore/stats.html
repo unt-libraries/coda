@@ -1,0 +1,231 @@
+{% extends "mdstore/base.html" %}
+{% load humanize %}
+{% block head-extra %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart", "controls"]});
+    google.setOnLoadCallback(drawFreqChart);
+
+    function drawFreqChart() {
+        var dashboard = new google.visualization.Dashboard(
+           document.getElementById('dashboard')
+        );
+
+        var control = new google.visualization.ControlWrapper({
+            'controlType': 'ChartRangeFilter',
+            'containerId': 'control',
+            'options': {
+                // Filter by the date axis.
+
+                'filterColumnIndex': 0,
+                'ui': {
+                    'chartType': 'LineChart',
+                    'chartOptions': {
+                        backgroundColor: { fill:'transparent' },
+                        'chartArea': {'width': '90%'},
+                        'hAxis': {'baselineColor': 'none'},
+                    },
+                    'chartView': {
+                        'columns': [0, 1],
+                    },
+                    // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
+                    'minRangeSize': 86400000,
+                },
+
+            },
+            // Initial range
+            'state': {
+                'range': {
+                    'start': new Date(2004, 11, 1),
+                    'end': new Date(),
+                },
+            },
+        });
+
+        var chart = new google.visualization.ChartWrapper({
+            'chartType': 'LineChart',
+            'containerId': 'chart',
+            'options': {
+                // Use the same chart area width as the control for axis alignment.
+                backgroundColor: { fill:'transparent' },
+                'chartArea': {'height': '80%', 'width': '90%'},
+                'hAxis': {
+                    'slantedText': false,
+                },
+                'vAxis': {
+                    'gridlines': {count: 10},
+                    'textStyle': {color: 'black', fontName: 'arial', fontSize: 11}
+                },
+                'legend': {'position': 'none'}
+            },
+            // Convert the first column from 'date' to 'string'.
+            'view': {
+                'columns': [
+                    {
+                        'calc': function(dataTable, rowIndex) {
+                            return dataTable.getFormattedValue(rowIndex, 0).toString().substring(7,12) + ' ' + dataTable.getFormattedValue(rowIndex, 0).toString().substring(0,5);
+                        },
+                        'type': 'string',
+                    },
+                    1,
+                ]
+            }
+        });
+
+        // make one set of data for the frequency
+        var data_monthly_bags = new google.visualization.DataTable();
+        data_monthly_bags.addColumn('date', 'Date');
+        data_monthly_bags.addColumn('number', 'Bag Count');
+        {% for k, v in monthly_bags %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_bags.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        // make another set of data for the running total bags
+        var data_monthly_running_bag_total = new google.visualization.DataTable();
+        data_monthly_running_bag_total.addColumn('date', 'Date');
+        data_monthly_running_bag_total.addColumn('number', 'Bag Count');
+        {% for k, v in monthly_running_bag_total %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_running_bag_total.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        // make one set of data for the frequency
+        var data_monthly_files = new google.visualization.DataTable();
+        data_monthly_files.addColumn('date', 'Date');
+        data_monthly_files.addColumn('number', 'Files Added');
+        {% for k, v in monthly_files %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_files.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        // make one set of data for the frequency
+        var data_monthly_running_file_total = new google.visualization.DataTable();
+        data_monthly_running_file_total.addColumn('date', 'Date');
+        data_monthly_running_file_total.addColumn('number', 'Total Files');
+        {% for k, v in monthly_running_file_total %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_running_file_total.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        // make one set of data for the frequency
+        var data_monthly_size_total = new google.visualization.DataTable();
+        data_monthly_size_total.addColumn('date', 'Date');
+        data_monthly_size_total.addColumn('number', 'Total Size');
+        {% for k, v in monthly_size %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_size_total.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        // make one set of data for the frequency
+        var data_monthly_running_size_total = new google.visualization.DataTable();
+        data_monthly_running_size_total.addColumn('date', 'Date');
+        data_monthly_running_size_total.addColumn('number', 'Total Size');
+        {% for k, v in monthly_running_size %}
+        var date = new Date({{ k.year }}, {{ k.month }});
+        data_monthly_running_size_total.addRow([date, {{ v }}]);
+        {% endfor %}
+
+        var data = [];
+        data[0] = data_monthly_bags;
+        data[1] = data_monthly_running_bag_total;
+        data[2] = data_monthly_files;
+        data[3] = data_monthly_running_file_total;
+        data[4] = data_monthly_size_total;
+        data[5] = data_monthly_running_size_total;
+        var button0 = document.getElementById('b0');
+        var button1 = document.getElementById('b1');
+        var button2 = document.getElementById('b2');
+        var button3 = document.getElementById('b3');
+        var button4 = document.getElementById('b4');
+        var button5 = document.getElementById('b5');
+        var current = 0;
+
+        button0.onclick = function() {
+            current = 0;
+            drawDashboard();
+        }
+        button1.onclick = function() {
+            current = 1;
+            drawDashboard();
+        }
+        button2.onclick = function() {
+            current = 2;
+            drawDashboard();
+        }
+        button3.onclick = function() {
+            current = 3;
+            drawDashboard();
+        }
+        button4.onclick = function() {
+            current = 4;
+            drawDashboard();
+        }
+        button5.onclick = function() {
+            current = 5;
+            drawDashboard();
+        }
+
+        function drawDashboard() {
+            // Disabling the button while the chart is drawing.
+            button0.disabled = true;
+            button1.disabled = true;
+            button2.disabled = true;
+            button3.disabled = true;
+            button4.disabled = true;
+            button5.disabled = true;
+            google.visualization.events.addListener(chart, 'ready',
+                function() {
+                    button0.disabled = false;
+                    button1.disabled = false;
+                    button2.disabled = false;
+                    button3.disabled = false;
+                    button4.disabled = false;
+                    button5.disabled = false;
+                    if (current == 0) {
+                        button0.disabled = true;
+                    }
+                    if (current == 1) {
+                        button1.disabled = true;
+                    }
+                    if (current == 2) {
+                        button2.disabled = true;
+                    }
+                    if (current == 3) {
+                        button3.disabled = true;
+                    }
+                    if (current == 4) {
+                        button4.disabled = true;
+                    }
+                    if (current == 5) {
+                        button5.disabled = true;
+                    }
+                });
+            dashboard.bind(control, chart);
+            dashboard.draw(data[current]);
+        }
+        drawDashboard();
+    }
+</script>
+{% endblock %}
+{% block body_class %}Coda Stats{% endblock %}
+{% block title %}Coda Stats{% endblock %}
+{% block content %}
+    <div class="container text-center">
+        <a class="btn btn-primary btn-large" href="/bag/"><h1><i class="icon-white icon-briefcase"></i> {{ totals.pk__count|intcomma }} bags</h1></a>
+        <a class="btn btn-primary btn-large" href="/node/"><h1><i class="icon-white icon-hdd"></i> {{ totals.size__sum|filesizeformat }}</h1></a>
+        <a class="btn btn-primary btn-large" href="/bag/"><h1><i class="icon-white icon-file"></i> {{ totals.files__sum|intcomma }} files</h1></a>
+    </div><br> <br>
+    <div class="container text-center" id="dashboard">
+        <div class="btn-group">
+            <input class="btn btn-info" id="b0" value="Monthly Bags Added" type='button'></input>
+            <input class="btn btn-info" id="b1" value="Running Bags Total" type='button'></input>
+            <input class="btn btn-info" id="b2" value="Monthly Files Added" type='button'></input>
+            <input class="btn btn-info" id="b3" value="Running Files Total" type='button'></input>
+            <input class="btn btn-info" id="b4" value="Monthly Size Total" type='button'></input>
+            <input class="btn btn-info" id="b5" value="Running Size Total" type='button'></input>
+        </div>
+        <div id="chart" style='width: auto; height: 300px;'></div>
+        <div id="control" style='width: auto; height: 50px;'></div>
+    </div>
+{% endblock %}

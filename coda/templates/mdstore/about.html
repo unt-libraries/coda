@@ -1,0 +1,471 @@
+{% extends 'mdstore/base.html' %}
+{% block content %}
+<!-- simple introduction of Coda -->
+<div class='container-fluid'>
+<h3>Introduction</h3>
+    The UNT Coda App is a tool for validating and retrieving data related to coda and premis events. If you have questions or comments about the UNT Coda App, please contact Mark Phillips at <a href="mailto:mark.phillips@unt.edu">mark.phillips@unt.edu</a>.
+
+<h3>Three Sections</h3>
+    Notice there are three sections to The Coda App. The first section is <b>CODA</b>. This section will detail bags information and statistics, storage node status, and also serves up the sitemap xml files. There is also a system in place to validate the contents of BagIT structures. The second section is <b>PREMIS EVENTS</b>. Premis Events serve as a status indicator for different events as they relate to the coda system, such as data migration events. This section gives detail on the agents, which give infomation related about the transfer from underlying medium storage to another, a list of the most recent events, and a search utility for the events. The third and final section is <b>QUEUE</b>. The queue shows a listing of to-be-ran and completed process, such as a harvest event. There is also a stats page and search function.<br>
+</div>
+<div class='container-fluid'>
+    <h3>Search API</h3>
+    <p>Lets dive right in! The following are various search examples using <a href="http://www.cs.sunysb.edu/documentation/curl/index.html">curl</a>:</p>
+
+    <!--BEGIN CODE MARKUP-->
+    <div id="highlight-python"><pre>
+    # to get only the events which have failed, use the 'outcome' url argument
+    $ curl {{ request.META.HTTP_HOST }}/event/search.json?outcome=http://purl.org/net/untl/vocabularies/eventOutcomes#failure
+    [
+        {
+            "date": "2013-05-13 14:27:29",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck",
+            "identifier": "2226bcc6f9334e3eb0ab5f64c498c852",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure"
+        },
+        {
+            "date": "2013-05-13 14:27:30",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#migration",
+            "identifier": "4f1e8bfc6e9440b982db1b9d3ab6f33f",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure"
+        },
+        ... etc ...
+    ]
+
+    # to get the events which failed after a certain date, append a 'start_date' argument
+    $ curl {{ request.META.HTTP_HOST }}/event/search.json?outcome=http://purl.org/net/untl/vocabularies/eventOutcomes#failure&start_date=05/13/2013
+    [
+        {
+            "date": "2013-05-13 14:27:30",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#migration",
+            "identifier": "4f1e8bfc6e9440b982db1b9d3ab6f33f",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure"
+        },
+        ... etc ...
+    ]
+
+    # filter events to a particular bag object by giving a 'link_object_id'
+    $ curl {{ request.META.HTTP_HOST }}/event/search.json?link_object_id=ark:/67531/coda1295
+    # this argument can also be given as merely the coda shortname, like so:
+    $ curl {{ request.META.HTTP_HOST }}/event/search.json?link_object_id=coda1295
+    [
+        {
+            "date": "2013-05-13 14:27:29",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck",
+            "identifier": "2226bcc6f9334e3eb0ab5f64c498c852",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure"
+        },
+        {
+            "date": "2013-05-13 14:27:30",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#migration",
+            "identifier": "4f1e8bfc6e9440b982db1b9d3ab6f33f",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure"
+        },
+        {
+            "date": "2013-05-13 16:38:41",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck",
+            "identifier": "1e6f47613242412dbb898fd07d1e24a8",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#success"
+        },
+        {
+            "date": "2013-05-13 16:38:42",
+            "event_type": "http://purl.org/net/untl/vocabularies/preservationEvents/#migration",
+            "identifier": "51c4d077e3884fef9d8119e39524bbfe",
+            "linked_objects": "ark:/67531/coda1295",
+            "outcome": "http://purl.org/net/untl/vocabularies/eventOutcomes/#success"
+        }
+    ]</pre></div>
+
+    <h3>Search return codes</h3>
+    <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_Success">200 OK</a> response:
+        <ul><li>user gave a fully-formed search query which returns a list of results in JSON format</li></ul>note: it is possible to receive an empty set with a 200 OK response if, for instance, you search for a bag that doesn't exist - or a date range in the future.
+
+    <!--BEGIN PARAMETERS-->
+    <h3>How can I narrow my search?</h3>
+    You might have noticed a few of these from the above examples. Parameters hang off the end of a search request to narrow the results you get in your response and will get you closer to the premis events you are attempting to lookup. All parameters are optional<br>
+    <b>outcome</b>: <i>Optional</i> - The result of the premis event. The two valid options for this parameter are "http://purl.org/net/untl/vocabularies/eventOutcomes/#failure" and "http://purl.org/net/untl/vocabularies/eventOutcomes/#success".<br>
+    <b>event_type</b>: <i>Optional</i> - The type or classification of the premis event. The three valid options for this parameter are "http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck", "http://purl.org/net/untl/vocabularies/preservationEvents/#migration" and "http://purl.org/net/untl/vocabularies/preservationEvents/#replication"<br>
+    <b>start_date</b>: <i>Optional</i> - The lower bound of the time frame in which to search for premis events. The proper format for this parameter is MM/DD/YYYY.<br>
+    <b>end_date</b>: <i>Optional</i> - The upper bound of the time frame in which to search for premis events. The proper format for this parameter is MM/DD/YYYY.<br>
+    <b>linked_object_id</b>: <i>Optional</i> - The text identifier for the associated Bag Object. This can be submitted in one of two formats: 'ark:/67531/(bag_identifier)', or more succintly, just pass in the (bag_identifier). There may be more than one bag id associated with an event.<br>
+
+    <h3>B.E.Q.A.N. HTTP Methods on ATOM Publishing Protocol (APP)</h3>
+    Here are some examples for using the ATOM publishing protocol.
+
+    <h4>Bag</h4>
+    Bags are virtual storage zones for library content and metadata.
+    <!--BEGIN CODE MARKUP-->
+    <div id="highlight-python"><pre>
+# To submit a new bag via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/bag/
+
+# To get the bag records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/bag/
+
+# To get the data of a particular bag
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+
+# To update the contents of a bag
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+
+# To delete a particular bag
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+
+# here's a simple example of what a bag xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;ark:/67531/coda2&lt;/title&gt;
+  &lt;id&gt;ark:/67531/coda2&lt;/id&gt;
+  &lt;updated&gt;2013-06-05T17:05:33Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name&gt;server&lt;/name&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/"&gt;
+      &lt;bag:name&gt;ark:/67531/coda2&lt;/bag:name&gt;
+      &lt;bag:fileCount&gt;43&lt;/bag:fileCount&gt;
+      &lt;bag:payloadSize&gt;46259062&lt;/bag:payloadSize&gt;
+      &lt;bag:bagitVersion&gt;0.96&lt;/bag:bagitVersion&gt;
+      &lt;bag:lastVerified/&gt;
+      &lt;bag:bagInfo&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;External-Description&lt;/bag:name&gt;
+          &lt;bag:body&gt;Newspaper issues from Canadian, Texas including the"Canadian Advertiser" and the "Hemphill County News" funded by the HemphillCounty Public Library. Partner was Hemphill County Public Library. The DolphBriscoe Center for American History at the University of Texas held the mastermicrofilm reels. Content was digitized from microfilm using NDNP standards byiArchives. Content was delivered in a batch called "batch_tx_20090210_deltacanadian" and then processed for inclusion in the Portal to Texas History.Master files are tiff images with accompanying OCR and bounding box files.&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Bag-Size&lt;/bag:name&gt;
+          &lt;bag:body&gt;44.22M&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Internal-Sender-Identifier&lt;/bag:name&gt;
+          &lt;bag:body&gt;1939031701&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;External-Identifier&lt;/bag:name&gt;
+          &lt;bag:body&gt;ark:/67531/metapth47080&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Organization-Address&lt;/bag:name&gt;
+          &lt;bag:body&gt;P. O. Box 305190, Denton, TX 76203-5190&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Bagging-Date&lt;/bag:name&gt;
+          &lt;bag:body&gt;2009-09-24&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Contact-Phone&lt;/bag:name&gt;
+          &lt;bag:body&gt;940-369-7809&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Contact-Name&lt;/bag:name&gt;
+          &lt;bag:body&gt;Mark Phillips&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Contact-Email&lt;/bag:name&gt;
+          &lt;bag:body&gt;mark.phillips@unt.edu&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;BagIt-Version&lt;/bag:name&gt;
+          &lt;bag:body&gt;0.96&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Payload-Oxum&lt;/bag:name&gt;
+          &lt;bag:body&gt;46259062.43&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Tag-File-Character-Encoding&lt;/bag:name&gt;
+          &lt;bag:body&gt;UTF-8&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+        &lt;bag:item&gt;
+          &lt;bag:name&gt;Source-Organization&lt;/bag:name&gt;
+          &lt;bag:body&gt;University of North Texas Libraries&lt;/bag:body&gt;
+        &lt;/bag:item&gt;
+      &lt;/bag:bagInfo&gt;
+    &lt;/bag:codaXML&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+</pre></div>
+<h4>Event</h4>
+An event is an action to a bag.
+<!--BEGIN CODE MARKUP-->
+<div id="highlight-python"><pre>
+# To update the contents of an event
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+
+# To get the data of a particular event
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+
+# To submit a new event via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/event/
+
+# To get the event records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/event/
+
+# To delete a particular event
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+
+# here's a simple example of what an event xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/title&gt;
+  &lt;id&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/id&gt;
+  &lt;updated&gt;2013-06-05T17:04:40Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name&gt;server&lt;/name&gt;
+  &lt;/author&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;premis:event xmlns:premis="info:lc/xmlns/premis-v2"&gt;
+      &lt;premis:eventDetail&gt;THIS IS EDITING THE EVENT DETAIL&lt;/premis:eventDetail&gt;
+      &lt;premis:eventOutcomeInformation&gt;
+        &lt;premis:eventOutcomeDetail&gt;Total time for verification: 0:00:01.839590&lt;/premis:eventOutcomeDetail&gt;
+        &lt;premis:eventOutcome&gt;http://purl.org/net/untl/vocabularies/eventOutcomes/#success&lt;/premis:eventOutcome&gt;
+      &lt;/premis:eventOutcomeInformation&gt;
+      &lt;premis:eventType&gt;http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck&lt;/premis:eventType&gt;
+      &lt;premis:linkingAgentIdentifier&gt;
+        &lt;premis:linkingAgentIdentifierValue&gt;http://{{ request.META.HTTP_HOST }}/agent/codaMigrationVerification&lt;/premis:linkingAgentIdentifierValue&gt;
+        &lt;premis:linkingAgentIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#URL&lt;/premis:linkingAgentIdentifierType&gt;
+      &lt;/premis:linkingAgentIdentifier&gt;
+      &lt;premis:eventIdentifier&gt;
+        &lt;premis:eventIdentifierValue&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/premis:eventIdentifierValue&gt;
+        &lt;premis:eventIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#UUID&lt;/premis:eventIdentifierType&gt;
+      &lt;/premis:eventIdentifier&gt;
+      &lt;premis:eventDateTime&gt;2013-05-13 14:14:55&lt;/premis:eventDateTime&gt;
+      &lt;premis:linkingObjectIdentifier&gt;
+        &lt;premis:linkingObjectIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#ARK&lt;/premis:linkingObjectIdentifierType&gt;
+        &lt;premis:linkingObjectIdentifierValue&gt;ark:/67531/coda10kx&lt;/premis:linkingObjectIdentifierValue&gt;
+        &lt;premis:linkingObjectRole/&gt;
+      &lt;/premis:linkingObjectIdentifier&gt;
+    &lt;/premis:event&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+</pre></div>
+
+<h4>Queue</h4>
+    A Queue entry is a process on a bag.
+    <!--BEGIN CODE MARKUP-->
+    <div id="highlight-python"><pre>
+# To update the contents of a queue entry
+$ curl -s -X PUT --data-binary @queue.xml http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+
+# To get the data of a particular queue entry
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+
+# To submit a new queue entry via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/queue/
+
+# To get the queue collection
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/queue/
+
+# To delete a particular queue entry
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+
+# here's a simple example of what an queue xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;ark:/67531/coda4fnk&lt;/title&gt;
+  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/ark:/67531/coda4fnk/&lt;/id&gt;
+  &lt;updated&gt;2013-06-17T17:11:29Z&lt;/updated&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;queueEntry xmlns="http://digital2.library.unt.edu/coda/queuexml/"&gt;
+      &lt;ark&gt;ark:/67531/coda4fnk&lt;/ark&gt;
+      &lt;oxum&gt;327039156.34&lt;/oxum&gt;
+      &lt;urlListLink&gt;http://digital2.library.unt.edu/ark:/67531/coda4fnk.urls&lt;/urlListLink&gt;
+      &lt;status&gt;3&lt;/status&gt;
+      &lt;start&gt;2013-05-17T01:12:20Z&lt;/start&gt;
+      &lt;end&gt;2013-05-17T01:12:33Z&lt;/end&gt;
+      &lt;position&gt;1&lt;/position&gt;
+    &lt;/queueEntry&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+</pre></div>
+<h4>Agent</h4>
+An agent creates events.
+<!--BEGIN CODE MARKUP-->
+<div id="highlight-python"><pre>
+# To get the data of a particular agent
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+
+# To get the agent records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/agent/
+
+# To update the contents of a agent
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+
+# To submit a new agent via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/agent/
+
+# To delete a particular agent
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+
+# Here's what an agent xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;premis:agent xmlns:premis="info:lc/xmlns/premis-v2"&gt;
+  &lt;premis:agentIdentifier&gt;
+    &lt;premis:agentIdentifierValue&gt;codaMigration&lt;/premis:agentIdentifierValue&gt;
+    &lt;premis:agentIdentifierType&gt;purl:thing&lt;/premis:agentIdentifierType&gt;
+  &lt;/premis:agentIdentifier&gt;
+  &lt;premis:agentName&gt;Bloda Bligration Blagent&lt;/premis:agentName&gt;
+  &lt;premis:agentType&gt;Software&lt;/premis:agentType&gt;
+&lt;/premis:agent&gt;
+</pre></div>
+<h4>Node</h4>
+A node is a physical storage location.
+<!--BEGIN CODE MARKUP-->
+<div id="highlight-python"><pre>
+# To submit a new node via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/
+
+# To update the contents of a node
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+
+# To delete a particular node
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/node/ark:/67531/coda-001/
+
+# To get the node records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/
+
+# To get the data of a particular node
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+
+# here's a simple example of what an node xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;coda-001&lt;/title&gt;
+  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/coda-001/&lt;/id&gt;
+  &lt;updated&gt;2013-06-13T19:06:49Z&lt;/updated&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;node&gt;
+      &lt;name&gt;coda-001&lt;/name&gt;
+      &lt;capacity&gt;25286628343808&lt;/capacity&gt;
+      &lt;size&gt;34361344&lt;/size&gt;
+      &lt;path&gt;/data3/coda-001&lt;/path&gt;
+      &lt;url&gt;http://example.com/coda-001/&lt;/url&gt;
+      &lt;last_checked&gt;2013-05-03 14:42:40&lt;/last_checked&gt;
+    &lt;/node&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+</pre>
+</div>
+<h4>Node</h4>
+A node is a physical storage location.
+<!--BEGIN CODE MARKUP-->
+<div id="highlight-python"><pre>
+# To submit a new node via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/
+
+# To update the contents of a node
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+
+# To delete a particular node
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/node/ark:/67531/coda-001/
+
+# To get the node records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/
+
+# To get the data of a particular node
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+
+# here's a simple example of what an node xml looks like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;coda-001&lt;/title&gt;
+  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/coda-001/&lt;/id&gt;
+  &lt;updated&gt;2013-06-13T19:06:49Z&lt;/updated&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;node&gt;
+      &lt;name&gt;coda-001&lt;/name&gt;
+      &lt;capacity&gt;25286628343808&lt;/capacity&gt;
+      &lt;size&gt;34361344&lt;/size&gt;
+      &lt;path&gt;/data3/coda-001&lt;/path&gt;
+      &lt;url&gt;http://example.com/coda-001/&lt;/url&gt;
+      &lt;last_checked&gt;2013-05-03 14:42:40&lt;/last_checked&gt;
+    &lt;/node&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+</pre>
+</div>
+<h2>Validations</h2>
+Validation objects are a 1-1 object relationship with Bags. Validations are run concurrently, nonstop, via a daemon that continually asks for the 'next' validation to perform.
+The 'next' validation is represented as an XML feed of 1 entry.
+Accessing the 'next' validation looks something like this:
+<div id="highlight-python"><pre>
+# ask for the next item to be validated
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/validate/next/
+
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us"&gt;
+  &lt;title&gt;UNT Coda Validate App&lt;/title&gt;
+  &lt;link href="http://{{ request.META.HTTP_HOST }}/validate/next/" rel="alternate"&gt;&lt;/link&gt;
+  &lt;link href="http://{{ request.META.HTTP_HOST }}/validate/next/" rel="self"&gt;&lt;/link&gt;
+  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/validate/next/&lt;/id&gt;
+  &lt;updated&gt;2014-08-08T14:48:25Z&lt;/updated&gt;
+  &lt;author&gt;
+    &lt;name&gt;UNT Coda System&lt;/name&gt;
+  &lt;/author&gt;
+  &lt;subtitle&gt;The highest priority validation item&lt;/subtitle&gt;
+  &lt;entry&gt;
+    &lt;title&gt;ark:/67531/coda4pon&lt;/title&gt;
+    &lt;link href="http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/" rel="alternate"&gt;&lt;/link&gt;
+    &lt;id&gt;http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/&lt;/id&gt;
+    &lt;summary type="html"&gt;Item was randomly selected and within the past year because there is no prioritized record.&lt;/summary&gt;
+  &lt;/entry&gt;
+&lt;/feed&gt;
+</pre></div>
+Note that the feed's entry item also has a 'summary' attribute. This field should explain the reasoning why the record was chosen as the next item in the validation queue.
+As you might guess, this implies that there is a set of rules which govern the validation's order, of which we will go into detail...
+<h3>Validation Order</h3>
+<ol>
+  <li>The record that has a 'priority' of greater than 0 and the oldest 'priority_change_date'.</li>
+  <li>Randomly selected record from the set of items with a 'last_verified' date which is also older than the VALIDATION_PERIOD setting.</li>
+  <li>The record with the oldest 'last_verified' date.</li>
+</ol>
+note: these rules can be filtered further by a specific server. To do so, ask for the next feed with a url structure like this:
+<div id="highlight-python"><pre>
+# filtering validation next feed
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/validate/next/&lt;server&gt;/
+</pre></div>
+<h3>Validation Interface</h3>
+Retrieving the next item is all well and good, but it doesn't answer the question of how we will update the record on it's pass/fail result after the actual validation occurs.
+We of course extend the REST API /APP/ interface to allow updating records.
+<div id="highlight-python"><pre>
+# To submit a new validate via xml file
+$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/validate/
+
+# The daemon will issue a PUT to update the status of the validation
+$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+
+# To delete a particular validate (we probably wont ever want to do this)
+$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+
+# To get all the validate records
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/validate/
+
+# To get the data of a particular validtation
+$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+
+# here's a simple example of what a validation xml might look like
+&lt;?xml version="1.0"?&gt;
+&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
+  &lt;title&gt;ark:/67531/coda99wt&lt;/title&gt;
+  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda99wt/&lt;/id&gt;
+  &lt;updated&gt;2014-08-08T20:18:08Z&lt;/updated&gt;
+  &lt;content type="application/xml"&gt;
+    &lt;validate xmlns:validate="http://digital2.library.unt.edu/coda/validatexml/"&gt;
+      &lt;identifier&gt;ark:/67531/coda99wt&lt;/identifier&gt;
+      &lt;last_verified&gt;2014-08-06 12:19:14&lt;/last_verified&gt;
+      &lt;last_verified_status&gt;Passed&lt;/last_verified_status&gt;
+      &lt;priority_change_date&gt;2014-07-30 18:00:58&lt;/priority_change_date&gt;
+      &lt;priority&gt;0&lt;/priority&gt;
+      &lt;server&gt;example.host&lt;/server&gt;
+    &lt;/validate&gt;
+  &lt;/content&gt;
+&lt;/entry&gt;
+
+</pre></div>
+<br><br>{% endblock %}

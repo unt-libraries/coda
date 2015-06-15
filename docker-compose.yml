@@ -1,0 +1,16 @@
+db:
+    image: mysql:latest
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=coda_local
+coda: 
+    build: .
+    command: python coda/coda_project/manage.py runserver 0.0.0.0:80
+    volumes:
+        - .:/app/
+    ports:
+        - "8000:80"
+    links:
+        - db
+
+

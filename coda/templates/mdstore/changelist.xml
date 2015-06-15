@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">
+    <rs:md capability="changelist" modified="{{ MOST_RECENT_BAGGING_DATE }}"/>
+{% for url in urlset %}
+<url>
+	<loc>http://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}</loc>
+	<rs:md hash="oxum: {{ url.size }}.{{ url.files }}"/>
+	<rs:ln href="http://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}.urls" rel="alternate" type="text/x-checkm"/>
+</url>{% endfor %}
+</sitemapindex>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:rs="http://www.openarchives.org/rs/terms/">
+    <rs:md capability="resourcelist" modified="{{ MOST_RECENT_BAGGING_DATE }}"/>
+{% for url in urlset %}
+<url>
+	<loc>{{ url.location }}</loc>
+	<rs:md hash="oxum: {{ url.oxum }}"/>
+	<rs:ln href="{{ url.location }}.urls" rel="alternate" type="text/x-checkm"/>
+</url>{% endfor %}
+</sitemapindex>

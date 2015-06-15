@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+  <title>ark:/67531/coda2</title>
+  <id>ark:/67531/coda2</id>
+  <updated>2013-06-05T17:05:33Z</updated>
+  <author>
+    <name>server</name>
+  </author>
+  <content type="application/xml">
+    <bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/">
+      <bag:name>ark:/67531/coda2</bag:name>
+      <bag:fileCount>43</bag:fileCount>
+      <bag:payloadSize>46259062</bag:payloadSize>
+      <bag:bagitVersion>0.96</bag:bagitVersion>
+      <bag:lastVerified/>
+      <bag:bagInfo>
+        <bag:item>
+          <bag:name>External-Description</bag:name>
+          <bag:body>Newspaper issues from Canadian, Texas including the"Canadian Advertiser" and the "Hemphill County News" funded by the HemphillCounty Public Library. Partner was Hemphill County Public Library. The DolphBriscoe Center for American History at the University of Texas held the mastermicrofilm reels. Content was digitized from microfilm using NDNP standards byiArchives. Content was delivered in a batch called "batch_tx_20090210_deltacanadian" and then processed for inclusion in the Portal to Texas History.Master files are tiff images with accompanying OCR and bounding box files.</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Bag-Size</bag:name>
+          <bag:body>44.22M</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Internal-Sender-Identifier</bag:name>
+          <bag:body>1939031701</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>External-Identifier</bag:name>
+          <bag:body>ark:/67531/metapth47080</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Organization-Address</bag:name>
+          <bag:body>P. O. Box 305190, Denton, TX 76203-5190</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Bagging-Date</bag:name>
+          <bag:body>2009-09-24</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Contact-Phone</bag:name>
+          <bag:body>940-369-7809</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Contact-Name</bag:name>
+          <bag:body>Mark Phillips</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Contact-Email</bag:name>
+          <bag:body>mark.phillips@unt.edu</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>BagIt-Version</bag:name>
+          <bag:body>0.96</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Payload-Oxum</bag:name>
+          <bag:body>46259062.43</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Tag-File-Character-Encoding</bag:name>
+          <bag:body>UTF-8</bag:body>
+        </bag:item>
+        <bag:item>
+          <bag:name>Source-Organization</bag:name>
+          <bag:body>University of North Texas Libraries</bag:body>
+        </bag:item>
+      </bag:bagInfo>
+    </bag:codaXML>
+  </content>
+</entry>

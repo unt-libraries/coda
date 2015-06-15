@@ -1,0 +1,13 @@
+{% extends 'mdstore/base.html' %}
+{% block content %}
+    <h2>
+        Input an external ID and get all associated items.
+    </h2>
+
+    <form action="/extidentifier/" method="get">
+        <div>
+            <input type="text" name="ark"/>
+            <button style="vertical-align: top" class="btn-small" type="submit">Submit</button>
+        </div>
+    </form>
+{% endblock %}

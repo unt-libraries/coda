@@ -1,0 +1,39 @@
+{% extends "mdstore/base.html" %}
+{% block content %}
+{% load humanize %}
+
+<table id="results" class="table table-striped info">
+    <tr>
+        <th style="width: 20%;">Ark</th>
+        <th><i class="icon-tag"></i> {{ record.ark }}</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td><i class="icon-asterisk"></i>
+            {% for status in status_list %}
+                {% if status.0 == record.status %}
+                    {{ status.1 }}
+                {% endif %}
+            {% endfor %}</td>
+    </tr>
+    <tr>
+        <th>Harvest Start Date</th>
+        <td><i class="icon-calendar"></i> {{ record.harvest_start }}</td>
+    </tr>
+    <tr>
+        <th>Harvest End Date</th>
+        <td><i class="icon-calendar"></i> {{ record.harvest_end }}</td>
+    </tr>
+    <tr>
+        <th>Oxum</th>
+        <td><i class="icon-hdd"></i> {{ record.oxum }}</td>
+    </tr>
+    <tr>
+        <th>Queue Position</th>
+        <td><i class="icon-list-ol"></i> {{ record.queue_position }}</td>
+    </tr>
+</table>
+<a class="btn btn-success btn-large" href="http://{{ request.META.HTTP_HOST }}/APP/queue/{{ record.ark }}/">
+    ATOMPUB <i class="icon-rss"></i>
+</a>
+{% endblock %}

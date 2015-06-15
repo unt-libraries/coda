@@ -1,0 +1,75 @@
+{% extends 'mdstore/base.html' %}
+{% load humanize %}
+{% block head-extra %}
+<script>
+$(document).ready(function() {
+    $('#priority').click(function(){
+        $.ajax({
+            type: "GET",
+            url: "{% url prioritize_json %}",
+            data: {'identifier': $(this).attr('name')},
+            dataType: "text",
+            success: function(response) {
+                $('#p').html('<span class="disabled btn btn-warning"><i class="icon-bolt"></i> 1</span>');
+                $('#alert').html('<div class="span6 alert alert-warning"><a href="#" class="close" data-dismiss="alert">&times;</a><strong><i class="icon-bolt"></i> Zap!</strong> This is a prioritized validation! It will be validated post-haste!</div>');
+            },
+            error: function(rs, e) {
+                alert(rs.responseText);
+            }
+        });
+    })
+});
+</script>
+{% endblock %}
+{% block content %}
+<div id="alert" class="row">
+</div>
+<div class="row">
+    <div class="span6">
+        <table id="results" class="table table-bordered table-hover table-striped">
+            <tr>
+                <th>Identifier</th>
+                <td><b><i class="icon-info"></i> {{ validate.identifier }}</b></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td><span title="{{ validate.last_verified_status }}" class="disabled btn btn-block btn-mini btn-{% if validate.last_verified_status == "Failed" %}danger{% else %}{% if validate.last_verified_status == "Unverified"%}warning{% else %}success{% endif %}{% endif %}">{{ validate.last_verified_status }}</span></td>
+            </tr>
+            <tr>
+                <th>Verified Date</th>
+                <td><i class="icon-calendar"></i> {{ validate.last_verified }}</td>
+            </tr>
+            <tr>
+                <th>Added Date</th>
+                <td><i class="icon-calendar"></i> {{ validate.added }}</td>
+            </tr>
+            <tr>
+                <th>Priority</th>
+                <td>
+                    <div id="p">
+                        <i class="icon-bolt"></i> {{ validate.priority }}
+                        {% if validate.priority == 0 %}
+                            <input name='{{ validate.identifier }}' id='priority' value='Prioritize!' type='button' class='btn btn-mini btn-warning pull-right' />
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Priority Change Date</th>
+                <td><i class="icon-calendar"></i> {{ validate.priority_change_date }}</td>
+            </tr>
+            <tr>
+                <th>Server</th>
+                <td><i class="icon-hdd"></i> {{ validate.server }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="span6">
+        <a class="btn btn-success btn-large" href="http://{{ request.META.HTTP_HOST }}/APP/validate/{{ validate.identifier }}/">
+            ATOMPUB <i class="icon-rss"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

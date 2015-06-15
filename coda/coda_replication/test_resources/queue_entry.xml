@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+  <title>ark:/67531/coda4fnk</title>
+  <id>http://example.com/ark:/67531/coda4fnk/</id>
+  <updated>2014-04-23T15:39:20Z</updated>
+  <content type="application/xml">
+    <queueEntry xmlns="http://digital2.library.unt.edu/coda/queuexml/">
+      <ark>ark:/67531/coda4fnk</ark>
+      <oxum>3640551.188</oxum>
+      <urlListLink>http://example.com/ark:/67531/coda4fnk.urls</urlListLink>
+      <status>1</status>
+      <start>2013-05-17T01:35:04Z</start>
+      <end>2013-05-17T01:35:13Z</end>
+      <position>2</position>
+    </queueEntry>
+  </content>
+</entry>

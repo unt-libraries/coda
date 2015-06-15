@@ -1,0 +1,42 @@
+{% extends "mdstore/base.html" %}
+{% load humanize %}
+{% block head-extra %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load('visualization', '1.1', {packages: ['corechart', 'controls']});
+</script>
+<script type="text/javascript">
+    google.setOnLoadCallback(drawContributionChart);
+    function drawContributionChart() {
+        // Create and populate the data table.
+        var data = google.visualization.arrayToDataTable([
+            ['Replication Status', 'Count'],
+            {% for k, v in status_counts.items %}
+            ['{{ k }}', {{ v }}],
+            {% endfor %}
+        ]);
+        // Create and draw the visualization.
+        var piechart = new google.visualization.PieChart(document.getElementById('piechart'));
+            piechart.draw(data,
+                {
+                    backgroundColor: { fill:'transparent' },
+                    title: 'status distribution',
+                });
+    }
+</script>
+{% endblock %}
+{% block body_class %}Queue Stats{% endblock %}
+{% block title %}Queue Stats{% endblock %}
+{% block content %}
+    {% if totals == 0 %}
+    <div class="container text-center">
+        There are no queue entries. The system will show a graph on this page after adding content to the queue.
+    </div>
+    {% else %}
+    <div class="container text-center">
+        <a class="btn btn-primary btn-small"><h2><i class="icon-list-ol"></i> {{ totals|intcomma }} queue entries</h2></a>
+
+    </div><br><br>
+    <div class="pull-left" id="piechart" style='width: 600px; height: 600px;'></div>
+    {% endif %}
+{% endblock %}

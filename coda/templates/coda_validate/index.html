@@ -1,0 +1,61 @@
+{% extends 'mdstore/base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="well pagination-centered">
+    <h1>Coda <i class="icon-ok"></i>alidate</h1>
+</div>
+{% if recently_prioritized.count > 0 %}
+<div>
+    <table class='table table-hover table-striped table-bordered'>
+        <h2>Prioritized Items</h2>
+        <thead>
+            <tr class="info">
+                <th><i class="icon-info"></i> Identifier</th>
+                <th><i class="icon-calendar"></i> Added</th>
+                <th><i class="icon-calendar"></i> Last Verified</th>
+                <th><i class="icon-calendar"></i> Date Prioritized</th>
+                <th><i class="icon-info-sign"></i> Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for v in recently_prioritized %}
+            <tr>
+                <td><a href='/validate/{{ v.identifier }}/'>{{ v.identifier }}</a></td>
+                <td>{{ v.added }}</td>
+                <td>{{ v.last_verified }}</td>
+                <td>{{ v.priority_change_date }}</td>
+                <td>
+                    <span title="{{ v.last_verified_status }}" class="disabled btn btn-block btn-mini btn-{% if v.last_verified_status == "Failed" %}danger{% else %}{% if v.last_verified_status == "Unverified"%}warning{% else %}success{% endif %}{% endif %}">{{ v.last_verified_status }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+<div>
+    <table class='table table-hover table-striped table-bordered'>
+        <h2>Recent Activity</h2>
+        <thead>
+            <tr class="info">
+                <th><i class="icon-info"></i> Identifier</th>
+                <th><i class="icon-calendar"></i> Added</th>
+                <th><i class="icon-calendar"></i> Last Verified</th>
+                <th><i class="icon-info-sign"></i> Status</th>
+            </tr>
+        </thead>
+        {% for v in recently_verified %}
+            <tr>
+                <td><a href='/validate/{{ v.identifier }}/'>{{ v.identifier }}</a></td>
+                <td>{{ v.added }}</td>
+                <td>{{ v.last_verified }}</td>
+                <td>
+                    <span title="{{ v.last_verified_status }}" class="disabled btn btn-block btn-mini btn-{% if v.last_verified_status == "Failed" %}danger{% else %}{% if v.last_verified_status == "Unverified"%}warning{% else %}success{% endif %}{% endif %}">{{ v.last_verified_status }}</span>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

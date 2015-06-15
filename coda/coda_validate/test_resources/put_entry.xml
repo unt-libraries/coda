@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+  <title>ark:/67531/coda123459</title>
+  <id>http://example.com/APP/validate/ark:/67531/coda123459/</id>
+  <updated>2014-08-11T18:37:40Z</updated>
+  <content type="application/xml">
+    <validate:validate xmlns:validate="http://digital2.library.unt.edu/coda/validatexml/">
+      <validate:identifier>ark:/67531/coda123459</validate:identifier>
+      <validate:last_verified>2000-01-01 00:00:00</validate:last_verified>
+      <validate:last_verified_status>Unverified</validate:last_verified_status>
+      <validate:priority_change_date>2000-01-01 00:00:00</validate:priority_change_date>
+      <validate:priority>1</validate:priority>
+      <validate:server>example.host</validate:server>
+    </validate:validate>
+  </content>
+</entry>

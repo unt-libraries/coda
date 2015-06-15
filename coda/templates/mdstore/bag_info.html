@@ -1,0 +1,92 @@
+{% extends "mdstore/base.html" %}
+{% block content %}
+{% load humanize %}
+<!-- MAIN HEADER BUTTON GROUP -->
+<div class="btn-group">
+    <a class="btn btn-large btn-primary">{{ bag }}</a>
+    <a class="btn btn-large btn-warning" href="{{ request.build_absolute_uri|slice:":-1" }}.urls">URLS</a>
+    <a class="btn btn-large btn-danger" href="http://{{ request.META.HTTP_HOST }}/APP/bag/{{ bag }}">ATOM</a>
+</div>
+<!-- BAG INFO HEADER -->
+<h3 class="main"><i class="icon-white icon-briefcase"></i> Bag Info Details:</h3>
+<table class="table table-striped info">
+    {% for k in bag_info %}
+        <tr>
+            <th style="width: 20%; border-right:5px solid {% cycle #00B230,#E8B85A,#4C23E8,#885499,#FF2F35,#58807D %}">{{ k.field_name }}:</th>
+            <td>
+                {% if k.field_name == 'Contact-Email' %}
+                    <i class="icon-envelope"></i> <a href="mailto:{{ k.field_body }}">{{ k.field_body }}</a>
+                {% else %}{% if k.field_name == 'External-Identifier' %}
+                    <i class="icon-globe"></i> <a href="http://texashistory.unt.edu/{{ k.field_body }}">{{ k.field_body }}</a>
+                {% else %}{% if k.field_name == 'Payload-Oxum' %}
+                    <i class="icon-hdd"></i> {{ payload_oxum_size|filesizeformat }}, <i class="icon-file-alt"></i> {{ payload_oxum_file_count }} files
+                {% else %}{% if k.field_name == 'Bagging-Date' %}
+                    <i class="icon-calendar"></i> {{ bag_date|timesince }} ago
+                {% else %}{% if k.field_name == 'Organization-Address' %}
+                    <i class="icon-building"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Contact-Phone' %}
+                    <i class="icon-phone"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'BagIt-Version' %}
+                    <i class="icon-info-sign"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Bag-Size' %}
+                    <i class="icon-hdd"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Contact-Name' %}
+                    <i class="icon-user"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Internal-Sender-Identifier' %}
+                    <i class="icon-tag"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Source-Organization' and 'University of North Texas' in k.field_body %}
+                    <img src="http://example.com/media/aubrey_public/images/brand-digital-library/favicon.ico"></i> {{ k.field_body }}
+                {% else %}
+                    <i class="icon-leaf"></i> {{ k.field_body }}
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+<!-- EVENTS HEADER -->
+{% if json_events|length > 0 %}
+
+<h3><i class="icon-link icon-large"></i>There are <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ json_events.feed.entry|length }} premis events</a> associated with {{ bag }}:</h3>
+
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+        <th>Event ID</th>
+        <th>Event Date</th>
+        <th>Event Status</th>
+        <th>Linked Object(s)</th>
+        <th>Classified Type</th>
+	</tr>
+  </thead>
+  <tbody>
+
+{% for event in json_events.feed.entry %}
+
+    <tr>
+
+        <td><i class="icon-tag"></i><a href="http://{{ request.META.HTTP_HOST }}/event/{{ event.identifier }}"> {{ event.identifier }}</a></td>
+
+
+        <td>{{ event.date }}</td>
+
+
+        <td>{% if event.outcome|slice:"53:" == 'success' %} <a href="http://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-success">Success</span></a>{% else %} <a href="http://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-important">Failure</span></a>{% endif %}
+        </td>
+
+        <td><i class="icon-link"></i> {{ event.linked_objects }}</td>
+
+        <td><i class="icon-asterisk"></i> <a href="http://{{ request.META.HTTP_HOST }}/event/search/?type={{ event.event_type|urlencode }}"> {{ event.event_type }}</a></td>
+
+    </tr>
+
+
+{% endfor %}
+	</tbody>
+</table>
+
+
+{% else %}
+    <h3><i class="icon-remove icon-large"></i> There are no <em>premis events</em> associated with this bag.</h3>
+{% endif %}
+{% endblock %}

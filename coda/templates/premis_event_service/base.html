@@ -1,0 +1,53 @@
+{% load url from future %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>{% block title %}{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.min.css" rel="stylesheet">
+        <style type="text/css">body { padding-top: 60px; }</style>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css"
+            type="text/css"
+            media="all">
+        <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js" type="text/javascript"></script>
+        {%  block head-extra %}{% endblock %}
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid" style="padding-left: 40px;">
+                    <ul class="nav">
+                        <li><a class="brand" href="{% url 'premis_event_service.views.recent_event_list' %}">PREMIS Event Service</a></li>
+                        <li><a href="{% url 'premis_event_service.views.recent_event_list' %}">Events</a></li>
+                        <li><a href="{% url 'premis_event_service.views.event_search' %}">Search</a></li>
+                        <li><a href="{% url 'premis_event_service.views.humanAgent' %}">Agents</a></li>
+                        <li class="divider-vertical"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="body">
+            {% block body %}
+            <div class="content_title">
+                {% block content_title %}{% endblock %}
+            </div>
+            <div class="content container-fluid">
+                {% if maintenance_message %}
+                <div class="alert alert-block alert-error">
+                    <strong>{{ maintenance_message }}</strong>
+                </div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>

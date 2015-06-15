@@ -1,0 +1,22 @@
+{% extends 'mdstore/base.html' %}
+{% load humanize %}
+{% block content %}
+{% if prioritized %}
+<div class="alert alert-warning">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <strong><i class="icon-bolt"></i> Zap!</strong> You've prioritized record '{{ identifier }}'.
+</div>
+{% endif %}
+<div class='pagination-centered'>
+    <h1>Prioritize</h1>
+    <p>Input the identifier of a record that needs validation soon.</p>
+    <form action='/validate/prioritize/' class="form-inline" method='get'>
+        <fieldset>
+        <div class="input-prepend">
+            <span class="add-on"><i class="icon-bolt"></i> </span>
+            <input name="identifier" class="span4" id="prependedInput" type="text" placeholder="Enter an ark:/ to prioritize">
+        </div>
+        <button type="submit" class="btn">Submit</button>
+        </fieldset>
+    </form>
+</div>{% endblock %}
