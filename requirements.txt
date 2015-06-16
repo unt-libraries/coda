@@ -9,3 +9,4 @@ pyoai==2.4.4
 
 git+git://github.com/unt-libraries/django-premis-event-service
 git+git://github.com/unt-libraries/pypairtree
+git+git://github.com/unt-libraries/codalib
