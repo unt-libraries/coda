@@ -306,9 +306,3 @@ class APPNodeHTTPTest(CodaCase):
         response = self.c.delete('/APP/node/coda-123/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
 
-# class TestSitemap(TestCase):
-#     def sitemap(self):
-#         self.assertEqual(BaseSitemap.items, 400000)
-
-if __name__ == "__main__":
-    unittest.main()
