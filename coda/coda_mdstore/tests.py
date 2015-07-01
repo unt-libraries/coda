@@ -1,14 +1,15 @@
-from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
-from django.core.urlresolvers import resolve
-from coda_mdstore.views import prepare_graph_date_range
-from datetime import date, datetime
-from django.test import TestCase
-from coda_mdstore.resourcesync import BaseSitemap
-from coda_mdstore.views import *
-from django.conf import settings
 import os
+import unittest
+from datetime import date, datetime
+
+from django.conf import settings
+from django.core.urlresolvers import resolve
+from django.test import TestCase, Client
+
 import coda_mdstore
-from django.test import Client
+from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
+from coda_mdstore.views import *
+
 
 settings.SITE_ID = 1
 
@@ -105,6 +106,8 @@ class BagTest(CodaCase):
         self.assertIsNotNone(b.last_verified_status)
         self.assertIsNotNone(b.bagging_date)
 
+    @unittest.skip('Search requires a FULLTEXT index which is not '
+                   'currently part the build process.')
     def test_can_search_for_bags(self):
         # check out its homepage
         response = self.c.get('/')
@@ -157,6 +160,8 @@ class CodaViewTest(CodaCase):
         self.assertContains(response, "<?xml version=\"1.0\" encoding=\"utf-8\"?>")
         self.assertEqual(response.status_code, 200)
 
+    @unittest.skip('Search requires a FULLTEXT index which is not '
+                   'currently part the build process.')
     def test_search_view(self):
         response = self.c.get('/search/')
         self.assertEqual(response.status_code, 200)
@@ -190,10 +195,10 @@ class APPBagHTTPTest(CodaCase):
 
     def test_GET(self):
         # create the base level get request and test it's response
-        response = self.c.get('/APP/bag/')
+        response = self.c.get('/APP/bag/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
         # test GETting our test bag
-        response = self.c.get('/APP/bag/ark:/67531/coda2/')
+        response = self.c.get('/APP/bag/ark:/67531/coda2/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
 
     def test_POST(self):
@@ -204,18 +209,20 @@ class APPBagHTTPTest(CodaCase):
             response = self.c.post(
                 '/APP/bag/',
                 data,
+                HTTP_HOST='example.com',
                 content_type='text/xml',
             )
         self.assertEqual(response.status_code, 201)
 
     def test_PUT(self):
-        with open(            
+        with open(
             os.path.join(os.path.dirname(coda_mdstore.__file__), 'test_resources', 'bag_entry.xml')
         ) as f:
             data = f.read()
             response = self.c.put(
                 '/APP/bag/ark:/67531/coda2/',
                 data,
+                HTTP_HOST='example.com',
                 content_type='text/xml',
             )
         self.assertEqual(response.status_code, 200)
@@ -230,6 +237,7 @@ class APPBagHTTPTest(CodaCase):
             response = self.c.put(
                 '/APP/bag/ark:/67531/coda2/',
                 data,
+                HTTP_HOST='example.com',
                 content_type='text/xml',
             )
         bag = Bag.objects.get(name='ark:/67531/coda2')
@@ -240,7 +248,7 @@ class APPBagHTTPTest(CodaCase):
         self.assertEqual(ext_id_before.count(), ext_id_after.count())
 
     def test_DELETE(self):
-        response = self.c.delete('/APP/bag/ark:/67531/coda2/')
+        response = self.c.delete('/APP/bag/ark:/67531/coda2/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
 
 
@@ -253,10 +261,10 @@ class APPNodeHTTPTest(CodaCase):
 
     def test_GET(self):
         # create the base level get request and test it's response
-        response = self.c.get('/APP/node/')
+        response = self.c.get('/APP/node/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
         # test GETting our test node
-        response = self.c.get('/APP/node/coda-123/')
+        response = self.c.get('/APP/node/coda-123/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
 
     def test_POST(self):
@@ -267,6 +275,7 @@ class APPNodeHTTPTest(CodaCase):
             response = self.c.post(
                 '/APP/node/',
                 data,
+                HTTP_HOST='example.com',
                 content_type='text/xml',
             )
         self.assertEqual(response.status_code, 201)
@@ -288,17 +297,12 @@ class APPNodeHTTPTest(CodaCase):
             response = self.c.put(
                 '/APP/node/coda-001/',
                 data,
+                HTTP_HOST='example.com',
                 content_type='text/xml',
             )
         self.assertEqual(response.status_code, 200)
 
     def test_DELETE(self):
-        response = self.c.delete('/APP/node/coda-123/')
+        response = self.c.delete('/APP/node/coda-123/', HTTP_HOST='example.com')
         self.assertEqual(response.status_code, 200)
 
-# class TestSitemap(TestCase):
-#     def sitemap(self):
-#         self.assertEqual(BaseSitemap.items, 400000)
-
-if __name__ == "__main__":
-    unittest.main()
