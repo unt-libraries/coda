@@ -1,7 +1,7 @@
 import os
 import unittest
-
 from datetime import date, datetime
+
 from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.test import TestCase, Client
