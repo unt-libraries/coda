@@ -1,7 +1,7 @@
-# Coda
+# Coda [![Build Status](https://travis-ci.org/unt-libraries/coda.svg?branch=master)](https://travis-ci.org/unt-libraries/coda)
+
 
 ## Developing
-
 To take advantage of the dev environment that is already configured, you need to have Docker(>= 1.3) and Docker Compose installed.
 
 Install [Docker](https://docs.docker.com/installation/)
