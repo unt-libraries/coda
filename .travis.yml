@@ -1,0 +1,17 @@
+language: python
+sudo: false
+python: 2.7
+services:
+    - mysql
+env:
+    global:
+        - DB_HOST=localhost
+        - DB_MYSQL_USER=travis
+        - DB_PASSWORD=''
+        - PYTHONPATH=`pwd`/coda
+before_script:
+    - mysql -e 'create database coda_local;'
+    - cp coda/coda_project/settings/secrets.json.template coda/coda_project/settings/secrets.json
+    - python ./coda/coda_project/manage.py syncdb --noinput --settings=coda_project.settings.test
+script:
+    - py.test --create-db
