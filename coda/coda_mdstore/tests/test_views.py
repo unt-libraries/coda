@@ -1,9 +1,13 @@
+import urllib2
+
 import pytest
-from mock import Mock, MagicMock
+from mock import Mock, MagicMock, patch
 
 from django.core.urlresolvers import reverse
+from django import http
 
 from .. import views
+from .. import models
 
 
 # Add this mark so that we are not loading all the urls for
@@ -40,7 +44,7 @@ class TestIndexView:
         Event.objects.count.return_value = 10
         monkeypatch.setattr('coda_mdstore.views.Event', Event)
 
-    def test_status_code_200(self, rf):
+    def test_returns_status_code_200(self, rf):
         request = rf.get('/')
         response = views.index(request)
         assert response.status_code == 200
@@ -144,32 +148,54 @@ class Test_bagHTML:
         Bag = Mock()
         monkeypatch.setattr('coda_mdstore.views.get_object_or_404', Bag)
 
-        Bag_Info1 = MagicMock()
-        Bag_Info1.field_name = 'Payload-Oxum'
+        PayloadOxum = MagicMock()
+        PayloadOxum.field_name = 'Payload-Oxum'
+        self.payload_oxum = PayloadOxum
 
-        Bag_Info2 = MagicMock()
-        Bag_Info2.field_name = 'Bagging-Date'
-        Bag_Info2.field_body = '2015-01-01'
+        BaggingDate = MagicMock()
+        BaggingDate.field_name = 'Bagging-Date'
+        BaggingDate.field_body = '2015-01-01'
+        self.bagging_date = BaggingDate
 
         Bag_Info = Mock()
-        Bag_Info.objects.filter.return_value = [Bag_Info1, Bag_Info2]
+        Bag_Info.objects.filter.return_value = [PayloadOxum, BaggingDate]
         monkeypatch.setattr('coda_mdstore.views.Bag_Info', Bag_Info)
 
         Site = Mock()
         Site.objects.get_current().name = 'example.com'
         monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
-    def test_bag_info_does_not_have_payload_oxum(self):
-        pass
+    @pytest.mark.xfail(reason='View cannot handle bag without a member '
+                              'Payload-Oxum Bag_Info')
+    def test_bag_info_does_not_have_payload_oxum(self, rf):
+        self.payload_oxum.field_name = ''
+        response = views.bagHTML(rf.get('/'), 'fake-identifier')
 
-    def test_bag_info_does_not_have_bagging_date(self):
-        pass
+        assert response.status_code in (200, 404)
 
-    def test_catches_urlerror(self):
-        pass
+    @pytest.mark.xfail(reason='View cannot handle bag without a member '
+                              'Bagging-Date Bag_Info')
+    def test_bag_info_does_not_have_bagging_date(self, rf):
+        self.bagging_date.field_name = ''
+        response = views.bagHTML(rf.get('/'), 'fake-identifier')
 
-    def test_renders_correct_template(self):
-        pass
+        assert response.status_code in (200, 404)
+
+    def test_catches_urlerror(self, client, monkeypatch):
+        urlopen = Mock(side_effect=urllib2.URLError('Fake Exception'))
+        monkeypatch.setattr('coda_mdstore.views.urllib2.urlopen', urlopen)
+
+        response = client.get(
+            reverse('coda_mdstore.views.bagHTML', args=['fake-identifier']))
+
+        assert urlopen.call_count == 1
+        assert response.context[-1]['json_events'] == {}
+
+    def test_renders_correct_template(self, client):
+        response = client.get(
+            reverse('coda_mdstore.views.bagHTML', args=['fake-identifier']))
+
+        assert response.template[0].name == 'mdstore/bag_info.html'
 
     @pytest.mark.parametrize('key', [
         'site_title',
@@ -186,3 +212,56 @@ class Test_bagHTML:
             reverse('coda_mdstore.views.bagHTML', args=['fakeid']))
 
         assert key in response.context[-1]
+
+
+class Test_bagProxy:
+
+    @pytest.fixture(autouse=True)
+    def setup(self, monkeypatch):
+        Bag = Mock()
+        Bag.objects.get.return_value = Bag
+        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+
+        # The mocked value that getFileHandle will return.
+        fileHandle = Mock()
+        fileHandle.info().getheader.side_effect = ['text/plain', '255']
+        monkeypatch.setattr(
+            'coda_mdstore.views.getFileHandle', Mock(return_value=fileHandle))
+
+    def test_returns_status_code_200(self, rf):
+        request = rf.get('/')
+        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        assert response.status_code == 200
+
+    def test_response_has_correct_headers(self, rf):
+        request = rf.get('/')
+        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        assert response['Content-Length'] == '255'
+        assert response['Content-Type'] == 'text/plain'
+
+    # FIXME
+    @pytest.mark.xfail(msg="Figure out how to mock AND catch the DoesNotExist")
+    def test_raises_not_found_when_object_not_found(self, rf, monkeypatch):
+        Bag = Mock()
+        Bag.objects.get.side_effect = models.Bag.DoesNotExist
+        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+        request = rf.get('/')
+
+        with pytest.raises(http.HttpResponseNotFound):
+            views.bagProxy(request, 'fake-identifier', '/foo/bar')
+
+    def test_raises_http404_when_file_handle_is_false(self, rf, monkeypatch):
+        monkeypatch.setattr(
+            'coda_mdstore.views.getFileHandle', Mock(return_value=False))
+        request = rf.get('/')
+
+        with pytest.raises(http.Http404):
+            views.bagProxy(request, 'fake-identifier', '/foo/bar')
+
+    @pytest.mark.xfail
+    def test_bag_proxy_catches_exception_raised_by_getFileHandler(self):
+        assert 0
+
+
+class IntegrationTests:
+    pass
