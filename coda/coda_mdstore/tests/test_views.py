@@ -17,6 +17,15 @@ from .. import models
 pytestmark = pytest.mark.urls('coda_mdstore.urls')
 
 
+@pytest.fixture
+def patch_site(monkeypatch):
+    Site = mock.Mock()
+    Site.objects.get_current().name = 'example.com'
+    monkeypatch.setattr('coda_mdstore.views.Site', Site)
+    return Site
+
+
+@pytest.mark.usefixtures('patch_site')
 class TestIndexView:
 
     # @pytest.fixture(autouse=True)
@@ -29,26 +38,22 @@ class TestIndexView:
         self.bag_patcher = mock.patch('coda_mdstore.views.Bag')
         self.queue_entry_patcher = mock.patch('coda_mdstore.views.QueueEntry')
         self.validate_patcher = mock.patch('coda_mdstore.views.Validate')
-        self.site_patcher = mock.patch('coda_mdstore.views.Site')
         self.event_patcher = mock.patch('coda_mdstore.views.Event')
 
         self.mock_bag = self.bag_patcher.start()
         self.mock_queue_entry = self.queue_entry_patcher.start()
         self.mock_validate = self.validate_patcher.start()
-        self.mock_site = self.site_patcher.start()
         self.mock_event = self.event_patcher.start()
 
         self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1}
         self.mock_queue_entry.objects.count.return_value = 10
         self.mock_validate.objects.count.return_value = 10
-        self.mock_site.objects.get_current().name = 'example.com'
         self.mock_event.objects.count.return_value = 10
 
     def teardown_method(self, method):
         self.bag_patcher.stop()
         self.queue_entry_patcher.stop()
         self.validate_patcher.stop()
-        self.site_patcher.stop()
         self.event_patcher.stop()
 
     def test_returns_status_code_200(self, rf):
@@ -174,33 +179,27 @@ class TestJSONStatsView:
         assert payload['updated'] == '2015-01-01'
 
 
+@pytest.mark.usefixtures('patch_site')
 class TestAllBagsView:
 
-    def setup_method(self, method):
-        self.site_patcher = mock.patch('coda_mdstore.views.Site')
-        self.paginate_patcher = mock.patch(
-            'coda_mdstore.views.paginate_entries')
+    @pytest.fixture(autouse=True)
+    def mock_pe(self, monkeypatch):
+        """Patches the paginate_entries with a Mock object."""
+        mock_pe = mock.Mock()
+        monkeypatch.setattr(
+            'coda_mdstore.views.paginate_entries', mock_pe)
 
-        self.mock_site = self.site_patcher.start()
-        self.mock_paginate_entries = self.paginate_patcher.start()
-
-        self.mock_site.get_current().name = 'example.com'
-
-    def teardown_method(self, method):
-        self.site_patcher.stop()
-        self.paginate_patcher.stop()
+        return mock_pe
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.all_bags'))
         assert response.template[0].name == 'mdstore/bag_search_results.html'
 
-    def test_uses_paginated_entries(self, client, monkeypatch):
-        paginate_entries = mock.Mock(return_value='fake data')
-        monkeypatch.setattr(
-            'coda_mdstore.views.paginate_entries', paginate_entries)
+    def test_uses_paginated_entries(self, mock_pe, client, monkeypatch):
+        mock_pe.return_value = 'fake data'
 
         response = client.get(reverse('coda_mdstore.views.all_bags'))
-        assert paginate_entries.call_count == 1
+        assert mock_pe.call_count == 1
         assert response.context[-1]['entries'] == 'fake data'
 
     @pytest.mark.parametrize('key', [
@@ -226,6 +225,7 @@ class TestRobotsView:
         assert 'Disallow: /' in response.content
 
 
+@pytest.mark.usefixtures('patch_site')
 class TestBagHTMLView:
 
     @pytest.fixture(autouse=True)
@@ -245,10 +245,6 @@ class TestBagHTMLView:
         Bag_Info = mock.Mock()
         Bag_Info.objects.filter.return_value = [PayloadOxum, BaggingDate]
         monkeypatch.setattr('coda_mdstore.views.Bag_Info', Bag_Info)
-
-        Site = mock.Mock()
-        Site.objects.get_current().name = 'example.com'
-        monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Payload-Oxum Bag_Info')
