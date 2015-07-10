@@ -1,7 +1,9 @@
+from datetime import datetime
+import json
 import urllib2
 
+import mock
 import pytest
-from mock import Mock, MagicMock, patch
 
 from django.core.urlresolvers import reverse
 from django import http
@@ -17,32 +19,37 @@ pytestmark = pytest.mark.urls('coda_mdstore.urls')
 
 class TestIndexView:
 
-    @pytest.fixture(autouse=True)
-    def setup(self, monkeypatch):
+    # @pytest.fixture(autouse=True)
+    def setup_method(self, method):
         """
         Setup the tests for ..views.index by mocking the database
         models. This will be automatically provided to all the
         test methods.
         """
-        Bag = Mock()
-        Bag.objects.all().aggregate.return_value = {'files__sum': 1}
-        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+        self.bag_patcher = mock.patch('coda_mdstore.views.Bag')
+        self.queue_entry_patcher = mock.patch('coda_mdstore.views.QueueEntry')
+        self.validate_patcher = mock.patch('coda_mdstore.views.Validate')
+        self.site_patcher = mock.patch('coda_mdstore.views.Site')
+        self.event_patcher = mock.patch('coda_mdstore.views.Event')
 
-        QueueEntry = Mock()
-        QueueEntry.objects.count.return_value = 10
-        monkeypatch.setattr('coda_mdstore.views.QueueEntry', QueueEntry)
+        self.mock_bag = self.bag_patcher.start()
+        self.mock_queue_entry = self.queue_entry_patcher.start()
+        self.mock_validate = self.validate_patcher.start()
+        self.mock_site = self.site_patcher.start()
+        self.mock_event = self.event_patcher.start()
 
-        Validate = Mock()
-        Validate.objects.count.return_value = 10
-        monkeypatch.setattr('coda_mdstore.views.Validate', Validate)
+        self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1}
+        self.mock_queue_entry.objects.count.return_value = 10
+        self.mock_validate.objects.count.return_value = 10
+        self.mock_site.objects.get_current().name = 'example.com'
+        self.mock_event.objects.count.return_value = 10
 
-        Site = Mock()
-        Site.objects.get_current().name = 'example.com'
-        monkeypatch.setattr('coda_mdstore.views.Site', Site)
-
-        Event = Mock()
-        Event.objects.count.return_value = 10
-        monkeypatch.setattr('coda_mdstore.views.Event', Event)
+    def teardown_method(self, method):
+        self.bag_patcher.stop()
+        self.queue_entry_patcher.stop()
+        self.validate_patcher.stop()
+        self.site_patcher.stop()
+        self.event_patcher.stop()
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
@@ -72,9 +79,9 @@ class TestIndexView:
         """
         # Re-patch the Bag entity to modify the return value from the
         # database query.
-        Bag = Mock()
-        Bag.objects.all().aggregate.return_value = {'files__sum': None}
-        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+        self.mock_bag.objects.all().aggregate.return_value = {
+            'files__sum': None
+        }
 
         response = client.get(reverse('coda_mdstore.views.index'))
         assert response.context[-1]['totals']['files__sum'] == 0
@@ -84,7 +91,7 @@ class TestAboutView:
 
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch):
-        Site = Mock()
+        Site = mock.Mock()
         Site.objects.get_current().name = 'example.com'
         monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
@@ -93,24 +100,102 @@ class TestAboutView:
         assert response.template[0].name == 'mdstore/about.html'
 
 
-class TestAllBagsView:
+class TestStatsView:
 
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch):
-        Site = Mock()
+        Site = mock.Mock()
         Site.objects.get_current().name = 'example.com'
         monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
-        paginate_entries = Mock(return_value='fake data')
-        monkeypatch.setattr(
-            'coda_mdstore.views.paginate_entries', paginate_entries)
+    def test_no_bags_available(self, client, monkeypatch):
+        Bag = mock.Mock()
+        Bag.objects.count.return_value = 0
+        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+        response = client.get(reverse('coda_mdstore.views.stats'))
+
+        assert response.status_code == 200
+
+        assert response.context[-1]['totals'] == 0
+        assert response.context[-1]['monthly_bags'] == []
+        assert response.context[-1]['monthly_files'] == []
+        assert response.context[-1]['monthly_running_bag_total'] == []
+        assert response.context[-1]['monthly_running_file_total'] == []
+
+    @pytest.mark.xfail
+    def test_with_bags(self):
+        assert 0
+
+
+class TestJSONStatsView:
+
+    @mock.patch('coda_mdstore.views.Bag')
+    @mock.patch('coda_mdstore.views.Node')
+    def test_no_bags_or_nodes(self, mock_node, mock_bag, client):
+        mock_node.objects.aggregate.return_value = {'node_capacity__sum': 0}
+        mock_bag.objects.aggregate.return_value = {
+            'bagging_date__max': None,
+            'pk__count': 0,
+            'size__sum': 0,
+            'files__sum': 0
+        }
+
+        response = client.get(reverse('coda_mdstore.views.json_stats'))
+        payload = json.loads(response.content)
+
+        assert len(payload) == 5
+        assert payload['bags'] == 0
+        assert payload['capacity'] == 0
+        assert payload['capacity_used'] == 0
+        assert payload['files'] == 0
+        assert payload['updated'] == ''
+
+    @mock.patch('coda_mdstore.views.Bag')
+    @mock.patch('coda_mdstore.views.Node')
+    def test_with_bags_and_nodes(self, mock_node, mock_bag, client):
+        mock_node.objects.aggregate.return_value = {
+            'node_capacity__sum': 1000000
+        }
+        mock_bag.objects.aggregate.return_value = {
+            'bagging_date__max': datetime(2015, 01, 01),
+            'pk__count': 50,
+            'size__sum': 100000,
+            'files__sum': 1000,
+        }
+
+        response = client.get(reverse('coda_mdstore.views.json_stats'))
+        payload = json.loads(response.content)
+
+        assert len(payload) == 5
+        assert payload['bags'] == 50
+        assert payload['capacity'] == 1000000
+        assert payload['capacity_used'] == 100000
+        assert payload['files'] == 1000
+        assert payload['updated'] == '2015-01-01'
+
+
+class TestAllBagsView:
+
+    def setup_method(self, method):
+        self.site_patcher = mock.patch('coda_mdstore.views.Site')
+        self.paginate_patcher = mock.patch(
+            'coda_mdstore.views.paginate_entries')
+
+        self.mock_site = self.site_patcher.start()
+        self.mock_paginate_entries = self.paginate_patcher.start()
+
+        self.mock_site.get_current().name = 'example.com'
+
+    def teardown_method(self, method):
+        self.site_patcher.stop()
+        self.paginate_patcher.stop()
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.all_bags'))
         assert response.template[0].name == 'mdstore/bag_search_results.html'
 
     def test_uses_paginated_entries(self, client, monkeypatch):
-        paginate_entries = Mock(return_value='fake data')
+        paginate_entries = mock.Mock(return_value='fake data')
         monkeypatch.setattr(
             'coda_mdstore.views.paginate_entries', paginate_entries)
 
@@ -128,7 +213,7 @@ class TestAllBagsView:
         assert key in response.context[-1]
 
 
-class Test_shooRobot:
+class TestRobotsView:
 
     def test_user_agent_is_all(self, rf):
         request = rf.get('/')
@@ -141,27 +226,27 @@ class Test_shooRobot:
         assert 'Disallow: /' in response.content
 
 
-class Test_bagHTML:
+class TestBagHTMLView:
 
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch):
-        Bag = Mock()
+        Bag = mock.Mock()
         monkeypatch.setattr('coda_mdstore.views.get_object_or_404', Bag)
 
-        PayloadOxum = MagicMock()
+        PayloadOxum = mock.MagicMock()
         PayloadOxum.field_name = 'Payload-Oxum'
         self.payload_oxum = PayloadOxum
 
-        BaggingDate = MagicMock()
+        BaggingDate = mock.MagicMock()
         BaggingDate.field_name = 'Bagging-Date'
         BaggingDate.field_body = '2015-01-01'
         self.bagging_date = BaggingDate
 
-        Bag_Info = Mock()
+        Bag_Info = mock.Mock()
         Bag_Info.objects.filter.return_value = [PayloadOxum, BaggingDate]
         monkeypatch.setattr('coda_mdstore.views.Bag_Info', Bag_Info)
 
-        Site = Mock()
+        Site = mock.Mock()
         Site.objects.get_current().name = 'example.com'
         monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
@@ -182,7 +267,7 @@ class Test_bagHTML:
         assert response.status_code in (200, 404)
 
     def test_catches_urlerror(self, client, monkeypatch):
-        urlopen = Mock(side_effect=urllib2.URLError('Fake Exception'))
+        urlopen = mock.Mock(side_effect=urllib2.URLError('Fake Exception'))
         monkeypatch.setattr('coda_mdstore.views.urllib2.urlopen', urlopen)
 
         response = client.get(
@@ -214,19 +299,20 @@ class Test_bagHTML:
         assert key in response.context[-1]
 
 
-class Test_bagProxy:
+class TestBagProxyView:
 
     @pytest.fixture(autouse=True)
-    def setup(self, monkeypatch):
-        Bag = Mock()
+    def setup_method(self, monkeypatch):
+        Bag = mock.Mock()
         Bag.objects.get.return_value = Bag
         monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
 
         # The mocked value that getFileHandle will return.
-        fileHandle = Mock()
+        fileHandle = mock.Mock()
         fileHandle.info().getheader.side_effect = ['text/plain', '255']
         monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', Mock(return_value=fileHandle))
+            'coda_mdstore.views.getFileHandle',
+            mock.Mock(return_value=fileHandle))
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
@@ -239,20 +325,20 @@ class Test_bagProxy:
         assert response['Content-Length'] == '255'
         assert response['Content-Type'] == 'text/plain'
 
-    # FIXME
-    @pytest.mark.xfail(msg="Figure out how to mock AND catch the DoesNotExist")
-    def test_raises_not_found_when_object_not_found(self, rf, monkeypatch):
-        Bag = Mock()
-        Bag.objects.get.side_effect = models.Bag.DoesNotExist
-        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
-        request = rf.get('/')
+    @mock.patch('coda_mdstore.views.Bag')
+    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
+        mock_bag.DoesNotExist = models.Bag.DoesNotExist
+        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
 
-        with pytest.raises(http.HttpResponseNotFound):
-            views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        request = rf.get('/')
+        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+
+        assert isinstance(response, http.HttpResponseNotFound)
+        assert response.content == "There is no bag with id 'fake-identifier'."
 
     def test_raises_http404_when_file_handle_is_false(self, rf, monkeypatch):
         monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', Mock(return_value=False))
+            'coda_mdstore.views.getFileHandle', mock.Mock(return_value=False))
         request = rf.get('/')
 
         with pytest.raises(http.Http404):
@@ -260,6 +346,99 @@ class Test_bagProxy:
 
     @pytest.mark.xfail
     def test_bag_proxy_catches_exception_raised_by_getFileHandler(self):
+        assert 0
+
+
+class TestBagURLListView:
+
+    @pytest.mark.xfail(msg='Response content does not match other responses.')
+    @mock.patch('coda_mdstore.views.Bag')
+    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
+        mock_bag.DoesNotExist = models.Bag.DoesNotExist
+        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
+
+        request = rf.get('/')
+        response = views.bagURLList(request, 'fake-identifier')
+
+        assert isinstance(response, http.HttpResponseNotFound)
+        assert response.content == "There is no bag with id 'fake-identifier'."
+
+    @pytest.mark.xfail
+    def test_raises_http404_file_handle_is_falsy(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_output_text(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_top_files_block(self):
+        # TODO: rename once implemented.
+        assert 0
+
+    @pytest.mark.xfail
+    def test_path_is_not_unicode_safe(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_returns_status_code_200(self):
+        assert 0
+
+
+class TestBagURLListScrapeView:
+
+    @mock.patch('coda_mdstore.views.Bag')
+    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
+        mock_bag.DoesNotExist = models.Bag.DoesNotExist
+        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
+
+        request = rf.get('/')
+        response = views.bagURLListScrape(request, 'fake-identifier')
+
+        assert isinstance(response, http.HttpResponseNotFound)
+        assert response.content == "There is no bag with id 'fake-identifier'."
+
+    @pytest.mark.xfail
+    def test_raises_http404_file_handle_is_falsy(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_response_content(self):
+        assert 0
+
+
+class TestBagFullTextSearchATOMView:
+
+    @pytest.mark.xfail()
+    def test_smoke(self):
+        assert 0
+
+
+class TestBagFullTextSearchView:
+
+    @pytest.mark.xfail()
+    def test_smoke(self):
+        assert 0
+
+
+class TestShowNodeStatusView:
+
+    @pytest.mark.xfail()
+    def test_smoke(self):
+        assert 0
+
+
+class TestAppNode:
+
+    @pytest.mark.xfail()
+    def test_smoke(self):
+        assert 0
+
+
+class TestAppBag:
+
+    @pytest.mark.xfail()
+    def test_smoke(self):
         assert 0
 
 
