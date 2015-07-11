@@ -92,31 +92,20 @@ class TestIndexView:
         assert response.context[-1]['totals']['files__sum'] == 0
 
 
+@pytest.mark.usefixtures('patch_site')
 class TestAboutView:
-
-    @pytest.fixture(autouse=True)
-    def setup(self, monkeypatch):
-        Site = mock.Mock()
-        Site.objects.get_current().name = 'example.com'
-        monkeypatch.setattr('coda_mdstore.views.Site', Site)
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.about'))
         assert response.template[0].name == 'mdstore/about.html'
 
 
+@pytest.mark.usefixtures('patch_site')
 class TestStatsView:
 
-    @pytest.fixture(autouse=True)
-    def setup(self, monkeypatch):
-        Site = mock.Mock()
-        Site.objects.get_current().name = 'example.com'
-        monkeypatch.setattr('coda_mdstore.views.Site', Site)
-
-    def test_no_bags_available(self, client, monkeypatch):
-        Bag = mock.Mock()
-        Bag.objects.count.return_value = 0
-        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+    @mock.patch('coda_mdstore.views.Bag')
+    def test_no_bags_available(self, mock_bag, client):
+        mock_bag.objects.count.return_value = 0
         response = client.get(reverse('coda_mdstore.views.stats'))
 
         assert response.status_code == 200
