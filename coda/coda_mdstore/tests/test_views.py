@@ -384,11 +384,17 @@ class TestBagURLListScrapeView:
         assert isinstance(response, http.HttpResponseNotFound)
         assert response.content == "There is no bag with id 'fake-identifier'."
 
-    @pytest.mark.xfail
-    def test_raises_http404_file_handle_is_falsy(self):
-        assert 0
+    @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
+    @mock.patch('coda_mdstore.views.Bag')
+    @mock.patch('coda_mdstore.views.getFileHandle')
+    def test_raises_http404_file_handle_is_falsy(self, mock_gfh, mock_bag, rf):
+        mock_gfh.return_value = False
+        request = rf.get('/')
 
-    @pytest.mark.xfail
+        with pytest.raises(http.Http404):
+            views.bagURLListScrape(request, 'fake-identifier')
+
+    @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
     def test_response_content(self):
         assert 0
 
