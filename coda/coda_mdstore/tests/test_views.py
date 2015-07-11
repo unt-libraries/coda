@@ -233,17 +233,18 @@ class TestBagHTMLView:
         Bag = mock.Mock()
         monkeypatch.setattr('coda_mdstore.views.get_object_or_404', Bag)
 
-        PayloadOxum = mock.MagicMock()
-        PayloadOxum.field_name = 'Payload-Oxum'
-        self.payload_oxum = PayloadOxum
+        self.payload_oxum = mock.MagicMock()
+        self.payload_oxum.field_name = 'Payload-Oxum'
 
-        BaggingDate = mock.MagicMock()
-        BaggingDate.field_name = 'Bagging-Date'
-        BaggingDate.field_body = '2015-01-01'
-        self.bagging_date = BaggingDate
+        self.bagging_date = mock.MagicMock()
+        self.bagging_date.field_name = 'Bagging-Date'
+        self.bagging_date.field_body = '2015-01-01'
 
         Bag_Info = mock.Mock()
-        Bag_Info.objects.filter.return_value = [PayloadOxum, BaggingDate]
+        Bag_Info.objects.filter.return_value = [
+            self.bagging_date,
+            self.payload_oxum
+        ]
         monkeypatch.setattr('coda_mdstore.views.Bag_Info', Bag_Info)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
