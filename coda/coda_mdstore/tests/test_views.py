@@ -241,7 +241,7 @@ class TestBagHTMLView:
                               'Payload-Oxum Bag_Info')
     def test_bag_info_does_not_have_payload_oxum(self, rf):
         self.payload_oxum.field_name = ''
-        response = views.bagHTML(rf.get('/'), 'fake-identifier')
+        response = views.bagHTML(rf.get('/'), 'ark:/00001/id')
 
         assert response.status_code in (200, 404)
 
@@ -249,7 +249,7 @@ class TestBagHTMLView:
                               'Bagging-Date Bag_Info')
     def test_bag_info_does_not_have_bagging_date(self, rf):
         self.bagging_date.field_name = ''
-        response = views.bagHTML(rf.get('/'), 'fake-identifier')
+        response = views.bagHTML(rf.get('/'), 'ark:/00001/id')
 
         assert response.status_code in (200, 404)
 
@@ -258,14 +258,14 @@ class TestBagHTMLView:
         monkeypatch.setattr('coda_mdstore.views.urllib2.urlopen', urlopen)
 
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=['fake-identifier']))
+            reverse('coda_mdstore.views.bagHTML', args=['ark:/00001/id']))
 
         assert urlopen.call_count == 1
         assert response.context[-1]['json_events'] == {}
 
     def test_renders_correct_template(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=['fake-identifier']))
+            reverse('coda_mdstore.views.bagHTML', args=['ark:/00001/id']))
 
         assert response.template[0].name == 'mdstore/bag_info.html'
 
@@ -303,12 +303,12 @@ class TestBagProxyView:
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
         assert response.status_code == 200
 
     def test_response_has_correct_headers(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
         assert response['Content-Length'] == '255'
         assert response['Content-Type'] == 'text/plain'
 
@@ -318,10 +318,10 @@ class TestBagProxyView:
         mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
 
         request = rf.get('/')
-        response = views.bagProxy(request, 'fake-identifier', '/foo/bar')
+        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
 
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'fake-identifier'."
+        assert response.content == "There is no bag with id 'ark:/00001/id'."
 
     def test_raises_http404_when_file_handle_is_false(self, rf, monkeypatch):
         monkeypatch.setattr(
@@ -329,7 +329,7 @@ class TestBagProxyView:
         request = rf.get('/')
 
         with pytest.raises(http.Http404):
-            views.bagProxy(request, 'fake-identifier', '/foo/bar')
+            views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
 
     @pytest.mark.xfail
     def test_bag_proxy_catches_exception_raised_by_getFileHandler(self):
@@ -345,10 +345,10 @@ class TestBagURLListView:
         mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
 
         request = rf.get('/')
-        response = views.bagURLList(request, 'fake-identifier')
+        response = views.bagURLList(request, 'ark:/00001/id')
 
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'fake-identifier'."
+        assert response.content == "There is no bag with id 'ark:/00001/id'."
 
     @pytest.mark.xfail
     def test_raises_http404_file_handle_is_falsy(self):
@@ -380,10 +380,10 @@ class TestBagURLListScrapeView:
         mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
 
         request = rf.get('/')
-        response = views.bagURLListScrape(request, 'fake-identifier')
+        response = views.bagURLListScrape(request, 'ark:/00001/id')
 
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'fake-identifier'."
+        assert response.content == "There is no bag with id 'ark:/00001/id'."
 
     @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
     @mock.patch('coda_mdstore.views.Bag')
@@ -393,7 +393,7 @@ class TestBagURLListScrapeView:
         request = rf.get('/')
 
         with pytest.raises(http.Http404):
-            views.bagURLListScrape(request, 'fake-identifier')
+            views.bagURLListScrape(request, 'ark:/00001/id')
 
     @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
     def test_response_content(self):
