@@ -7,6 +7,7 @@ import pytest
 
 from django.core.urlresolvers import reverse
 from django import http
+from django.core.paginator import Paginator
 
 from .. import views
 from .. import models
@@ -401,23 +402,81 @@ class TestBagURLListScrapeView:
 
 class TestBagFullTextSearchATOMView:
 
-    @pytest.mark.xfail()
+    @pytest.mark.xfail(msg='The function bagFullTextSearchATOM is not used.')
     def test_smoke(self):
         assert 0
 
 
 class TestBagFullTextSearchView:
 
-    @pytest.mark.xfail()
-    def test_smoke(self):
-        assert 0
+    @mock.patch('coda_mdstore.views.Paginator', spec=Paginator)
+    @mock.patch('coda_mdstore.views.bagSearch')
+    def test_returns_paginator_object(self, mock_bagSearch, mock_paginator):
+        bagList = mock.Mock()
+        bagList.count.return_value = 15
+        mock_bagSearch.return_value = bagList
+
+        paginator = views.bagFullTextSearch('test search')
+
+        assert isinstance(paginator, Paginator)
+        mock_paginator.assert_called_with(bagList, 50)
 
 
+@pytest.mark.usefixtures('patch_site')
 class TestShowNodeStatusView:
 
-    @pytest.mark.xfail()
-    def test_smoke(self):
-        assert 0
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
+        self.node = mock.MagicMock()
+        self.node_instance = mock.MagicMock()
+        self.node.objects.get.return_value = self.node_instance
+        monkeypatch.setattr('coda_mdstore.views.Node', self.node)
+
+    def test_gets_status_for_single_node(self, rf):
+        request = rf.get('/')
+        response = views.showNodeStatus(request, '001')
+
+        assert response.status_code == 200
+        assert self.node.objects.all.call_count == 0
+
+    def test_single_node_context(self, client):
+        # TODO: Update the url ordering so that we can get the url with
+        #       reverse.
+        url = '/node/coda-001/'
+        response = client.get(url)
+
+        assert response.context[-1].get('node', False)
+        assert response.context[-1].get('filled', False)
+        assert response.context[-1].get('available', False)
+
+    def test_response_with_all_nodes(self, rf):
+        self.node.objects.all.return_value = (
+            [mock.Mock(node_capacity=2, node_size=1) for _ in range(10)]
+        )
+
+        request = rf.get('/')
+        response = views.showNodeStatus(request)
+        assert response.status_code == 200
+
+    def test_context_with_all_nodes(self, client):
+        self.node.objects.all.return_value = (
+            [mock.Mock(node_capacity=2, node_size=1) for _ in range(10)]
+        )
+
+        response = client.get(reverse('coda_mdstore.views.showNodeStatus'))
+        context = response.context[-1]
+
+        assert len(context.get('status_list')) == 10
+        assert context.get('total_capacity') == 20
+        assert context.get('total_size') == 10
+        assert context.get('total_available') == 10
+        assert context.get('total_filled') == 50
+
+    def test_no_nodes_available(self, rf):
+        self.node.objects.all.return_value = []
+        request = rf.get('/')
+        response = views.showNodeStatus(request)
+        assert response.status_code == 200
 
 
 class TestAppNode:
