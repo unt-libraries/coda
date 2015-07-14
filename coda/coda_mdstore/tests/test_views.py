@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import urllib2
 
+from lxml import etree
 import mock
 import pytest
 
@@ -481,15 +482,111 @@ class TestShowNodeStatusView:
 
 class TestAppNode:
 
-    @pytest.mark.xfail()
-    def test_smoke(self):
-        assert 0
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
+        self.node = mock.MagicMock(node_name='coda-001')
+        monkeypatch.setattr('coda_mdstore.views.Node', self.node)
+
+        xml = etree.Element('root')
+        self.nodeEntry = mock.MagicMock(return_value=xml)
+        monkeypatch.setattr('coda_mdstore.views.nodeEntry', self.nodeEntry)
+
+        self.createNode = mock.MagicMock(return_value=self.node)
+        monkeypatch.setattr('coda_mdstore.views.createNode', self.createNode)
+
+        self.updateNode = mock.MagicMock(return_value=self.node)
+        monkeypatch.setattr('coda_mdstore.views.updateNode', self.updateNode)
+
+    def test_get_request_without_identifier(self, rf):
+        config = dict(node_name='test', node_url='example.com',
+                      node_path='/foo/bar', node_capacity=10,
+                      node_size=5, last_checked='2015-01-01')
+
+        self.node.objects.all.return_value = (
+            [mock.Mock(**config) for _ in range(10)]
+        )
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_node(request)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        tree = etree.fromstring(response.content)
+        # There are 7 elements that precede the first of the 10 entry elements.
+        assert len(tree) == 17
+
+    def test_get_request_with_identifier(self, rf):
+        self.node.objects.return_value = mock.Mock()
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_node(request, '001')
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert response.content == '<?xml version="1.0"?>\n<root/>\n'
+
+    def test_get_request_with_identifier_raises_exception(self, rf):
+        self.node.objects.return_value = mock.Mock()
+        self.node.DoesNotExist = models.Node.DoesNotExist
+        self.node.objects.get.side_effect = models.Node.DoesNotExist
+
+        request = rf.get('/')
+        response = views.app_node(request, '001')
+        assert response.status_code == 404
+
+    def test_post_request(self, rf):
+        request = rf.post('/', HTTP_HOST='example.com')
+        response = views.app_node(request)
+
+        assert response.status_code == 201
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert self.node.save.call_count == 1
+        assert response['Location'] == 'http://example.com/APP/node/coda-001/'
+
+    def test_put_request(self, rf):
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_node(request, '001')
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert self.node.save.call_count == 1
+
+    def test_delete_request(self, rf):
+        self.node.objects.get.return_value = self.node
+
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_node(request, '001')
+
+        assert response.status_code == 200
+        assert self.node.delete.call_count == 1
+
+    def test_delete_request_raises_not_found(self, rf):
+        self.node.objects.return_value = mock.Mock()
+        self.node.DoesNotExist = models.Node.DoesNotExist
+        self.node.objects.get.side_effect = models.Node.DoesNotExist
+
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_node(request, '001')
+
+        assert response.status_code == 404
 
 
 class TestAppBag:
 
-    @pytest.mark.xfail()
-    def test_smoke(self):
+    @pytest.mark.xfail
+    def test_get_request(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_get_request_with_identifier(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_post_request(self):
+        assert 0
+
+    @pytest.mark.xfail
+    def test_delete_request(self):
         assert 0
 
 
