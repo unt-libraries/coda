@@ -513,8 +513,9 @@ class TestAppNode:
         assert response['Content-Type'] == 'application/atom+xml'
 
         tree = etree.fromstring(response.content)
-        # There are 7 elements that precede the first of the 10 entry elements.
-        assert len(tree) == 17
+        # There should be atleast 10 elements, which is the number of
+        # node objects Node.objects.all() will return.
+        assert len(tree) >= 10
 
     def test_get_request_with_identifier(self, rf):
         self.node.objects.return_value = mock.Mock()
@@ -560,7 +561,7 @@ class TestAppNode:
         assert response.status_code == 200
         assert self.node.delete.call_count == 1
 
-    def test_delete_request_raises_not_found(self, rf):
+    def test_delete_request_returns_not_found(self, rf):
         self.node.objects.return_value = mock.Mock()
         self.node.DoesNotExist = models.Node.DoesNotExist
         self.node.objects.get.side_effect = models.Node.DoesNotExist
@@ -573,21 +574,81 @@ class TestAppNode:
 
 class TestAppBag:
 
-    @pytest.mark.xfail
-    def test_get_request(self):
-        assert 0
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
+        self.bag = mock.MagicMock()
+        self.bag.name = 'Mock Bag'
+        monkeypatch.setattr('coda_mdstore.views.Bag', self.bag)
+
+        xml = etree.Element('bag')
+        self.objectsToXML = mock.MagicMock(return_value=xml)
+        monkeypatch.setattr(
+            'coda_mdstore.views.objectsToXML', self.objectsToXML)
+
+        self.createBag = mock.MagicMock(return_value=(self.bag, None))
+        monkeypatch.setattr('coda_mdstore.views.createBag', self.createBag)
+
+    def test_get_request_returns_not_found(self, rf):
+        self.bag.objects.return_value = mock.Mock()
+        self.bag.DoesNotExist = models.Bag.DoesNotExist
+        self.bag.objects.get.side_effect = models.Bag.DoesNotExist
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, 'ark:/00001/id')
+
+        assert response.status_code == 404
+
+    def test_get_request(self, rf):
+        bags = []
+        for _ in range(10):
+            m = mock.Mock()
+            m.name = 'Mock Bag'
+            bags.append(m)
+
+        self.bag.objects.order_by.return_value = bags
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_bag(request)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        tree = etree.fromstring(response.content)
+        assert len(tree) >= 10
 
     @pytest.mark.xfail
     def test_get_request_with_identifier(self):
         assert 0
 
-    @pytest.mark.xfail
-    def test_post_request(self):
-        assert 0
+    def test_post_request(self, rf):
+        request = rf.post('/', HTTP_HOST='example.com')
+        response = views.app_bag(request)
 
-    @pytest.mark.xfail
-    def test_delete_request(self):
-        assert 0
+        assert response.status_code == 201
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert response['Location'] == 'http://example.com/APP/bag/Mock Bag/'
+
+    def test_delete_request_is_successful(self, rf, monkeypatch):
+        monkeypatch.setattr(
+            'coda_mdstore.views.get_object_or_404',
+            mock.Mock(return_value=self.bag))
+
+        monkeypatch.setattr(
+            'coda_mdstore.views.get_list_or_404',
+            mock.Mock(return_value=[]))
+
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, 'ark:/00001/id')
+
+        assert response.status_code == 200
+        assert self.bag.delete.call_count == 1
+
+    def test_delete_request_returns_bad_request(self, rf):
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_bag(request)
+
+        assert response.status_code == 400
+        assert self.bag.delete.call_count == 0
 
 
 class IntegrationTests:
