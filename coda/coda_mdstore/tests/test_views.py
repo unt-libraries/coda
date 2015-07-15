@@ -31,7 +31,6 @@ def patch_site(monkeypatch):
 @pytest.mark.usefixtures('patch_site')
 class TestIndexView:
 
-    # @pytest.fixture(autouse=True)
     def setup_method(self, method):
         """
         Setup the tests for ..views.index by mocking the database
@@ -376,6 +375,7 @@ class TestBagURLListView:
     def test_returns_status_code_200(self):
         assert 0
 
+
 @pytest.mark.django_db
 class TestBagURLListScrapeView:
 
@@ -387,7 +387,6 @@ class TestBagURLListScrapeView:
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
             'coda_mdstore.views.getFileHandle', self.getFileHandle)
-
 
     def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
@@ -477,21 +476,6 @@ class TestShowNodeStatusView:
 
 @pytest.mark.django_db
 class TestAppNode:
-
-    # @pytest.fixture(autouse=True)
-    # def setup_fixtures(self, monkeypatch):
-    #     self.node = mock.MagicMock(node_name='coda-001')
-    #     monkeypatch.setattr('coda_mdstore.views.Node', self.node)
-
-    #     xml = etree.Element('root')
-    #     self.nodeEntry = mock.MagicMock(return_value=xml)
-    #     monkeypatch.setattr('coda_mdstore.views.nodeEntry', self.nodeEntry)
-
-    #     self.createNode = mock.MagicMock(return_value=self.node)
-    #     monkeypatch.setattr('coda_mdstore.views.createNode', self.createNode)
-
-    #     self.updateNode = mock.MagicMock(return_value=self.node)
-    #     monkeypatch.setattr('coda_mdstore.views.updateNode', self.updateNode)
 
     def test_get_request_without_identifier(self, rf):
         [NodeFactory.create() for _ in range(10)]
