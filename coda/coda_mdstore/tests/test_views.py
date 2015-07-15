@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 
 from .. import views
 from .. import models
+from .factories import BagWithBag_InfoFactory, NodeFactory
 
 
 # Add this mark so that we are not loading all the urls for
@@ -102,12 +103,11 @@ class TestAboutView:
         assert response.template[0].name == 'mdstore/about.html'
 
 
+@pytest.mark.django_db
 @pytest.mark.usefixtures('patch_site')
 class TestStatsView:
 
-    @mock.patch('coda_mdstore.views.Bag')
-    def test_no_bags_available(self, mock_bag, client):
-        mock_bag.objects.count.return_value = 0
+    def test_no_bags_available(self, client):
         response = client.get(reverse('coda_mdstore.views.stats'))
 
         assert response.status_code == 200
@@ -287,69 +287,73 @@ class TestBagHTMLView:
         assert key in response.context[-1]
 
 
+@pytest.mark.django_db
 class TestBagProxyView:
 
     @pytest.fixture(autouse=True)
-    def setup_method(self, monkeypatch):
-        Bag = mock.Mock()
-        Bag.objects.get.return_value = Bag
-        monkeypatch.setattr('coda_mdstore.views.Bag', Bag)
+    def setup_fixtures(self, monkeypatch):
+        self.bag = BagWithBag_InfoFactory.create()
 
         # The mocked value that getFileHandle will return.
-        fileHandle = mock.Mock()
-        fileHandle.info().getheader.side_effect = ['text/plain', '255']
+        file_handle = mock.Mock()
+        file_handle.info().getheader.side_effect = ['text/plain', '255']
+
+        self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle',
-            mock.Mock(return_value=fileHandle))
+            'coda_mdstore.views.getFileHandle', self.getFileHandle)
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
+        response = views.bagProxy(request, self.bag.name, '/foo/bar')
         assert response.status_code == 200
 
     def test_response_has_correct_headers(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
+        response = views.bagProxy(request, self.bag.name, '/foo/bar')
         assert response['Content-Length'] == '255'
         assert response['Content-Type'] == 'text/plain'
 
-    @mock.patch('coda_mdstore.views.Bag')
-    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
-        mock_bag.DoesNotExist = models.Bag.DoesNotExist
-        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
-
+    def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
+        response = views.bagProxy(request, 'ark:/00002/id', '/foo/bar')
 
-        assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00001/id'."
+        assert response.status_code == 404
+        assert response.content == "There is no bag with id 'ark:/00002/id'."
 
-    def test_raises_http404_when_file_handle_is_false(self, rf, monkeypatch):
-        monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', mock.Mock(return_value=False))
+    def test_raises_http404_when_file_handle_is_false(self, rf):
+        self.getFileHandle.return_value = False
         request = rf.get('/')
 
         with pytest.raises(http.Http404):
-            views.bagProxy(request, 'ark:/00001/id', '/foo/bar')
+            views.bagProxy(request, self.bag.name, '/foo/bar')
 
     @pytest.mark.xfail
     def test_bag_proxy_catches_exception_raised_by_getFileHandler(self):
         assert 0
 
 
+@pytest.mark.django_db
 class TestBagURLListView:
 
-    @pytest.mark.xfail(msg='Response content does not match other responses.')
-    @mock.patch('coda_mdstore.views.Bag')
-    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
-        mock_bag.DoesNotExist = models.Bag.DoesNotExist
-        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
+        self.bag = BagWithBag_InfoFactory.create()
 
+        # The mocked value that getFileHandle will return.
+        file_handle = mock.Mock()
+        file_handle.info().getheader.side_effect = ['text/plain', '255']
+
+        self.getFileHandle = mock.Mock(return_value=file_handle)
+        monkeypatch.setattr(
+            'coda_mdstore.views.getFileHandle', self.getFileHandle)
+
+    @pytest.mark.xfail(msg='Response content does not match other responses.')
+    def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
-        response = views.bagURLList(request, 'ark:/00001/id')
+        response = views.bagURLList(request, 'ark:/00002/id')
 
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00001/id'."
+        assert response.content == "There is no bag with id 'ark:/00002/id'."
 
     @pytest.mark.xfail
     def test_raises_http404_file_handle_is_falsy(self):
@@ -372,27 +376,33 @@ class TestBagURLListView:
     def test_returns_status_code_200(self):
         assert 0
 
-
+@pytest.mark.django_db
 class TestBagURLListScrapeView:
 
-    @mock.patch('coda_mdstore.views.Bag')
-    def test_raises_not_found_when_object_not_found(self, mock_bag, rf):
-        mock_bag.DoesNotExist = models.Bag.DoesNotExist
-        mock_bag.objects.get.side_effect = models.Bag.DoesNotExist
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
+        file_handle = mock.Mock()
+        file_handle.info().getheader.side_effect = ['text/plain', '255']
 
+        self.getFileHandle = mock.Mock(return_value=file_handle)
+        monkeypatch.setattr(
+            'coda_mdstore.views.getFileHandle', self.getFileHandle)
+
+
+    def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
         response = views.bagURLListScrape(request, 'ark:/00001/id')
 
+        assert response.status_code == 404
         assert isinstance(response, http.HttpResponseNotFound)
         assert response.content == "There is no bag with id 'ark:/00001/id'."
 
     @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
-    @mock.patch('coda_mdstore.views.Bag')
-    @mock.patch('coda_mdstore.views.getFileHandle')
-    def test_raises_http404_file_handle_is_falsy(self, mock_gfh, mock_bag, rf):
-        mock_gfh.return_value = False
-        request = rf.get('/')
+    def test_raises_http404_file_handle_is_falsy(self, rf):
+        BagWithBag_InfoFactory.create()
+        self.getFileHandle.return_value = False
 
+        request = rf.get('/')
         with pytest.raises(http.Http404):
             views.bagURLListScrape(request, 'ark:/00001/id')
 
@@ -408,42 +418,33 @@ class TestBagFullTextSearchATOMView:
         assert 0
 
 
+@pytest.mark.django_db
 class TestBagFullTextSearchView:
 
-    @mock.patch('coda_mdstore.views.Paginator', spec=Paginator)
-    @mock.patch('coda_mdstore.views.bagSearch')
-    def test_returns_paginator_object(self, mock_bagSearch, mock_paginator):
-        bagList = mock.Mock()
-        bagList.count.return_value = 15
-        mock_bagSearch.return_value = bagList
-
+    @pytest.mark.xfail(msg='FULLTEXT index is required.')
+    def test_returns_paginator_object(self):
+        [BagWithBag_InfoFactory.create() for _ in range(15)]
         paginator = views.bagFullTextSearch('test search')
 
         assert isinstance(paginator, Paginator)
-        mock_paginator.assert_called_with(bagList, 50)
 
 
+@pytest.mark.django_db
 @pytest.mark.usefixtures('patch_site')
 class TestShowNodeStatusView:
 
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        self.node = mock.MagicMock()
-        self.node_instance = mock.MagicMock()
-        self.node.objects.get.return_value = self.node_instance
-        monkeypatch.setattr('coda_mdstore.views.Node', self.node)
-
     def test_gets_status_for_single_node(self, rf):
+        node = NodeFactory.create()
         request = rf.get('/')
-        response = views.showNodeStatus(request, '001')
+        response = views.showNodeStatus(request, node.node_name)
 
         assert response.status_code == 200
-        assert self.node.objects.all.call_count == 0
 
     def test_single_node_context(self, client):
         # TODO: Update the url ordering so that we can get the url with
         #       reverse.
-        url = '/node/coda-001/'
+        node = NodeFactory.create()
+        url = '/node/{0}/'.format(node.node_name)
         response = client.get(url)
 
         assert response.context[-1].get('node', False)
@@ -451,61 +452,49 @@ class TestShowNodeStatusView:
         assert response.context[-1].get('available', False)
 
     def test_response_with_all_nodes(self, rf):
-        self.node.objects.all.return_value = (
-            [mock.Mock(node_capacity=2, node_size=1) for _ in range(10)]
-        )
+        [NodeFactory.create() for _ in range(10)]
 
         request = rf.get('/')
         response = views.showNodeStatus(request)
         assert response.status_code == 200
 
     def test_context_with_all_nodes(self, client):
-        self.node.objects.all.return_value = (
-            [mock.Mock(node_capacity=2, node_size=1) for _ in range(10)]
-        )
+        [NodeFactory.create() for _ in range(10)]
 
         response = client.get(reverse('coda_mdstore.views.showNodeStatus'))
         context = response.context[-1]
 
         assert len(context.get('status_list')) == 10
-        assert context.get('total_capacity') == 20
-        assert context.get('total_size') == 10
-        assert context.get('total_available') == 10
-        assert context.get('total_filled') == 50
+        assert context.get('total_capacity') == 1024 * 1000 * 10
+        assert context.get('total_size') == 512 * 900 * 10
+        assert context.get('total_filled') == 45.0
 
     def test_no_nodes_available(self, rf):
-        self.node.objects.all.return_value = []
         request = rf.get('/')
         response = views.showNodeStatus(request)
         assert response.status_code == 200
 
 
+@pytest.mark.django_db
 class TestAppNode:
 
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        self.node = mock.MagicMock(node_name='coda-001')
-        monkeypatch.setattr('coda_mdstore.views.Node', self.node)
+    # @pytest.fixture(autouse=True)
+    # def setup_fixtures(self, monkeypatch):
+    #     self.node = mock.MagicMock(node_name='coda-001')
+    #     monkeypatch.setattr('coda_mdstore.views.Node', self.node)
 
-        xml = etree.Element('root')
-        self.nodeEntry = mock.MagicMock(return_value=xml)
-        monkeypatch.setattr('coda_mdstore.views.nodeEntry', self.nodeEntry)
+    #     xml = etree.Element('root')
+    #     self.nodeEntry = mock.MagicMock(return_value=xml)
+    #     monkeypatch.setattr('coda_mdstore.views.nodeEntry', self.nodeEntry)
 
-        self.createNode = mock.MagicMock(return_value=self.node)
-        monkeypatch.setattr('coda_mdstore.views.createNode', self.createNode)
+    #     self.createNode = mock.MagicMock(return_value=self.node)
+    #     monkeypatch.setattr('coda_mdstore.views.createNode', self.createNode)
 
-        self.updateNode = mock.MagicMock(return_value=self.node)
-        monkeypatch.setattr('coda_mdstore.views.updateNode', self.updateNode)
+    #     self.updateNode = mock.MagicMock(return_value=self.node)
+    #     monkeypatch.setattr('coda_mdstore.views.updateNode', self.updateNode)
 
     def test_get_request_without_identifier(self, rf):
-        config = dict(node_name='test', node_url='example.com',
-                      node_path='/foo/bar', node_capacity=10,
-                      node_size=5, last_checked='2015-01-01')
-
-        self.node.objects.all.return_value = (
-            [mock.Mock(**config) for _ in range(10)]
-        )
-
+        [NodeFactory.create() for _ in range(10)]
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request)
 
@@ -518,94 +507,69 @@ class TestAppNode:
         assert len(tree) >= 10
 
     def test_get_request_with_identifier(self, rf):
-        self.node.objects.return_value = mock.Mock()
+        node = NodeFactory.create()
         request = rf.get('/', HTTP_HOST='example.com')
-        response = views.app_node(request, '001')
+        response = views.app_node(request, node.node_name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
-        assert response.content == '<?xml version="1.0"?>\n<root/>\n'
+        # TODO: test the response content.
 
     def test_get_request_with_identifier_raises_exception(self, rf):
-        self.node.objects.return_value = mock.Mock()
-        self.node.DoesNotExist = models.Node.DoesNotExist
-        self.node.objects.get.side_effect = models.Node.DoesNotExist
-
         request = rf.get('/')
         response = views.app_node(request, '001')
         assert response.status_code == 404
 
-    def test_post_request(self, rf):
+    @mock.patch('coda_mdstore.views.createNode')
+    def test_post_request(self, mock_createNode, rf):
+        node = NodeFactory.create()
+        mock_createNode.return_value = node
+
         request = rf.post('/', HTTP_HOST='example.com')
         response = views.app_node(request)
 
         assert response.status_code == 201
         assert response['Content-Type'] == 'application/atom+xml'
-        assert self.node.save.call_count == 1
-        assert response['Location'] == 'http://example.com/APP/node/coda-001/'
+        assert response['Location'] == (
+            'http://example.com/APP/node/{0}/'.format(node.node_name)
+        )
 
-    def test_put_request(self, rf):
+    @mock.patch('coda_mdstore.views.updateNode')
+    def test_put_request(self, mock_updateNode, rf):
+        node = NodeFactory.create()
+        mock_updateNode.return_value = node
+
         request = rf.put('/', HTTP_HOST='example.com')
-        response = views.app_node(request, '001')
+        response = views.app_node(request, node.node_name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
-        assert self.node.save.call_count == 1
 
     def test_delete_request(self, rf):
-        self.node.objects.get.return_value = self.node
+        node = NodeFactory.create()
 
         request = rf.delete('/', HTTP_HOST='example.com')
-        response = views.app_node(request, '001')
+        response = views.app_node(request, node.node_name)
 
         assert response.status_code == 200
-        assert self.node.delete.call_count == 1
 
     def test_delete_request_returns_not_found(self, rf):
-        self.node.objects.return_value = mock.Mock()
-        self.node.DoesNotExist = models.Node.DoesNotExist
-        self.node.objects.get.side_effect = models.Node.DoesNotExist
-
         request = rf.delete('/', HTTP_HOST='example.com')
-        response = views.app_node(request, '001')
+        response = views.app_node(request, 'DNE-001')
 
         assert response.status_code == 404
 
 
+@pytest.mark.django_db
 class TestAppBag:
 
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        self.bag = mock.MagicMock()
-        self.bag.name = 'Mock Bag'
-        monkeypatch.setattr('coda_mdstore.views.Bag', self.bag)
-
-        xml = etree.Element('bag')
-        self.objectsToXML = mock.MagicMock(return_value=xml)
-        monkeypatch.setattr(
-            'coda_mdstore.views.objectsToXML', self.objectsToXML)
-
-        self.createBag = mock.MagicMock(return_value=(self.bag, None))
-        monkeypatch.setattr('coda_mdstore.views.createBag', self.createBag)
-
     def test_get_request_returns_not_found(self, rf):
-        self.bag.objects.return_value = mock.Mock()
-        self.bag.DoesNotExist = models.Bag.DoesNotExist
-        self.bag.objects.get.side_effect = models.Bag.DoesNotExist
-
         request = rf.get('/', HTTP_HOST='example.com')
-        response = views.app_bag(request, 'ark:/00001/id')
-
+        response = views.app_bag(request, 'ark:/00002/id')
         assert response.status_code == 404
 
     def test_get_request(self, rf):
-        bags = []
-        for _ in range(10):
-            m = mock.Mock()
-            m.name = 'Mock Bag'
-            bags.append(m)
-
-        self.bag.objects.order_by.return_value = bags
+        [BagWithBag_InfoFactory.create() for _ in range(10)]
 
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
@@ -620,36 +584,33 @@ class TestAppBag:
     def test_get_request_with_identifier(self):
         assert 0
 
-    def test_post_request(self, rf):
+    @mock.patch('coda_mdstore.views.createBag')
+    def test_post_request(self, mock_createBag, rf):
+        bag = BagWithBag_InfoFactory.create()
+        mock_createBag.return_value = bag, bag.bag_info_set
+
         request = rf.post('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
 
         assert response.status_code == 201
         assert response['Content-Type'] == 'application/atom+xml'
-        assert response['Location'] == 'http://example.com/APP/bag/Mock Bag/'
+        assert response['Location'] == (
+            'http://example.com/APP/bag/{0}/'.format(bag.name)
+        )
 
-    def test_delete_request_is_successful(self, rf, monkeypatch):
-        monkeypatch.setattr(
-            'coda_mdstore.views.get_object_or_404',
-            mock.Mock(return_value=self.bag))
-
-        monkeypatch.setattr(
-            'coda_mdstore.views.get_list_or_404',
-            mock.Mock(return_value=[]))
-
+    def test_delete_request_is_successful(self, rf):
+        bag = BagWithBag_InfoFactory.create()
         request = rf.delete('/', HTTP_HOST='example.com')
-        response = views.app_bag(request, 'ark:/00001/id')
+        response = views.app_bag(request, bag.name)
 
         assert response.status_code == 200
-        assert self.bag.delete.call_count == 1
+        assert models.Bag.objects.exists() is False
 
     def test_delete_request_returns_bad_request(self, rf):
         request = rf.delete('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
-
         assert response.status_code == 400
-        assert self.bag.delete.call_count == 0
 
-
-class IntegrationTests:
-    pass
+    @pytest.mark.xfail
+    def test_delete_request_removes_member_bag_info_objects(self):
+        pass
