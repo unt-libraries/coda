@@ -116,9 +116,18 @@ class TestStatsView:
         assert response.context[-1]['monthly_running_bag_total'] == []
         assert response.context[-1]['monthly_running_file_total'] == []
 
-    @pytest.mark.xfail
-    def test_with_bags(self):
-        assert 0
+    def test_with_bags(self,  client):
+        [BagWithBag_InfoFactory.create() for _ in range(20)]
+
+        response = client.get(reverse('coda_mdstore.views.stats'))
+        assert response.status_code == 200
+
+        context = response.context[-1]
+        assert type(context['totals']) is dict
+        assert len(context['monthly_bags']) != 0
+        assert len(context['monthly_files']) != 0
+        assert len(context['monthly_running_bag_total']) != 0
+        assert len(context['monthly_running_file_total']) != 0
 
 
 class TestJSONStatsView:
