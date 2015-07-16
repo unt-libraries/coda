@@ -13,12 +13,7 @@ from django.core.paginator import Paginator
 
 from .. import views
 from .. import models
-from .factories import (
-    FullBagFactory,
-    NodeFactory,
-    BagFactory,
-    ExternalIdentifierFactory
-)
+from .factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 
 
 # Add this mark so that we are not loading all the urls for
@@ -401,6 +396,7 @@ class TestExternalIdentiferSearch:
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
+
 class TestExternalIdentiferSearchJSON:
 
     @pytest.mark.xfail(reason="No TESTS!")
@@ -536,14 +532,14 @@ class TestShowNodeStatusView:
         assert response.context[-1].get('available', False)
 
     def test_response_with_all_nodes(self, rf):
-        [NodeFactory.create() for _ in range(10)]
+        NodeFactory.create_batch(10)
 
         request = rf.get('/')
         response = views.showNodeStatus(request)
         assert response.status_code == 200
 
     def test_context_with_all_nodes(self, client):
-        [NodeFactory.create() for _ in range(10)]
+        NodeFactory.create_batch(10)
 
         response = client.get(reverse('coda_mdstore.views.showNodeStatus'))
         context = response.context[-1]
@@ -562,7 +558,7 @@ class TestShowNodeStatusView:
 class TestAppNode:
 
     def test_get_request_without_identifier(self, rf):
-        [NodeFactory.create() for _ in range(10)]
+        NodeFactory.create_batch(10)
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request)
 
