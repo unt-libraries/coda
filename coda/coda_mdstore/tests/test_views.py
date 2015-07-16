@@ -17,10 +17,13 @@ from .factories import BagWithBag_InfoFactory, NodeFactory
 
 # Add this mark so that we are not loading all the urls for
 # the entire project when using reverse.
-pytestmark = pytest.mark.urls('coda_mdstore.urls')
+pytestmark = [
+    pytest.mark.urls('coda_mdstore.urls'),
+    pytest.mark.django_db()
+]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def patch_site(monkeypatch):
     Site = mock.Mock()
     Site.objects.get_current().name = 'example.com'
@@ -28,7 +31,6 @@ def patch_site(monkeypatch):
     return Site
 
 
-@pytest.mark.usefixtures('patch_site')
 class TestIndexView:
 
     def setup_method(self, method):
@@ -94,7 +96,6 @@ class TestIndexView:
         assert response.context[-1]['totals']['files__sum'] == 0
 
 
-@pytest.mark.usefixtures('patch_site')
 class TestAboutView:
 
     def test_renders_correct_template(self, client):
@@ -102,8 +103,6 @@ class TestAboutView:
         assert response.template[0].name == 'mdstore/about.html'
 
 
-@pytest.mark.django_db
-@pytest.mark.usefixtures('patch_site')
 class TestStatsView:
 
     def test_no_bags_available(self, client):
@@ -169,7 +168,6 @@ class TestJSONStatsView:
         assert payload['updated'] == '2015-01-01'
 
 
-@pytest.mark.usefixtures('patch_site')
 class TestAllBagsView:
 
     @pytest.fixture(autouse=True)
@@ -215,8 +213,6 @@ class TestRobotsView:
         assert 'Disallow: /' in response.content
 
 
-@pytest.mark.django_db
-@pytest.mark.usefixtures('patch_site')
 class TestBagHTMLView:
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
@@ -279,7 +275,6 @@ class TestBagHTMLView:
         assert key in response.context[-1]
 
 
-@pytest.mark.django_db
 class TestBagProxyView:
 
     @pytest.fixture(autouse=True)
@@ -324,7 +319,6 @@ class TestBagProxyView:
         assert 0
 
 
-@pytest.mark.django_db
 class TestBagURLListView:
 
     @pytest.fixture(autouse=True)
@@ -369,7 +363,6 @@ class TestBagURLListView:
         assert 0
 
 
-@pytest.mark.django_db
 class TestBagURLListScrapeView:
 
     @pytest.fixture(autouse=True)
@@ -410,7 +403,6 @@ class TestBagFullTextSearchATOMView:
         assert 0
 
 
-@pytest.mark.django_db
 class TestBagFullTextSearchView:
 
     @pytest.mark.xfail(msg='FULLTEXT index is required.')
@@ -421,8 +413,6 @@ class TestBagFullTextSearchView:
         assert isinstance(paginator, Paginator)
 
 
-@pytest.mark.django_db
-@pytest.mark.usefixtures('patch_site')
 class TestShowNodeStatusView:
 
     def test_gets_status_for_single_node(self, rf):
@@ -467,7 +457,6 @@ class TestShowNodeStatusView:
         assert response.status_code == 200
 
 
-@pytest.mark.django_db
 class TestAppNode:
 
     def test_get_request_without_identifier(self, rf):
@@ -537,7 +526,6 @@ class TestAppNode:
         assert response.status_code == 404
 
 
-@pytest.mark.django_db
 class TestAppBag:
 
     def test_get_request_returns_not_found(self, rf):
