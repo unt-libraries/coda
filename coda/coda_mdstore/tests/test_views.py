@@ -323,8 +323,18 @@ class TestBagProxyView:
         with pytest.raises(http.Http404):
             views.bagProxy(request, self.bag.name, '/foo/bar')
 
-    @pytest.mark.xfail
-    def test_bag_proxy_catches_exception_raised_by_getFileHandler(self):
+
+class TestExternalIdentiferSearch:
+
+    @pytest.mark.xfail(reason="No TESTS!")
+    def test_smoke(self):
+        assert 0
+
+
+class TestExternalIdentiferSearchJSON:
+
+    @pytest.mark.xfail(reason="No TESTS!")
+    def test_smoke(self):
         assert 0
 
 
