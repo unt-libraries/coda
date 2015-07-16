@@ -12,7 +12,12 @@ from django.core.paginator import Paginator
 
 from .. import views
 from .. import models
-from .factories import BagWithBag_InfoFactory, NodeFactory
+from .factories import (
+    FullBagFactory,
+    NodeFactory,
+    BagFactory,
+    ExternalIdentifierFactory
+)
 
 
 # Add this mark so that we are not loading all the urls for
@@ -117,7 +122,7 @@ class TestStatsView:
         assert response.context[-1]['monthly_running_file_total'] == []
 
     def test_with_bags(self,  client):
-        [BagWithBag_InfoFactory.create() for _ in range(20)]
+        FullBagFactory.create_batch(20)
 
         response = client.get(reverse('coda_mdstore.views.stats'))
         assert response.status_code == 200
@@ -227,7 +232,7 @@ class TestBagHTMLView:
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Payload-Oxum Bag_Info')
     def test_bag_info_does_not_have_payload_oxum(self, rf):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         payload, bagging_date = bag.bag_info_set.all()
         payload.field_name = ''
         payload.save()
@@ -239,7 +244,7 @@ class TestBagHTMLView:
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Bagging-Date Bag_Info')
     def test_bag_info_does_not_have_bagging_date(self, rf):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         _, bagging_date = bag.bag_info_set.all()
         bagging_date.field_name = ''
         bagging_date.save()
@@ -250,7 +255,7 @@ class TestBagHTMLView:
 
     @mock.patch('coda_mdstore.views.urllib2.urlopen')
     def test_catches_urlerror(self, mock_urlopen, client):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
 
         response = client.get(
@@ -260,7 +265,7 @@ class TestBagHTMLView:
         assert response.context[-1]['json_events'] == {}
 
     def test_renders_correct_template(self, client):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         response = client.get(
             reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
@@ -277,7 +282,7 @@ class TestBagHTMLView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         response = client.get(
             reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
@@ -288,7 +293,7 @@ class TestBagProxyView:
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
-        self.bag = BagWithBag_InfoFactory.create()
+        self.bag = FullBagFactory.create()
 
         # The mocked value that getFileHandle will return.
         file_handle = mock.Mock()
@@ -342,7 +347,7 @@ class TestBagURLListView:
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
-        self.bag = BagWithBag_InfoFactory.create()
+        self.bag = FullBagFactory.create()
 
         # The mocked value that getFileHandle will return.
         file_handle = mock.Mock()
@@ -363,7 +368,7 @@ class TestBagURLListView:
 
     def test_raises_http404_file_handle_is_falsy(self, rf):
         self.getFileHandle.return_value = False
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         request = rf.get('/')
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
@@ -408,7 +413,7 @@ class TestBagURLListScrapeView:
     @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
                               'in scope.')
     def test_raises_http404_file_handle_is_falsy(self, rf):
-        BagWithBag_InfoFactory.create()
+        FullBagFactory.create()
         self.getFileHandle.return_value = False
 
         request = rf.get('/')
@@ -439,7 +444,7 @@ class TestBagFullTextSearchView:
 
     @pytest.mark.xfail(reason='FULLTEXT index is required.')
     def test_returns_paginator_object(self):
-        [BagWithBag_InfoFactory.create() for _ in range(15)]
+        FullBagFactory.create_batch(15)
         paginator = views.bagFullTextSearch('test search')
 
         assert isinstance(paginator, Paginator)
@@ -566,7 +571,7 @@ class TestAppBag:
         assert response.status_code == 404
 
     def test_get_request(self, rf):
-        [BagWithBag_InfoFactory.create() for _ in range(10)]
+        FullBagFactory.create_batch(10)
 
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
@@ -583,7 +588,7 @@ class TestAppBag:
 
     @mock.patch('coda_mdstore.views.createBag')
     def test_post_request(self, mock_createBag, rf):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         mock_createBag.return_value = bag, bag.bag_info_set
 
         request = rf.post('/', HTTP_HOST='example.com')
@@ -596,7 +601,7 @@ class TestAppBag:
         )
 
     def test_delete_request_is_successful(self, rf):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         request = rf.delete('/', HTTP_HOST='example.com')
         response = views.app_bag(request, bag.name)
 
@@ -609,7 +614,7 @@ class TestAppBag:
         assert response.status_code == 400
 
     def test_delete_request_removes_member_ext_identifier_objects(self, rf):
-        bag = BagWithBag_InfoFactory.create()
+        bag = FullBagFactory.create()
         request = rf.delete('/', HTTP_HOST='example.com')
 
         assert models.External_Identifier.objects.exists() is True

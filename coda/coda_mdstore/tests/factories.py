@@ -33,7 +33,7 @@ class ExternalIdentifierFactory(factory.django.DjangoModelFactory):
     value = factory.Sequence(lambda n: 'value {0}'.format(n))
 
 
-class BagWithBag_InfoFactory(BagFactory):
+class FullBagFactory(BagFactory):
     info1 = factory.RelatedFactory(
         Bag_InfoFactory,
         'bag_name',
