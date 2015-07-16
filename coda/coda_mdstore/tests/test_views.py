@@ -352,7 +352,8 @@ class TestBagURLListView:
         monkeypatch.setattr(
             'coda_mdstore.views.getFileHandle', self.getFileHandle)
 
-    @pytest.mark.xfail(msg='Response content does not match other responses.')
+    @pytest.mark.xfail(reason='The response content does not match other '
+                              'responses.')
     def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
         response = views.bagURLList(request, 'ark:/00002/id')
@@ -360,24 +361,27 @@ class TestBagURLListView:
         assert isinstance(response, http.HttpResponseNotFound)
         assert response.content == "There is no bag with id 'ark:/00002/id'."
 
-    @pytest.mark.xfail
-    def test_raises_http404_file_handle_is_falsy(self):
-        assert 0
+    def test_raises_http404_file_handle_is_falsy(self, rf):
+        self.getFileHandle.return_value = False
+        bag = BagWithBag_InfoFactory.create()
+        request = rf.get('/')
+        with pytest.raises(http.Http404):
+            views.bagURLList(request, bag.name)
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Refactor is required.')
     def test_output_text(self):
         assert 0
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Refactor is required.')
     def test_top_files_block(self):
         # TODO: rename once implemented.
         assert 0
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Refactor is required.')
     def test_path_is_not_unicode_safe(self):
         assert 0
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Refactor is required.')
     def test_returns_status_code_200(self):
         assert 0
 
@@ -401,7 +405,8 @@ class TestBagURLListScrapeView:
         assert isinstance(response, http.HttpResponseNotFound)
         assert response.content == "There is no bag with id 'ark:/00001/id'."
 
-    @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
+    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
+                              'in scope.')
     def test_raises_http404_file_handle_is_falsy(self, rf):
         BagWithBag_InfoFactory.create()
         self.getFileHandle.return_value = False
@@ -410,21 +415,29 @@ class TestBagURLListScrapeView:
         with pytest.raises(http.Http404):
             views.bagURLListScrape(request, 'ark:/00001/id')
 
-    @pytest.mark.xfail(msg='pairtreeCandidateList is not available in scope.')
+    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
+                              'in scope.')
     def test_response_content(self):
         assert 0
 
 
 class TestBagFullTextSearchATOMView:
 
-    @pytest.mark.xfail(msg='The function bagFullTextSearchATOM is not used.')
+    @pytest.mark.xfail(reason='bagFullTextSearchATOM is never called.')
+    def test_smoke(self):
+        assert 0
+
+
+class TestBagFullTextSearchHTMLView:
+
+    @pytest.mark.xfail
     def test_smoke(self):
         assert 0
 
 
 class TestBagFullTextSearchView:
 
-    @pytest.mark.xfail(msg='FULLTEXT index is required.')
+    @pytest.mark.xfail(reason='FULLTEXT index is required.')
     def test_returns_paginator_object(self):
         [BagWithBag_InfoFactory.create() for _ in range(15)]
         paginator = views.bagFullTextSearch('test search')
@@ -564,7 +577,7 @@ class TestAppBag:
         tree = etree.fromstring(response.content)
         assert len(tree) >= 10
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason="Refactor required.")
     def test_get_request_with_identifier(self):
         assert 0
 
@@ -595,6 +608,12 @@ class TestAppBag:
         response = views.app_bag(request)
         assert response.status_code == 400
 
-    @pytest.mark.xfail
-    def test_delete_request_removes_member_bag_info_objects(self):
-        pass
+    def test_delete_request_removes_member_ext_identifier_objects(self, rf):
+        bag = BagWithBag_InfoFactory.create()
+        request = rf.delete('/', HTTP_HOST='example.com')
+
+        assert models.External_Identifier.objects.exists() is True
+
+        response = views.app_bag(request, bag.name)
+        assert response.status_code == 200
+        assert models.External_Identifier.objects.exists() is False
