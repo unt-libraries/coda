@@ -3,6 +3,7 @@ import json
 import urllib2
 
 from lxml import etree
+from lxml import objectify
 import mock
 import pytest
 
@@ -330,11 +331,75 @@ class TestBagProxyView:
 
 
 class TestExternalIdentiferSearch:
+    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
-    @pytest.mark.xfail(reason="No TESTS!")
-    def test_smoke(self):
-        assert 0
+    def test_no_identifier_renders_html(self, client):
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch')
+        response = client.get(url)
+        assert 'text/html' in response['Content-Type']
 
+    def test_with_with_valid_coda_identifier_renders_xml(self, client):
+        bag = FullBagFactory.create(name='coda-001')
+        ExternalIdentifierFactory.create(belong_to_bag=bag)
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[bag.name])
+        response = client.get(url)
+
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert response.status_code == 200
+
+    def test_content_with_coda_identifier(self, client):
+        bag = FullBagFactory.create(name='coda-001')
+        ExternalIdentifierFactory.create(belong_to_bag=bag)
+
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[bag.name])
+        response = client.get(url)
+
+        bagxml = objectify.fromstring(response.content)
+        bag_entry = bagxml.entry.content[self.CODA_XML]
+
+        assert str(bag_entry.bagitVersion) == bag.bagit_version
+        assert bag_entry.payloadSize == bag.size
+        assert bag_entry.fileCount == bag.files
+        assert bag_entry.fileCount == bag.files
+        assert bag_entry.name == bag.name
+        assert len(list(bag_entry.bagInfo.iterchildren())) == 2
+
+    def test_with_with_valid_metadc_identifier_renders_xml(self, client):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='metadc000001'
+        )
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+        response = client.get(url)
+
+        assert response['Content-Type'] == 'application/atom+xml'
+        assert response.status_code == 200
+
+    def test_content_with_metadc_identifier(self, client):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='metadc000001'
+        )
+
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+        response = client.get(url)
+
+        bagxml = objectify.fromstring(response.content)
+        bag_entry = bagxml.entry.content[self.CODA_XML]
+
+        assert str(bag_entry.bagitVersion) == bag.bagit_version
+        assert bag_entry.payloadSize == bag.size
+        assert bag_entry.fileCount == bag.files
+        assert bag_entry.fileCount == bag.files
+        assert bag_entry.name == bag.name
+        assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
 class TestExternalIdentiferSearchJSON:
 
