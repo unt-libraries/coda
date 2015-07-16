@@ -215,57 +215,49 @@ class TestRobotsView:
         assert 'Disallow: /' in response.content
 
 
+@pytest.mark.django_db
 @pytest.mark.usefixtures('patch_site')
 class TestBagHTMLView:
-
-    @pytest.fixture(autouse=True)
-    def setup(self, monkeypatch):
-        Bag = mock.Mock()
-        monkeypatch.setattr('coda_mdstore.views.get_object_or_404', Bag)
-
-        self.payload_oxum = mock.MagicMock()
-        self.payload_oxum.field_name = 'Payload-Oxum'
-
-        self.bagging_date = mock.MagicMock()
-        self.bagging_date.field_name = 'Bagging-Date'
-        self.bagging_date.field_body = '2015-01-01'
-
-        Bag_Info = mock.Mock()
-        Bag_Info.objects.filter.return_value = [
-            self.bagging_date,
-            self.payload_oxum
-        ]
-        monkeypatch.setattr('coda_mdstore.views.Bag_Info', Bag_Info)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Payload-Oxum Bag_Info')
     def test_bag_info_does_not_have_payload_oxum(self, rf):
-        self.payload_oxum.field_name = ''
-        response = views.bagHTML(rf.get('/'), 'ark:/00001/id')
+        bag = BagWithBag_InfoFactory.create()
+        payload, bagging_date = bag.bag_info_set.all()
+        payload.field_name = ''
+        payload.save()
+
+        response = views.bagHTML(rf.get('/'), bag.name)
 
         assert response.status_code in (200, 404)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Bagging-Date Bag_Info')
     def test_bag_info_does_not_have_bagging_date(self, rf):
-        self.bagging_date.field_name = ''
-        response = views.bagHTML(rf.get('/'), 'ark:/00001/id')
+        bag = BagWithBag_InfoFactory.create()
+        _, bagging_date = bag.bag_info_set.all()
+        bagging_date.field_name = ''
+        bagging_date.save()
+
+        response = views.bagHTML(rf.get('/'), bag.name)
 
         assert response.status_code in (200, 404)
 
-    def test_catches_urlerror(self, client, monkeypatch):
-        urlopen = mock.Mock(side_effect=urllib2.URLError('Fake Exception'))
-        monkeypatch.setattr('coda_mdstore.views.urllib2.urlopen', urlopen)
+    @mock.patch('coda_mdstore.views.urllib2.urlopen')
+    def test_catches_urlerror(self, mock_urlopen, client):
+        bag = BagWithBag_InfoFactory.create()
+        mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
 
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=['ark:/00001/id']))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
-        assert urlopen.call_count == 1
+        assert mock_urlopen.call_count == 1
         assert response.context[-1]['json_events'] == {}
 
     def test_renders_correct_template(self, client):
+        bag = BagWithBag_InfoFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=['ark:/00001/id']))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
         assert response.template[0].name == 'mdstore/bag_info.html'
 
@@ -280,8 +272,9 @@ class TestBagHTMLView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
+        bag = BagWithBag_InfoFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=['fakeid']))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
         assert key in response.context[-1]
 
