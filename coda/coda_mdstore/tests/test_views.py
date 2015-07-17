@@ -2,8 +2,7 @@ from datetime import datetime
 import json
 import urllib2
 
-from lxml import etree
-from lxml import objectify
+from lxml import etree, objectify
 import mock
 import pytest
 
@@ -34,32 +33,30 @@ def patch_site(monkeypatch):
 
 class TestIndexView:
 
-    def setup_method(self, method):
+    @pytest.fixture(autouse=True)
+    def setup_fixtures(self, monkeypatch):
         """
         Setup the tests for ..views.index by mocking the database
         models. This will be automatically provided to all the
         test methods.
         """
-        self.bag_patcher = mock.patch('coda_mdstore.views.Bag')
-        self.queue_entry_patcher = mock.patch('coda_mdstore.views.QueueEntry')
-        self.validate_patcher = mock.patch('coda_mdstore.views.Validate')
-        self.event_patcher = mock.patch('coda_mdstore.views.Event')
 
-        self.mock_bag = self.bag_patcher.start()
-        self.mock_queue_entry = self.queue_entry_patcher.start()
-        self.mock_validate = self.validate_patcher.start()
-        self.mock_event = self.event_patcher.start()
-
+        self.mock_bag = mock.Mock()
         self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1}
-        self.mock_queue_entry.objects.count.return_value = 10
-        self.mock_validate.objects.count.return_value = 10
-        self.mock_event.objects.count.return_value = 10
+        monkeypatch.setattr('coda_mdstore.views.Bag', self.mock_bag)
 
-    def teardown_method(self, method):
-        self.bag_patcher.stop()
-        self.queue_entry_patcher.stop()
-        self.validate_patcher.stop()
-        self.event_patcher.stop()
+        self.mock_queue_entry = mock.Mock()
+        self.mock_queue_entry.objects.count.return_value = 10
+        monkeypatch.setattr('coda_mdstore.views.QueueEntry',
+                            self.mock_queue_entry)
+
+        self.mock_validate = mock.Mock()
+        self.mock_validate.objects.count.return_value = 10
+        monkeypatch.setattr('coda_mdstore.views.Validate', self.mock_validate)
+
+        self.mock_event = mock.Mock()
+        self.mock_event.objects.count.return_value = 10
+        monkeypatch.setattr('coda_mdstore.views.Event', self.mock_event)
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
@@ -82,7 +79,7 @@ class TestIndexView:
         response = client.get(reverse('coda_mdstore.views.index'))
         assert response.template[0].name == 'mdstore/index.html'
 
-    def test_totals_files__sum_key_is_none(self, client, monkeypatch):
+    def test_totals_files__sum_key_is_none(self, client):
         """
         Check that the `files__sum` key is set 0 if the db returns
         None.
