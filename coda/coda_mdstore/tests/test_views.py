@@ -577,9 +577,26 @@ class TestBagFullTextSearchATOMView:
 
 class TestBagFullTextSearchHTMLView:
 
-    @pytest.mark.xfail
-    def test_smoke(self):
-        assert 0
+    @pytest.mark.xfail(reason='FULLTEXT index is required.')
+    def test_response_with_search_query(self, client):
+        client.get(
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            {'search': 'metadc000001'}
+        )
+
+    def test_with_no_search_query(self, client):
+        response = client.get(
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'))
+        context = response.context[-1]
+
+        assert context['searchString'] == ""
+        assert context['entries'] == None
+        assert 'query' in context
+
+    def test_renders_correct_template(self, client):
+        response = client.get(
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'))
+        assert response.template[0].name == 'mdstore/bag_search_results.html'
 
 
 class TestBagFullTextSearchView:
