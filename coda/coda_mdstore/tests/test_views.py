@@ -396,12 +396,92 @@ class TestExternalIdentiferSearch:
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
+    def test_request_with_short_ark_parameter(self, client):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/67531/metadc000001'
+        )
+
+        # URL with the identifier as a url paramater.
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+        response1 = client.get(url)
+
+        # URL with the ark id as a query paramater.
+        url = reverse('coda_mdstore.views.externalIdentifierSearch')
+        response2 = client.get(url, {'ark': 'metadc000001'})
+
+        assert response1.content == response2.content
+        assert response1['Content-Type'] == response2['Content-Type']
+
+    def test_request_with_long_ark_parameter(self, client):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/67531/metadc000001'
+        )
+
+        # URL with the identifier as a url paramater.
+        url = reverse(
+            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+        response1 = client.get(url)
+
+        # URL with the ark id as a query paramater.
+        url = reverse('coda_mdstore.views.externalIdentifierSearch')
+        response2 = client.get(url, {'ark': 'ark:/67531/metadc000001'})
+
+        assert response1.content == response2.content
+        assert response1['Content-Type'] == response2['Content-Type']
+
 
 class TestExternalIdentiferSearchJSON:
 
-    @pytest.mark.xfail(reason="No TESTS!")
-    def test_smoke(self):
-        assert 0
+    @pytest.mark.xfail(reason='Exception raised without the `ark` query'
+                              ' parameter.')
+    def test_with_without_ark_parameter(self, client):
+        url = reverse('coda_mdstore.views.externalIdentifierSearchJSON')
+        response = client.get(url)
+        assert response.content == '[]'
+
+    def test_with_invalid_ark_id(self, rf):
+        request = rf.get('/', {'ark': 'ark:/67351/metadc000001'})
+        response = views.externalIdentifierSearchJSON(request)
+        assert response.content == '[]'
+        assert response['Content-Type'] == 'application/json'
+
+    def test_with_valid_ark_id(self, rf):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/67531/metadc000001'
+        )
+
+        request = rf.get('/', {'ark': ext_id.value})
+        response = views.externalIdentifierSearchJSON(request)
+        content = json.loads(response.content)
+
+        assert len(content) == 1
+        assert 'bagging_date' in content[0]
+        assert content[0]['name'] == bag.name
+        assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
+
+    def test_with_with_multiple_identifiers(self, rf):
+        bag = FullBagFactory.create()
+        ext_id = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/67531/metadc000001'
+        )
+        ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/67531/metadc000001'
+        )
+
+        request = rf.get('/', {'ark': ext_id.value})
+        response = views.externalIdentifierSearchJSON(request)
+        content = json.loads(response.content)
+
+        assert len(content) == 1
 
 
 class TestBagURLListView:
