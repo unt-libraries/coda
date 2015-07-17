@@ -325,29 +325,27 @@ class TestBagProxyView:
 class TestExternalIdentiferSearch:
     CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
-    def test_no_identifier_renders_html(self, client):
-        url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch')
-        response = client.get(url)
+    def test_no_identifier_renders_html(self, rf):
+        request = rf.get('/')
+        response = views.externalIdentifierSearch(request)
         assert 'text/html' in response['Content-Type']
 
-    def test_with_with_valid_coda_identifier_renders_xml(self, client):
+    def test_with_with_valid_coda_identifier_renders_xml(self, rf):
         bag = FullBagFactory.create(name='coda-001')
         ExternalIdentifierFactory.create(belong_to_bag=bag)
-        url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[bag.name])
-        response = client.get(url)
+
+        request = rf.get('/')
+        response = views.externalIdentifierSearch(request, bag.name)
 
         assert response['Content-Type'] == 'application/atom+xml'
         assert response.status_code == 200
 
-    def test_content_with_coda_identifier(self, client):
+    def test_content_with_coda_identifier(self, rf):
         bag = FullBagFactory.create(name='coda-001')
         ExternalIdentifierFactory.create(belong_to_bag=bag)
 
-        url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[bag.name])
-        response = client.get(url)
+        request = rf.get('/')
+        response = views.externalIdentifierSearch(request, bag.name)
 
         bagxml = objectify.fromstring(response.content)
         bag_entry = bagxml.entry.content[self.CODA_XML]
@@ -359,29 +357,28 @@ class TestExternalIdentiferSearch:
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
-    def test_with_with_valid_metadc_identifier_renders_xml(self, client):
+    def test_with_with_valid_metadc_identifier_renders_xml(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
             value='metadc000001'
         )
-        url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
-        response = client.get(url)
+
+        request = rf.get('/')
+        response = views.externalIdentifierSearch(request, ext_id.value)
 
         assert response['Content-Type'] == 'application/atom+xml'
         assert response.status_code == 200
 
-    def test_content_with_metadc_identifier(self, client):
+    def test_content_with_metadc_identifier(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
             value='metadc000001'
         )
 
-        url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
-        response = client.get(url)
+        request = rf.get('/')
+        response = views.externalIdentifierSearch(request, ext_id.value)
 
         bagxml = objectify.fromstring(response.content)
         bag_entry = bagxml.entry.content[self.CODA_XML]
@@ -393,40 +390,47 @@ class TestExternalIdentiferSearch:
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
-    def test_request_with_short_ark_parameter(self, client):
+    def test_request_with_short_ark_parameter(self, client, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
             value='ark:/67531/metadc000001'
         )
 
-        # URL with the identifier as a url paramater.
+        # URL with the identifier as a url paramater. We will feed the url to
+        # the request factory because the view will use the path to determine
+        # the id field.
         url = reverse(
             'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
-        response1 = client.get(url)
+        request = rf.get(url)
+        response1 = views.externalIdentifierSearch(request, ext_id.value)
 
         # URL with the ark id as a query paramater.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
-        response2 = client.get(url, {'ark': 'metadc000001'})
+        request = rf.get(url, {'ark': 'metadc000001'})
+        response2 = views.externalIdentifierSearch(request)
 
         assert response1.content == response2.content
         assert response1['Content-Type'] == response2['Content-Type']
 
-    def test_request_with_long_ark_parameter(self, client):
+    def test_request_with_long_ark_parameter(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
             value='ark:/67531/metadc000001'
         )
 
-        # URL with the identifier as a url paramater.
+        # Just like in the previous test, feed the real url to the request
+        # factory because the request path is used in the response content.
         url = reverse(
             'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
-        response1 = client.get(url)
+        request = rf.get(url)
+        response1 = views.externalIdentifierSearch(request, ext_id.value)
 
         # URL with the ark id as a query paramater.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
-        response2 = client.get(url, {'ark': 'ark:/67531/metadc000001'})
+        request = rf.get(url, {'ark': 'ark:/67531/metadc000001'})
+        response2 = views.externalIdentifierSearch(request)
 
         assert response1.content == response2.content
         assert response1['Content-Type'] == response2['Content-Type']
@@ -436,9 +440,9 @@ class TestExternalIdentiferSearchJSON:
 
     @pytest.mark.xfail(reason='Exception raised without the `ark` query'
                               ' parameter.')
-    def test_with_without_ark_parameter(self, client):
-        url = reverse('coda_mdstore.views.externalIdentifierSearchJSON')
-        response = client.get(url)
+    def test_with_without_ark_parameter(self, rf):
+        request = rf.get('/')
+        response = views.externalIdentifierSearchJSON(request)
         assert response.content == '[]'
 
     def test_with_invalid_ark_id(self, rf):
