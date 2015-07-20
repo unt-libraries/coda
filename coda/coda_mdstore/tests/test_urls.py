@@ -27,6 +27,10 @@ def test_bagURLList():
     assert resolve('/bag/ark:/67531/coda2.urls').func == views.bagURLList
 
 
+def test_bagProxy():
+    assert resolve('/bag/ark:/67531/foo/bar').func == views.bagProxy
+
+
 def test_stats():
     assert resolve('/stats/').func == views.stats
 
@@ -79,3 +83,7 @@ def test_about():
 def test_robots():
     url = resolve('/robots.txt')
     assert url.func == views.shooRobot
+
+
+def test_feed():
+    assert resolve('/feed/').func.__class__ == views.AtomSiteNewsFeed
