@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import urllib2
 
-from lxml import etree, objectify
+from lxml import objectify
 import mock
 import pytest
 
@@ -652,10 +652,9 @@ class TestAppNode:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-        tree = etree.fromstring(response.content)
-        # There should be atleast 10 elements, which is the number of
-        # node objects Node.objects.all() will return.
-        assert len(tree) >= 10
+        tree = objectify.fromstring(response.content)
+        entries = [e for e in tree.entry]
+        assert len(entries) == 10
 
     def test_get_request_with_identifier(self, rf):
         node = NodeFactory.create()
@@ -727,8 +726,9 @@ class TestAppBag:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-        tree = etree.fromstring(response.content)
-        assert len(tree) >= 10
+        tree = objectify.fromstring(response.content)
+        entries = [e for e in tree.entry]
+        assert len(entries) == 10
 
     @pytest.mark.xfail(reason="Refactor required.")
     def test_get_request_with_identifier(self):
