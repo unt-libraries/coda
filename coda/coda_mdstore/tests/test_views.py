@@ -179,21 +179,19 @@ class TestAllBagsView:
     @pytest.fixture(autouse=True)
     def mock_pe(self, monkeypatch):
         """Patches the paginate_entries with a Mock object."""
-        mock_pe = mock.Mock()
+        self.mock_paginate_entries = mock.Mock()
         monkeypatch.setattr(
-            'coda_mdstore.views.paginate_entries', mock_pe)
-
-        return mock_pe
+            'coda_mdstore.views.paginate_entries', self.mock_paginate_entries)
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.all_bags'))
         assert response.template[0].name == 'mdstore/bag_search_results.html'
 
-    def test_uses_paginated_entries(self, mock_pe, client, monkeypatch):
-        mock_pe.return_value = 'fake data'
+    def test_uses_paginated_entries(self, client, monkeypatch):
+        self.mock_paginate_entries.return_value = 'fake data'
 
         response = client.get(reverse('coda_mdstore.views.all_bags'))
-        assert mock_pe.call_count == 1
+        assert self.mock_paginate_entries.call_count == 1
         assert response.context[-1]['entries'] == 'fake data'
 
     @pytest.mark.parametrize('key', [
