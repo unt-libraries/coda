@@ -652,18 +652,30 @@ class TestAppNode:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
+        # Check that all of the Nodes are listed in the feed.
         tree = objectify.fromstring(response.content)
         entries = [e for e in tree.entry]
         assert len(entries) == 10
 
-    def test_get_request_with_identifier(self, rf):
+    def test_get_request_with_identifier_response(self, rf):
         node = NodeFactory.create()
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request, node.node_name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
-        # TODO: test the response content.
+
+    def test_get_request_with_identifier_content(self, rf):
+        node = NodeFactory.create()
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_node(request, node.node_name)
+
+        tree = objectify.fromstring(response.content)
+        assert len(tree.content.node) == 1
+        assert tree.content.node.name == node.node_name
+        assert tree.content.node.capacity == node.node_capacity
+        assert tree.content.node.path == node.node_path
+        assert tree.content.node.url == node.node_url
 
     def test_get_request_with_identifier_raises_exception(self, rf):
         request = rf.get('/')
