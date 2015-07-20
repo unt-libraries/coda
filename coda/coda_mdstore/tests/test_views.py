@@ -350,7 +350,6 @@ class TestExternalIdentiferSearch:
         assert str(bag_entry.bagitVersion) == bag.bagit_version
         assert bag_entry.payloadSize == bag.size
         assert bag_entry.fileCount == bag.files
-        assert bag_entry.fileCount == bag.files
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
@@ -382,7 +381,6 @@ class TestExternalIdentiferSearch:
 
         assert str(bag_entry.bagitVersion) == bag.bagit_version
         assert bag_entry.payloadSize == bag.size
-        assert bag_entry.fileCount == bag.files
         assert bag_entry.fileCount == bag.files
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
