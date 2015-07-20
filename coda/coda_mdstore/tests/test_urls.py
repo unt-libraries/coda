@@ -58,7 +58,7 @@ def test_externalIdentifierSearch_with_identifier():
 
 def test_externalIdentifierSearch():
     url = resolve('/extidentifier/')
-    assert url.func, views.externalIdentifierSearch
+    assert url.func == views.externalIdentifierSearch
 
 
 def test_externalIdentifierSearchJSON():
