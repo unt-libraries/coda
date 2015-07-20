@@ -632,8 +632,8 @@ class TestShowNodeStatusView:
         context = response.context[-1]
 
         assert len(context.get('status_list')) == 10
-        assert context.get('total_capacity') == 1024 * 1000 * 10
-        assert context.get('total_size') == 512 * 900 * 10
+        assert context.get('total_capacity') == NodeFactory.node_capacity * 10
+        assert context.get('total_size') == NodeFactory.node_size * 10
         assert context.get('total_filled') == 45.0
 
     def test_no_nodes_available(self, rf):
