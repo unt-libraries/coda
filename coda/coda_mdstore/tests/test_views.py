@@ -8,7 +8,6 @@ import pytest
 
 from django.core.urlresolvers import reverse
 from django import http
-from django.core.paginator import Paginator
 
 from .. import views
 from .. import models
@@ -597,16 +596,6 @@ class TestBagFullTextSearchHTMLView:
         response = client.get(
             reverse('coda_mdstore.views.bagFullTextSearchHTML'))
         assert response.template[0].name == 'mdstore/bag_search_results.html'
-
-
-class TestBagFullTextSearchView:
-
-    @pytest.mark.xfail(reason='FULLTEXT index is required.')
-    def test_returns_paginator_object(self):
-        FullBagFactory.create_batch(15)
-        paginator = views.bagFullTextSearch('test search')
-
-        assert isinstance(paginator, Paginator)
 
 
 class TestShowNodeStatusView:
