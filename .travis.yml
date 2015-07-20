@@ -14,4 +14,9 @@ before_script:
     - cp coda/coda_project/settings/secrets.json.template coda/coda_project/settings/secrets.json
     - python ./coda/coda_project/manage.py syncdb --noinput --settings=coda_project.settings.test
 script:
-    - py.test --create-db
+    - py.test --create-db --cov coda --cov-report html
+
+before_install:
+    - pip install codecov pytest-cov
+after_success:
+    - codecov
