@@ -113,7 +113,7 @@ class TestStatsView:
         assert response.context[-1]['monthly_running_bag_total'] == []
         assert response.context[-1]['monthly_running_file_total'] == []
 
-    def test_with_bags(self,  client):
+    def test_with_bags(self, client):
         FullBagFactory.create_batch(20)
 
         response = client.get(reverse('coda_mdstore.views.stats'))
@@ -588,7 +588,7 @@ class TestBagFullTextSearchHTMLView:
             reverse('coda_mdstore.views.bagFullTextSearchHTML'))
         context = response.context[-1]
 
-        assert context['searchString'] == ""
+        assert context['searchString'] == ''
         assert context['entries'] == None
         assert 'query' in context
 
