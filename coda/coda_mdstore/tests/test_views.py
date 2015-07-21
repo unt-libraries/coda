@@ -31,6 +31,9 @@ def patch_site(monkeypatch):
 
 
 class TestIndexView:
+    """
+    Tests for coda_mdstore.views.index.
+    """
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
@@ -94,6 +97,9 @@ class TestIndexView:
 
 
 class TestAboutView:
+    """
+    Tests for coda_mdstore.views.about.
+    """
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.about'))
@@ -101,6 +107,9 @@ class TestAboutView:
 
 
 class TestStatsView:
+    """
+    Tests for coda_mdstore.views.stats.
+    """
 
     def test_no_bags_available(self, client):
         response = client.get(reverse('coda_mdstore.views.stats'))
@@ -127,6 +136,9 @@ class TestStatsView:
 
 
 class TestJSONStatsView:
+    """
+    Tests for coda_mdstore.views.json_stats.
+    """
 
     @mock.patch('coda_mdstore.views.Bag')
     @mock.patch('coda_mdstore.views.Node')
@@ -174,6 +186,9 @@ class TestJSONStatsView:
 
 
 class TestAllBagsView:
+    """
+    Tests for coda_mdstore.views.all_bags.
+    """
 
     @pytest.fixture(autouse=True)
     def mock_pe(self, monkeypatch):
@@ -204,6 +219,9 @@ class TestAllBagsView:
 
 
 class TestRobotsView:
+    """
+    Tests for coda_mdstore.views.shooRobot.
+    """
 
     def test_user_agent_is_all(self, rf):
         request = rf.get('/')
@@ -217,6 +235,9 @@ class TestRobotsView:
 
 
 class TestBagHTMLView:
+    """
+    Tests for coda_mdstore.views.bagHTML.
+    """
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Payload-Oxum Bag_Info')
@@ -277,6 +298,9 @@ class TestBagHTMLView:
 
 
 class TestBagProxyView:
+    """
+    Tests for coda_mdstore.views.bagProxy.
+    """
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
@@ -318,6 +342,9 @@ class TestBagProxyView:
 
 
 class TestExternalIdentiferSearch:
+    """
+    Tests for coda_mdstore.views.externalIdentifierSearch.
+    """
     CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_no_identifier_renders_html(self, rf):
@@ -430,6 +457,9 @@ class TestExternalIdentiferSearch:
 
 
 class TestExternalIdentiferSearchJSON:
+    """
+    Tests for coda_mdstore.views.externalIdentifierSearchJSON.
+    """
 
     @pytest.mark.xfail(reason='Exception raised without the `ark` query'
                               ' parameter.')
@@ -480,6 +510,9 @@ class TestExternalIdentiferSearchJSON:
 
 
 class TestBagURLListView:
+    """
+    Tests for coda_mdstore.views.bagURLList.
+    """
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
@@ -529,6 +562,9 @@ class TestBagURLListView:
 
 
 class TestBagURLListScrapeView:
+    """
+    Tests for coda_mdstore.views.bagURLListScrape.
+    """
 
     @pytest.fixture(autouse=True)
     def setup_fixtures(self, monkeypatch):
@@ -564,6 +600,9 @@ class TestBagURLListScrapeView:
 
 
 class TestBagFullTextSearchATOMView:
+    """
+    Tests for coda_mdstore.views.bagFullTextSearchAtom.
+    """
 
     @pytest.mark.xfail(reason='bagFullTextSearchATOM is never called.')
     def test_smoke(self):
@@ -571,6 +610,9 @@ class TestBagFullTextSearchATOMView:
 
 
 class TestBagFullTextSearchHTMLView:
+    """
+    Tests for coda_mdstore.views.bagFullTextSearchHTML.
+    """
 
     @pytest.mark.xfail(reason='FULLTEXT index is required.')
     def test_response_with_search_query(self, client):
@@ -595,6 +637,9 @@ class TestBagFullTextSearchHTMLView:
 
 
 class TestShowNodeStatusView:
+    """
+    Tests for coda_mdstore.views.showNodeStatus.
+    """
 
     def test_gets_status_for_single_node(self, rf):
         node = NodeFactory.create()
@@ -641,6 +686,9 @@ class TestShowNodeStatusView:
 
 
 class TestAppNode:
+    """
+    Tests for coda_mdstore.views.showNodeStatus.
+    """
 
     def test_get_request_without_identifier(self, rf):
         NodeFactory.create_batch(10)
@@ -722,6 +770,9 @@ class TestAppNode:
 
 
 class TestAppBag:
+    """
+    Tests for coda_mdstore.views.app_bag.
+    """
 
     def test_get_request_returns_not_found(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')
