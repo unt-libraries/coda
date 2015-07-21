@@ -106,7 +106,6 @@ class TestStatsView:
         response = client.get(reverse('coda_mdstore.views.stats'))
 
         assert response.status_code == 200
-
         assert response.context[-1]['totals'] == 0
         assert response.context[-1]['monthly_bags'] == []
         assert response.context[-1]['monthly_files'] == []
@@ -117,9 +116,9 @@ class TestStatsView:
         FullBagFactory.create_batch(20)
 
         response = client.get(reverse('coda_mdstore.views.stats'))
-        assert response.status_code == 200
-
         context = response.context[-1]
+
+        assert response.status_code == 200
         assert type(context['totals']) is dict
         assert len(context['monthly_bags']) != 0
         assert len(context['monthly_files']) != 0
@@ -189,8 +188,8 @@ class TestAllBagsView:
 
     def test_uses_paginated_entries(self, client, monkeypatch):
         self.mock_paginate_entries.return_value = 'fake data'
-
         response = client.get(reverse('coda_mdstore.views.all_bags'))
+
         assert self.mock_paginate_entries.call_count == 1
         assert response.context[-1]['entries'] == 'fake data'
 
@@ -228,7 +227,6 @@ class TestBagHTMLView:
         payload.save()
 
         response = views.bagHTML(rf.get('/'), bag.name)
-
         assert response.status_code in (200, 404)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
@@ -240,7 +238,6 @@ class TestBagHTMLView:
         bagging_date.save()
 
         response = views.bagHTML(rf.get('/'), bag.name)
-
         assert response.status_code in (200, 404)
 
     @mock.patch('coda_mdstore.views.urllib2.urlopen')
@@ -301,6 +298,7 @@ class TestBagProxyView:
     def test_response_has_correct_headers(self, rf):
         request = rf.get('/')
         response = views.bagProxy(request, self.bag.name, '/foo/bar')
+
         assert response['Content-Length'] == '255'
         assert response['Content-Type'] == 'text/plain'
 
@@ -443,6 +441,7 @@ class TestExternalIdentiferSearchJSON:
     def test_with_invalid_ark_id(self, rf):
         request = rf.get('/', {'ark': 'ark:/67351/metadc000001'})
         response = views.externalIdentifierSearchJSON(request)
+
         assert response.content == '[]'
         assert response['Content-Type'] == 'application/json'
 
@@ -507,6 +506,7 @@ class TestBagURLListView:
         self.getFileHandle.return_value = False
         bag = FullBagFactory.create()
         request = rf.get('/')
+
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
@@ -552,8 +552,8 @@ class TestBagURLListScrapeView:
     def test_raises_http404_file_handle_is_falsy(self, rf):
         FullBagFactory.create()
         self.getFileHandle.return_value = False
-
         request = rf.get('/')
+
         with pytest.raises(http.Http404):
             views.bagURLListScrape(request, 'ark:/00001/id')
 
@@ -598,6 +598,7 @@ class TestShowNodeStatusView:
 
     def test_gets_status_for_single_node(self, rf):
         node = NodeFactory.create()
+
         request = rf.get('/')
         response = views.showNodeStatus(request, node.node_name)
 
@@ -619,6 +620,7 @@ class TestShowNodeStatusView:
 
         request = rf.get('/')
         response = views.showNodeStatus(request)
+
         assert response.status_code == 200
 
     def test_context_with_all_nodes(self, client):
@@ -669,8 +671,8 @@ class TestAppNode:
         node = NodeFactory.create()
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request, node.node_name)
-
         tree = objectify.fromstring(response.content)
+
         assert len(tree.content.node) == 1
         assert tree.content.node.name == node.node_name
         assert tree.content.node.capacity == node.node_capacity
@@ -709,16 +711,13 @@ class TestAppNode:
 
     def test_delete_request(self, rf):
         node = NodeFactory.create()
-
         request = rf.delete('/', HTTP_HOST='example.com')
         response = views.app_node(request, node.node_name)
-
         assert response.status_code == 200
 
     def test_delete_request_returns_not_found(self, rf):
         request = rf.delete('/', HTTP_HOST='example.com')
         response = views.app_node(request, 'DNE-001')
-
         assert response.status_code == 404
 
 
