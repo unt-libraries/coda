@@ -457,6 +457,20 @@ class TestExternalIdentiferSearch:
         assert response1.content == response2.content
         assert response1['Content-Type'] == response2['Content-Type']
 
+        bagxml1 = objectify.fromstring(response1.content)
+        bagxml2 = objectify.fromstring(response2.content)
+        bag_entry1 = bagxml1.entry.content[self.CODA_XML]
+        bag_entry2 = bagxml2.entry.content[self.CODA_XML]
+
+        assert bag_entry1.name == bag_entry2.name
+        assert bag_entry1.fileCount == bag_entry2.fileCount
+        assert bag_entry1.bagitVersion == bag_entry2.bagitVersion
+        assert bag_entry1.payloadSize == bag_entry2.payloadSize
+
+        bag_info_count1 = bag_entry1.bagInfo.countchildren()
+        bag_info_count2 = bag_entry2.bagInfo.countchildren()
+        assert bag_info_count1 == bag_info_count2
+
     def test_request_with_long_ark_parameter(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
@@ -476,8 +490,21 @@ class TestExternalIdentiferSearch:
         request = rf.get(url, {'ark': 'ark:/67531/metadc000001'})
         response2 = views.externalIdentifierSearch(request)
 
-        assert response1.content == response2.content
         assert response1['Content-Type'] == response2['Content-Type']
+
+        bagxml1 = objectify.fromstring(response1.content)
+        bagxml2 = objectify.fromstring(response2.content)
+        bag_entry1 = bagxml1.entry.content[self.CODA_XML]
+        bag_entry2 = bagxml2.entry.content[self.CODA_XML]
+
+        assert bag_entry1.name == bag_entry2.name
+        assert bag_entry1.fileCount == bag_entry2.fileCount
+        assert bag_entry1.bagitVersion == bag_entry2.bagitVersion
+        assert bag_entry1.payloadSize == bag_entry2.payloadSize
+
+        bag_info_count1 = bag_entry1.bagInfo.countchildren()
+        bag_info_count2 = bag_entry2.bagInfo.countchildren()
+        assert bag_info_count1 == bag_info_count2
 
 
 class TestExternalIdentiferSearchJSON:
