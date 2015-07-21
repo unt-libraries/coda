@@ -14,7 +14,7 @@ from .. import models
 from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 
 
-# Add this mark so that we are not loading all the urls for
+# Add this mark so that we are not loading all the URLs for
 # the entire project when using reverse.
 pytestmark = [
     pytest.mark.urls('coda_mdstore.urls'),
@@ -390,7 +390,7 @@ class TestExternalIdentiferSearch:
             value='ark:/67531/metadc000001'
         )
 
-        # URL with the identifier as a url paramater. We will feed the url to
+        # URL with the identifier as a URL parameter. We will feed the URL to
         # the request factory because the view will use the path to determine
         # the id field.
         url = reverse(
@@ -398,7 +398,7 @@ class TestExternalIdentiferSearch:
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
-        # URL with the ark id as a query paramater.
+        # URL with the ark id as a query parameter.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
         request = rf.get(url, {'ark': 'metadc000001'})
         response2 = views.externalIdentifierSearch(request)
@@ -413,14 +413,14 @@ class TestExternalIdentiferSearch:
             value='ark:/67531/metadc000001'
         )
 
-        # Just like in the previous test, feed the real url to the request
+        # Just like in the previous test, feed the real URL to the request
         # factory because the request path is used in the response content.
         url = reverse(
             'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
-        # URL with the ark id as a query paramater.
+        # URL with the ark id as a query parameter.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
         request = rf.get(url, {'ark': 'ark:/67531/metadc000001'})
         response2 = views.externalIdentifierSearch(request)
@@ -605,7 +605,7 @@ class TestShowNodeStatusView:
         assert response.status_code == 200
 
     def test_single_node_context(self, client):
-        # TODO: Update the url ordering so that we can get the url with
+        # TODO: Update the URL ordering so that we can get the URL with
         #       reverse.
         node = NodeFactory.create()
         url = '/node/{0}/'.format(node.node_name)
