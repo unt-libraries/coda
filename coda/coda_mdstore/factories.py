@@ -1,3 +1,6 @@
+"""
+Coda MDStore Model factories for test fixtures.
+"""
 import factory
 
 from datetime import datetime
@@ -34,6 +37,10 @@ class ExternalIdentifierFactory(factory.django.DjangoModelFactory):
 
 
 class FullBagFactory(BagFactory):
+    """
+    Factory to create a Bag object with two related Bag_Info objects, and
+    2 related External_Identifier objects.
+    """
     info1 = factory.RelatedFactory(
         Bag_InfoFactory,
         'bag_name',
