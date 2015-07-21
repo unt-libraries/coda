@@ -112,6 +112,9 @@ class TestStatsView:
     """
 
     def test_no_bags_available(self, client):
+        """
+        Test the context values when there are no bags are in the database.
+        """
         response = client.get(reverse('coda_mdstore.views.stats'))
 
         assert response.status_code == 200
@@ -122,6 +125,9 @@ class TestStatsView:
         assert response.context[-1]['monthly_running_file_total'] == []
 
     def test_with_bags(self, client):
+        """
+        Test the context values when there are bags are in the database.
+        """
         FullBagFactory.create_batch(20)
 
         response = client.get(reverse('coda_mdstore.views.stats'))
@@ -143,6 +149,10 @@ class TestJSONStatsView:
     @mock.patch('coda_mdstore.views.Bag')
     @mock.patch('coda_mdstore.views.Node')
     def test_no_bags_or_nodes(self, mock_node, mock_bag, client):
+        """
+        Test the outcome when the database does not contain any bags or
+        nodes.
+        """
         mock_node.objects.aggregate.return_value = {'node_capacity__sum': 0}
         mock_bag.objects.aggregate.return_value = {
             'bagging_date__max': None,
@@ -164,6 +174,9 @@ class TestJSONStatsView:
     @mock.patch('coda_mdstore.views.Bag')
     @mock.patch('coda_mdstore.views.Node')
     def test_with_bags_and_nodes(self, mock_node, mock_bag, client):
+        """
+        Test the outcome when the database does contain bags and nodes.
+        """
         mock_node.objects.aggregate.return_value = {
             'node_capacity__sum': 1000000
         }
@@ -202,6 +215,9 @@ class TestAllBagsView:
         assert response.template[0].name == 'mdstore/bag_search_results.html'
 
     def test_uses_paginated_entries(self, client, monkeypatch):
+        """
+        Verify that the view calls paginate_entries.
+        """
         self.mock_paginate_entries.return_value = 'fake data'
         response = client.get(reverse('coda_mdstore.views.all_bags'))
 
@@ -242,6 +258,10 @@ class TestBagHTMLView:
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Payload-Oxum Bag_Info')
     def test_bag_info_does_not_have_payload_oxum(self, rf):
+        """
+        Verify the outcome when a Bag does not have a member Bag_Info
+        that has the `Payload-Oxum` key.
+        """
         bag = FullBagFactory.create()
         payload, bagging_date = bag.bag_info_set.all()
         payload.field_name = ''
@@ -253,6 +273,10 @@ class TestBagHTMLView:
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
                               'Bagging-Date Bag_Info')
     def test_bag_info_does_not_have_bagging_date(self, rf):
+        """
+        Verify the outcome when a Bag does not have a member Bag_Info
+        that has the `Bagging-Date` key.
+        """
         bag = FullBagFactory.create()
         _, bagging_date = bag.bag_info_set.all()
         bagging_date.field_name = ''
