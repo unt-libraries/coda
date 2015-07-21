@@ -2,7 +2,7 @@ import factory
 
 from datetime import datetime
 
-from .. import models
+from . import models
 
 
 class BagFactory(factory.django.DjangoModelFactory):

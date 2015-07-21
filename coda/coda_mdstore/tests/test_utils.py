@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 import pytest
 
 from .. import views
-from . import factories
+from .. import factories
 
 
 class TestBagFullTextSearch:

@@ -11,7 +11,7 @@ from django import http
 
 from .. import views
 from .. import models
-from .factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
+from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 
 
 # Add this mark so that we are not loading all the urls for
