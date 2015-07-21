@@ -648,10 +648,14 @@ class TestAppNode:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-        # Check that all of the Nodes are listed in the feed.
+    def test_get_request_without_identifier_response_content(self, rf):
+        NodeFactory.create_batch(10)
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_node(request)
         tree = objectify.fromstring(response.content)
-        entries = [e for e in tree.entry]
-        assert len(entries) == 10
+
+        # Check that all of the Nodes are listed in the feed.
+        assert len(tree.entry) == 10
 
     def test_get_request_with_identifier_response(self, rf):
         node = NodeFactory.create()
@@ -734,9 +738,14 @@ class TestAppBag:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
+    def test_get_request_response_content(self, rf):
+        FullBagFactory.create_batch(10)
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_bag(request)
+
         tree = objectify.fromstring(response.content)
-        entries = [e for e in tree.entry]
-        assert len(entries) == 10
+        assert len(tree.entry) == 10
 
     @pytest.mark.xfail(reason="Refactor required.")
     def test_get_request_with_identifier(self):
