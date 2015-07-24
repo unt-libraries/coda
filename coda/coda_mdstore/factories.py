@@ -1,9 +1,9 @@
 """
 Coda MDStore Model factories for test fixtures.
 """
-import factory
-
 from datetime import datetime
+
+import factory
 
 from . import models
 
