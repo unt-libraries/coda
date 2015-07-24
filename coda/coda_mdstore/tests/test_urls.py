@@ -1,5 +1,7 @@
+from django.contrib import sitemaps
 from django.core.urlresolvers import resolve
 
+from .. import resourcesync
 from .. import views
 
 
@@ -87,3 +89,19 @@ def test_robots():
 
 def test_feed():
     assert resolve('/feed/').func.__class__ == views.AtomSiteNewsFeed
+
+
+def test_resourceindex():
+    assert resolve('/resourceindex.xml').func == sitemaps.views.index
+
+
+def test_resourcelist_secion():
+    assert resolve('/resourcelist-001.xml').func == sitemaps.views.sitemap
+
+
+def test_changelist():
+    assert resolve('/changelist.xml').func == resourcesync.changelist
+
+
+def test_capabilitylist():
+    assert resolve('/capabilitylist.xml').func == resourcesync.capabilitylist
