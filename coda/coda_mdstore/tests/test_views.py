@@ -866,6 +866,17 @@ class TestAppBag:
             'http://example.com/APP/bag/{0}/'.format(bag.name)
         )
 
+    @mock.patch('coda_mdstore.views.updateBag')
+    def test_put_request(self, mock_updateBag, rf):
+        bag = FullBagFactory.create()
+        mock_updateBag.return_value = bag
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
     def test_delete_request_is_successful(self, rf):
         bag = FullBagFactory.create()
         request = rf.delete('/', HTTP_HOST='example.com')
