@@ -874,8 +874,12 @@ class TestAppBag:
         assert response.status_code == 200
         assert models.Bag.objects.exists() is False
 
-    def test_delete_request_returns_bad_request(self, rf):
-        request = rf.delete('/', HTTP_HOST='example.com')
+    def test_request_returns_bad_request(self, rf):
+        """
+        Test that a status code 400 is returned if the request method
+        is not one of GET, POST, PUT, or DELETE.
+        """
+        request = rf.head('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
         assert response.status_code == 400
 
