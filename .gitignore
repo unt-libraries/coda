@@ -3,3 +3,6 @@
 *.swo
 
 secrets.json
+.coverage
+htmlcov/*
+
