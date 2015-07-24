@@ -376,7 +376,7 @@ class TestExternalIdentiferSearch:
         response = views.externalIdentifierSearch(request)
         assert 'text/html' in response['Content-Type']
 
-    def test_with_with_valid_coda_identifier_renders_xml(self, rf):
+    def test_with_valid_coda_identifier_renders_xml(self, rf):
         bag = FullBagFactory.create(name='coda-001')
         ExternalIdentifierFactory.create(belong_to_bag=bag)
 
