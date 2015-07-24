@@ -824,6 +824,7 @@ class TestAppBag:
     """
     Tests for coda_mdstore.views.app_bag.
     """
+    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_get_request_returns_not_found(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')
@@ -848,9 +849,38 @@ class TestAppBag:
         tree = objectify.fromstring(response.content)
         assert len(tree.entry) == 10
 
-    @pytest.mark.xfail(reason="Refactor required.")
-    def test_get_request_with_identifier(self):
-        assert 0
+    def test_get_request_with_invalid_identifier(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, 'ark:/000002/id1')
+        assert response.status_code == 404
+
+    def test_get_request_with_identifier_without_erc(self, rf):
+        bag = FullBagFactory.create()
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        tree = objectify.fromstring(response.content)
+        bag_xml = tree.content[self.CODA_XML]
+        assert bag_xml.name == bag.name
+
+    @pytest.mark.xfail(reason='WSGI request objects do not have a ._req '
+                              'attribtue.')
+    def test_get_request_with_identifier_with_erc_support(self, rf):
+        bag = FullBagFactory.create()
+        request = rf.get('/??', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+        assert response['Content-Type'] == 'text/plain'
+
+    @pytest.mark.xfail(reason='WSGI request objects do not have a ._req '
+                              'attribtue.')
+    def test_get_request_with_identifier_with_erc(self, rf):
+        bag = FullBagFactory.create()
+        request = rf.get('/?', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+        assert response['Content-Type'] == 'text/plain'
 
     @mock.patch('coda_mdstore.views.createBag')
     def test_post_request(self, mock_createBag, rf):
