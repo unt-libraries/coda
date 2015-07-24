@@ -867,7 +867,7 @@ class TestAppBag:
         assert bag_xml.name == bag.name
 
     @pytest.mark.xfail(reason='WSGI request objects do not have a ._req '
-                              'attribtue.')
+                              'attribute.')
     def test_get_request_with_identifier_with_erc_support(self, rf):
         bag = FullBagFactory.create()
         request = rf.get('/??', HTTP_HOST='example.com')
@@ -875,7 +875,7 @@ class TestAppBag:
         assert response['Content-Type'] == 'text/plain'
 
     @pytest.mark.xfail(reason='WSGI request objects do not have a ._req '
-                              'attribtue.')
+                              'attribute.')
     def test_get_request_with_identifier_with_erc(self, rf):
         bag = FullBagFactory.create()
         request = rf.get('/?', HTTP_HOST='example.com')

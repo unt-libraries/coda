@@ -95,7 +95,7 @@ def test_resourceindex():
     assert resolve('/resourceindex.xml').func == sitemaps.views.index
 
 
-def test_resourcelist_secion():
+def test_resourcelist_section():
     assert resolve('/resourcelist-001.xml').func == sitemaps.views.sitemap
 
 
