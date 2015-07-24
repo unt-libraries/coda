@@ -402,7 +402,7 @@ class TestExternalIdentiferSearch:
         assert bag_entry.name == bag.name
         assert len(list(bag_entry.bagInfo.iterchildren())) == 2
 
-    def test_with_with_valid_metadc_identifier_renders_xml(self, rf):
+    def test_with_valid_metadc_identifier_renders_xml(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
@@ -542,7 +542,7 @@ class TestExternalIdentiferSearchJSON:
         assert content[0]['name'] == bag.name
         assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
 
-    def test_with_with_multiple_identifiers(self, rf):
+    def test_with_multiple_identifiers(self, rf):
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
