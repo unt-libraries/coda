@@ -83,7 +83,7 @@ class TestIndexView:
 
     def test_totals_files__sum_key_is_none(self, client):
         """
-        Check that the `files__sum` key is set 0 if the db returns
+        Check that the `files__sum` key is set to 0 if the query returns
         None.
         """
         # Re-patch the Bag entity to modify the return value from the
@@ -113,7 +113,7 @@ class TestStatsView:
 
     def test_no_bags_available(self, client):
         """
-        Test the context values when there are no bags are in the database.
+        Test the context values when no bags are in the database.
         """
         response = client.get(reverse('coda_mdstore.views.stats'))
 
@@ -126,7 +126,7 @@ class TestStatsView:
 
     def test_with_bags(self, client):
         """
-        Test the context values when there are bags are in the database.
+        Test the context values when bags are in the database.
         """
         FullBagFactory.create_batch(20)
 
@@ -514,7 +514,7 @@ class TestExternalIdentiferSearchJSON:
 
     @pytest.mark.xfail(reason='Exception raised without the `ark` query'
                               ' parameter.')
-    def test_with_without_ark_parameter(self, rf):
+    def test_without_ark_parameter(self, rf):
         request = rf.get('/')
         response = views.externalIdentifierSearchJSON(request)
         assert response.content == '[]'
