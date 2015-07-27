@@ -1,4 +1,6 @@
 from django.core.paginator import Paginator
+from lxml import etree, objectify
+import mock
 import pytest
 
 from .. import presentation
@@ -42,3 +44,43 @@ class TestBagSearch:
 
     def test_search_finds_bag_by_bag_info():
         assert 0
+
+
+@pytest.mark.django_db
+class TestMakeBagAtomFeed:
+    """
+    Tests for coda_mdstore.presentation.makeBagAtomFeed.
+    """
+
+    @mock.patch('coda_mdstore.presentation.objectsToXML')
+    @mock.patch('coda_mdstore.presentation.wrapAtom', lambda *args: etree.Element('atomEntry'))
+    def test_with_bag_objects(self, *args):
+        title = 'test title'
+        _id = 'test-id'
+        bag_list = factories.FullBagFactory.create_batch(5)
+
+        result = presentation.makeBagAtomFeed(bag_list, _id, title)
+        feed = objectify.fromstring(etree.tostring(result))
+
+        assert len(feed.atomEntry) == 5
+        assert feed.id == _id
+        assert feed.title == title
+        assert feed.updated.text is None
+        assert feed.link.get('href') == _id
+        assert feed.link.get('rel') == 'self'
+
+    @mock.patch('coda_mdstore.presentation.wrapAtom')
+    def test_without_bag_objects(self, wrapAtom):
+        title = 'test title'
+        _id = 'test-id'
+        bag_list = []
+
+        result = presentation.makeBagAtomFeed(bag_list, _id, title)
+        feed = objectify.fromstring(etree.tostring(result))
+
+        assert wrapAtom.call_count == 0
+        assert feed.id == _id
+        assert feed.title == title
+        assert feed.updated.text is None
+        assert feed.link.get('href') == _id
+        assert feed.link.get('rel') == 'self'
