@@ -83,3 +83,31 @@ class TestMakeBagAtomFeed:
         assert feed.link.get('href') == _id
         assert feed.link.get('rel') == 'self'
         assert feed.countchildren() == 4
+
+
+@pytest.mark.django_db
+class TestObjectsToXML:
+    """
+    Test for coda_mdstore.presentation.objectsToXML.
+    """
+
+    def test_bag_attribute_conversion(self):
+        bag = factories.FullBagFactory.create()
+        xml = etree.tostring(presentation.objectsToXML(bag))
+        bag_xml = objectify.fromstring(xml)
+
+        assert bag_xml.name == bag.name
+        assert bag_xml.fileCount == bag.files
+        assert bag_xml.payloadSize == bag.size
+        assert bag_xml.payloadSize == bag.size
+
+    def test_bag_info_attribute_conversion(self):
+        bag = factories.FullBagFactory.create()
+        xml = etree.tostring(presentation.objectsToXML(bag))
+        bag_xml = objectify.fromstring(xml)
+
+        for i, bag_info in enumerate(bag.bag_info_set.all()):
+            bag_info_xml = bag_xml.bagInfo.item[i]
+            assert bag_info_xml.name.text == bag_info.field_name
+            assert bag_info_xml.body.text == bag_info.field_body
+            assert bag_info_xml.countchildren() == 2
