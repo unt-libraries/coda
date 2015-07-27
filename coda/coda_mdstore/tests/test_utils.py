@@ -69,8 +69,7 @@ class TestMakeBagAtomFeed:
         assert feed.link.get('href') == _id
         assert feed.link.get('rel') == 'self'
 
-    @mock.patch('coda_mdstore.presentation.wrapAtom')
-    def test_without_bag_objects(self, wrapAtom):
+    def test_without_bag_objects(self):
         title = 'test title'
         _id = 'test-id'
         bag_list = []
@@ -78,9 +77,9 @@ class TestMakeBagAtomFeed:
         result = presentation.makeBagAtomFeed(bag_list, _id, title)
         feed = objectify.fromstring(etree.tostring(result))
 
-        assert wrapAtom.call_count == 0
         assert feed.id == _id
         assert feed.title == title
         assert feed.updated.text is None
         assert feed.link.get('href') == _id
         assert feed.link.get('rel') == 'self'
+        assert feed.countchildren() == 4
