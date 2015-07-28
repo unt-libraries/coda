@@ -153,3 +153,57 @@ class TestGetNodeByName:
         node = presentation.getNodeByName(person_xml, name)
         assert node.tag == name
         assert node.text == value
+
+
+class TestNodeEntry:
+    """
+    Tests for coda_mdstore.presentation.nodeEntry.
+    """
+
+    def test_xml_has_node_attributes(self):
+        node = factories.NodeFactory.build()
+        tree = presentation.nodeEntry(node)
+        xml_str = etree.tostring(tree)
+
+        xml_obj = objectify.fromstring(xml_str)
+        assert xml_obj.content.node.name == node.node_name
+        assert xml_obj.content.node.capacity == node.node_capacity
+        assert xml_obj.content.node.size == node.node_size
+        assert xml_obj.content.node.path == node.node_path
+        assert xml_obj.content.node.url == node.node_url
+        assert xml_obj.content.node.last_checked == str(node.last_checked)
+        assert xml_obj.content.node.countchildren() == 6
+
+    def test_xml_id(self):
+        node = factories.NodeFactory.build()
+        web_root = 'example.com'
+
+        tree = presentation.nodeEntry(node, web_root)
+        xml_str = etree.tostring(tree)
+        xml_obj = objectify.fromstring(xml_str)
+
+        assert web_root in xml_obj.id.text
+
+    def test_xml_title(self):
+        node = factories.NodeFactory.build()
+        tree = presentation.nodeEntry(node)
+        xml_str = etree.tostring(tree)
+
+        xml_obj = objectify.fromstring(xml_str)
+        assert xml_obj.title == node.node_name
+
+    def test_xml_has_author_name_element(self):
+        node = factories.NodeFactory.build()
+        tree = presentation.nodeEntry(node)
+        xml_str = etree.tostring(tree)
+
+        xml_obj = objectify.fromstring(xml_str)
+        assert hasattr(xml_obj.author, 'name')
+
+    def test_xml_has_author_uri_element(self):
+        node = factories.NodeFactory.build()
+        tree = presentation.nodeEntry(node)
+        xml_str = etree.tostring(tree)
+
+        xml_obj = objectify.fromstring(xml_str)
+        assert hasattr(xml_obj.author, 'uri')
