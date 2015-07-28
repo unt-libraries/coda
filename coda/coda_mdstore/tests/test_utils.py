@@ -111,3 +111,45 @@ class TestObjectsToXML:
             assert bag_info_xml.name.text == bag_info.field_name
             assert bag_info_xml.body.text == bag_info.field_body
             assert bag_info_xml.countchildren() == 2
+
+
+@pytest.fixture
+def person_xml():
+    return etree.fromstring(
+        """
+        <person>
+            <name>John Doe</name>
+            <age>34</age>
+        </person>
+        """
+    )
+
+
+@pytest.mark.usefixture('person_xml')
+class TestGetValueByName:
+    """
+    Tests for coda_mdstore.presentation.getValueByName.
+    """
+
+    @pytest.mark.parametrize('name, value', [
+        ('name', 'John Doe'),
+        ('age', '34')
+    ])
+    def test_returns_value(self, name, value, person_xml):
+        assert presentation.getValueByName(person_xml, name) == value
+
+
+@pytest.mark.usefixture('person_xml')
+class TestGetNodeByName:
+    """
+    Tests for coda_mdstore.presentation.getNodeByName.
+    """
+
+    @pytest.mark.parametrize('name, value', [
+        ('name', 'John Doe'),
+        ('age', '34')
+    ])
+    def test_returns_node(self, name, value, person_xml):
+        node = presentation.getNodeByName(person_xml, name)
+        assert node.tag == name
+        assert node.text == value
