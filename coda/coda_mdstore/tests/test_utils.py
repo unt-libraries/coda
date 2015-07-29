@@ -207,3 +207,43 @@ class TestNodeEntry:
 
         xml_obj = objectify.fromstring(xml_str)
         assert hasattr(xml_obj.author, 'uri')
+
+
+@pytest.mark.django_db
+class TestUpdateNode:
+
+    def test_node_not_found(self, rf):
+        node = factories.NodeFactory.build()
+        node_tree = presentation.nodeEntry(node)
+        node_xml = etree.tostring(node_tree, pretty_print=True)
+
+        request = rf.post('/', node_xml, 'application/xml')
+        response = presentation.updateNode(request)
+        assert response.status_code == 404
+
+    @pytest.mark.xfail(reason='Response should not have status code 200.')
+    def test_node_found_and_path_does_not_include_node_name(self, rf):
+        node = factories.NodeFactory.build()
+        node_tree = presentation.nodeEntry(node)
+        node_xml = etree.tostring(node_tree, pretty_print=True)
+
+        node.save()
+
+        request = rf.post('/', node_xml, 'application/xml')
+        response = presentation.updateNode(request)
+
+        assert response.status_code != 200
+        assert 'URL does not match the XML' in response.content
+
+    def test_node_updated(self, rf):
+        node = factories.NodeFactory.build()
+        node.save()
+
+        node.node_size = '0'
+        node_tree = presentation.nodeEntry(node)
+        node_xml = etree.tostring(node_tree, pretty_print=True)
+
+        url = '/node/{0}/detail'.format(node.node_name)
+        request = rf.post(url, node_xml, 'application/xml')
+        updated_node = presentation.updateNode(request)
+        assert updated_node.node_size == 0
