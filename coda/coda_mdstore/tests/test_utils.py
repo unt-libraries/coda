@@ -404,6 +404,8 @@ class TestXmlToBagObject:
     def test_has_bag_info_objects(self, bag_xml):
         bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
         assert len(bag_infos) == 2
+        # Verify that all of the bag_infos are instances of models.Bag_Info
+        assert all([isinstance(m, models.Bag_Info) for m in bag_infos])
 
     def test_has_no_bag_info_objects(self, bag_xml):
         del bag_xml.bagInfo.item
