@@ -280,4 +280,7 @@ class TestCreateNode:
         assert node.node_size == created_node.node_size
         assert node.node_path == created_node.node_path
         assert node.node_url == created_node.node_url
+
+        # Verify that the attribute exists, but do not attempt to guess
+        # the value.
         assert hasattr(node, 'last_checked')
