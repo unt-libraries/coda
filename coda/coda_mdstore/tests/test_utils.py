@@ -3,9 +3,10 @@ from lxml import etree, objectify
 import mock
 import pytest
 
+from .. import factories
+from .. import models
 from .. import presentation
 from .. import views
-from .. import factories
 
 
 class TestBagFullTextSearch:
@@ -211,6 +212,9 @@ class TestNodeEntry:
 
 @pytest.mark.django_db
 class TestUpdateNode:
+    """
+    Tests for coda_mdstore.presentation.updateNode.
+    """
 
     def test_node_not_found(self, rf):
         node = factories.NodeFactory.build()
@@ -247,3 +251,33 @@ class TestUpdateNode:
         request = rf.post(url, node_xml, 'application/xml')
         updated_node = presentation.updateNode(request)
         assert updated_node.node_size == 0
+
+
+class TestCreateNode:
+    """
+    Tests for coda_mdstore.presentation.createNode.
+    """
+
+    def test_returns_node_object(self, rf):
+        node = factories.NodeFactory.build()
+        node_tree = presentation.nodeEntry(node)
+        node_xml = etree.tostring(node_tree, pretty_print=True)
+
+        request = rf.post('/', node_xml, 'application/xml')
+        created_node = presentation.createNode(request)
+        assert isinstance(created_node, models.Node)
+
+    def test_created_node_attributes(self, rf):
+        node = factories.NodeFactory.build()
+        node_tree = presentation.nodeEntry(node)
+        node_xml = etree.tostring(node_tree, pretty_print=True)
+
+        request = rf.post('/', node_xml, 'application/xml')
+        created_node = presentation.createNode(request)
+
+        assert node.node_name == created_node.node_name
+        assert node.node_capacity == created_node.node_capacity
+        assert node.node_size == created_node.node_size
+        assert node.node_path == created_node.node_path
+        assert node.node_url == created_node.node_url
+        assert hasattr(node, 'last_checked')
