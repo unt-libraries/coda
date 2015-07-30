@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.paginator import Paginator
 from lxml import etree, objectify
 import mock
@@ -284,3 +286,127 @@ class TestCreateNode:
         # Verify that the attribute exists, but do not attempt to guess
         # the value.
         assert hasattr(node, 'last_checked')
+
+
+class TestXmlToBagObject:
+
+    @pytest.fixture
+    def bag_xml(self):
+        xml = """
+            <bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/">
+            <bag:name>ark:/67531/coda2</bag:name>
+            <bag:fileCount>43</bag:fileCount>
+            <bag:payloadSize>46259062</bag:payloadSize>
+            <bag:bagitVersion>0.96</bag:bagitVersion>
+            <bag:lastStatus>fail</bag:lastStatus>
+            <bag:lastVerified>2015-01-01</bag:lastVerified>
+            <bag:bagInfo>
+                <bag:item>
+                <bag:name>Bagging-Date</bag:name>
+                <bag:body>2009-09-24</bag:body>
+                </bag:item>
+                <bag:item>
+                <bag:name>Payload-Oxum</bag:name>
+                <bag:body>46259062.43</bag:body>
+                </bag:item>
+            </bag:bagInfo>
+            </bag:codaXML>
+        """
+        return objectify.fromstring(xml)
+
+    def test_name_not_set(self, bag_xml):
+        del bag_xml.name
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag is None
+        assert bag_infos is None
+        assert error == "Unable to set 'name' attribute"
+
+    def test_name_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.name == bag_xml.name
+        assert error is None
+
+    def test_fileCount_not_set(self, bag_xml):
+        del bag_xml.fileCount
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag is None
+        assert bag_infos is None
+        assert error == "Unable to set 'files' attribute"
+
+    def test_fileCount_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.files == str(bag_xml.fileCount)
+        assert error is None
+
+    def test_payloadSize_not_set(self, bag_xml):
+        del bag_xml.payloadSize
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag is None
+        assert bag_infos is None
+        assert "Unable to set 'size' attribute" in error
+
+    def test_payloadSize_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.size == bag_xml.payloadSize
+        assert error is None
+
+    def test_lastStatus_not_set(self, bag_xml):
+        del bag_xml.lastStatus
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.last_verified_status == 'pass'
+        assert error is None
+
+    def test_lastStatus_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.last_verified_status == bag_xml.lastStatus
+        assert error is None
+
+    def test_lastVerified_not_set(self, bag_xml):
+        del bag_xml.lastVerified
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert isinstance(bag.last_verified_date, datetime)
+        assert error is None
+
+    def test_lastVerified_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert isinstance(bag.last_verified_date, datetime)
+        assert error is None
+
+    def test_bagitVersion_not_set(self, bag_xml):
+        del bag_xml.bagitVersion
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.bagit_version == ''
+        assert error is None
+
+    def test_bagitVersion_is_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert bag.bagit_version == str(bag_xml.bagitVersion)
+        assert error is None
+
+    def test_baggingDate_not_set(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert isinstance(bag.bagging_date, datetime)
+        assert error is None
+
+    def test_has_bag_info_objects(self, bag_xml):
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+        assert len(bag_infos) == 2
+
+    def test_has_no_bag_info_objects(self, bag_xml):
+        del bag_xml.bagInfo.item
+        del bag_xml.bagInfo.item
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+        assert len(bag_infos) == 0
