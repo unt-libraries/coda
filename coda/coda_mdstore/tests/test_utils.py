@@ -48,6 +48,9 @@ class TestPercent:
 
 
 class TestBagFullTextSearch:
+    """
+    Tests for coda_mdstore.views.bagFullTextSearch.
+    """
 
     @pytest.mark.xfail(reason='FULLTEXT index is required.')
     def test_returns_paginator_object(self):
