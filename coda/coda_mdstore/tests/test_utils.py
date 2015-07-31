@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, Page
 from django.http import HttpResponse
 from lxml import etree, objectify
 import mock
@@ -10,6 +10,41 @@ from .. import factories
 from .. import models
 from .. import presentation
 from .. import views
+
+
+class TestPaginateEntries:
+    """
+    Tests for coda_mdstore.views.paginate_entries.
+    """
+
+    def test_returns_paginator_object(self, rf):
+        request = rf.get('/')
+        page = views.paginate_entries(request, [])
+        assert isinstance(page, Page)
+
+    def test_page_number_defaults_to_one(self, rf):
+        request = rf.get('/', {'page': 'foo'})
+        page = views.paginate_entries(request, [])
+        assert page.number == 1
+
+    def test_invalid_page_defaults_to_last_page(self, rf):
+        request = rf.get('/', {'page': 5})
+        page = views.paginate_entries(request, [1, 2, 3], 1)
+        assert page.number == 3
+
+
+class TestPercent:
+    """
+    Tests for coda_mdstore.views.percent.
+    """
+
+    def test_returns_float(self):
+        result = views.percent(1, 2)
+        assert isinstance(result, float)
+
+    def test_return_value(self):
+        result = views.percent(1, 2)
+        assert result == 50.0
 
 
 class TestBagFullTextSearch:
