@@ -222,7 +222,7 @@ class TestUpdateNode:
     def test_node_not_found(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
-        node_xml = etree.tostring(node_tree, pretty_print=True)
+        node_xml = etree.tostring(node_tree)
 
         request = rf.post('/', node_xml, 'application/xml')
         response = presentation.updateNode(request)
@@ -232,7 +232,7 @@ class TestUpdateNode:
     def test_node_found_and_path_does_not_include_node_name(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
-        node_xml = etree.tostring(node_tree, pretty_print=True)
+        node_xml = etree.tostring(node_tree)
 
         node.save()
 
@@ -248,7 +248,7 @@ class TestUpdateNode:
 
         node.node_size = '0'
         node_tree = presentation.nodeEntry(node)
-        node_xml = etree.tostring(node_tree, pretty_print=True)
+        node_xml = etree.tostring(node_tree)
 
         url = '/node/{0}/detail'.format(node.node_name)
         request = rf.post(url, node_xml, 'application/xml')
@@ -264,7 +264,7 @@ class TestCreateNode:
     def test_returns_node_object(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
-        node_xml = etree.tostring(node_tree, pretty_print=True)
+        node_xml = etree.tostring(node_tree)
 
         request = rf.post('/', node_xml, 'application/xml')
         created_node = presentation.createNode(request)
@@ -273,7 +273,7 @@ class TestCreateNode:
     def test_created_node_attributes(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
-        node_xml = etree.tostring(node_tree, pretty_print=True)
+        node_xml = etree.tostring(node_tree)
 
         request = rf.post('/', node_xml, 'application/xml')
         created_node = presentation.createNode(request)
