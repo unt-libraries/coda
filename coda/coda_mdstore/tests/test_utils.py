@@ -487,6 +487,9 @@ def bag_xml():
 @pytest.mark.django_db
 @pytest.mark.usefixture('bag_xml')
 class TestCreateBag:
+    """
+    Tests for coda_mdstore.presentation.createBag.
+    """
 
     @pytest.mark.xfail(reason='Exception in function will never be raised.')
     def test_raises_exception_when_xml_cannot_be_parsed(self):
@@ -515,6 +518,9 @@ class TestCreateBag:
 @pytest.mark.django_db
 @pytest.mark.usefixture('bag_xml')
 class TestUpdateBag:
+    """
+    Tests for coda_mdstore.presentation.updateBag.
+    """
     CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_returns_bag(self, bag_xml, rf):
