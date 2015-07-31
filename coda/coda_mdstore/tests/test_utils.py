@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from lxml import etree, objectify
 import mock
 import pytest
@@ -302,12 +303,12 @@ class TestXmlToBagObject:
             <bag:lastVerified>2015-01-01</bag:lastVerified>
             <bag:bagInfo>
                 <bag:item>
-                <bag:name>Bagging-Date</bag:name>
-                <bag:body>2009-09-24</bag:body>
+                    <bag:name>Bagging-Date</bag:name>
+                    <bag:body>2009-09-24</bag:body>
                 </bag:item>
                 <bag:item>
-                <bag:name>Payload-Oxum</bag:name>
-                <bag:body>46259062.43</bag:body>
+                    <bag:name>Payload-Oxum</bag:name>
+                    <bag:body>46259062.43</bag:body>
                 </bag:item>
             </bag:bagInfo>
             </bag:codaXML>
@@ -412,3 +413,117 @@ class TestXmlToBagObject:
         del bag_xml.bagInfo.item
         bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
         assert len(bag_infos) == 0
+
+
+@pytest.fixture
+def bag_xml():
+    xml = """<?xml version="1.0"?>
+        <entry xmlns="http://www.w3.org/2005/Atom">
+        <title>ark:/67531/coda2</title>
+        <id>ark:/67531/coda2</id>
+        <updated>2013-06-05T17:05:33Z</updated>
+        <author>
+            <name>server</name>
+        </author>
+        <content type="application/xml">
+            <bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/">
+            <bag:name>ark:/67531/coda2</bag:name>
+            <bag:fileCount>43</bag:fileCount>
+            <bag:payloadSize>46259062</bag:payloadSize>
+            <bag:bagitVersion>0.96</bag:bagitVersion>
+            <bag:lastVerified/>
+            <bag:bagInfo>
+                <bag:item>
+                    <bag:name>Payload-Oxum</bag:name>
+                    <bag:body>46259062.43</bag:body>
+                </bag:item>
+                <bag:item>
+                    <bag:name>Tag-File-Character-Encoding</bag:name>
+                    <bag:body>UTF-8</bag:body>
+                </bag:item>
+            </bag:bagInfo>
+            </bag:codaXML>
+        </content>
+        </entry>
+    """
+    return objectify.fromstring(xml)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixture('bag_xml')
+class TestCreateBag:
+
+    @pytest.mark.xfail(reason='Exception in function will never be raised.')
+    def test_raises_exception_when_xml_cannot_be_parsed(self):
+        with pytest.raises(Exception) as e:
+            presentation.createBag('')
+        assert str(e) == 'Unable to parse uploaded XML'
+
+    @pytest.mark.xfail(reason='Exception in function will never be raised.')
+    def test_raises_exception_when_content_element_not_present(self):
+        with pytest.raises(Exception) as e:
+            presentation.createBag('<root/>')
+        assert str(e) == 'No content to parse uploaded XML'
+
+    def test_returns_bag_object(self, bag_xml, rf):
+        xml_str = etree.tostring(bag_xml)
+        created_bag, created_bag_infos = presentation.createBag(xml_str)
+        assert isinstance(created_bag, models.Bag)
+
+    def test_returns_bag_info_objects(self, bag_xml, rf):
+        xml_str = etree.tostring(bag_xml)
+        created_bag, created_bag_infos = presentation.createBag(xml_str)
+        for bag_info in created_bag_infos:
+            assert isinstance(bag_info, models.Bag_Info)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixture('bag_xml')
+class TestUpdateBag:
+    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
+
+    def test_returns_bag(self, bag_xml, rf):
+        bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
+        xml_str = etree.tostring(bag_xml)
+
+        request = rf.post('/APP/bag/{0}/'.format(bag.name), xml_str, 'application/xml')
+        updated_bag = presentation.updateBag(request)
+        assert isinstance(updated_bag, models.Bag)
+
+    def test_bag_is_updated(self, bag_xml, rf):
+        bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
+        xml_str = etree.tostring(bag_xml)
+
+        request = rf.post('/APP/bag/{0}/'.format(bag.name), xml_str, 'application/xml')
+        updated_bag = presentation.updateBag(request)
+
+        bag_tree = bag_xml.content[self.CODA_XML]
+        assert updated_bag.name == bag_tree.name
+        assert updated_bag.size == bag_tree.payloadSize
+        assert updated_bag.bagit_version == str(bag_tree.bagitVersion)
+        assert updated_bag.files == str(bag_tree.fileCount)
+
+        assert updated_bag.bag_info_set.count() == 2
+        assert updated_bag.external_identifier_set.count() == 0
+
+    def test_request_path_does_not_match_name(self, bag_xml, rf):
+        factories.FullBagFactory.create(name='ark:/67531/coda2')
+        xml_str = etree.tostring(bag_xml)
+
+        request = rf.post('/', xml_str, 'application/xml')
+        resp = presentation.updateBag(request)
+
+        assert isinstance(resp, HttpResponse)
+        assert resp.status_code == 200
+        assert 'name supplied in the URL does not match' in resp.content
+
+    def test_bag_object_not_found(self, bag_xml, rf):
+        factories.FullBagFactory.create()
+        xml_str = etree.tostring(bag_xml)
+
+        request = rf.post('/', xml_str, 'application/xml')
+        resp = presentation.updateBag(request)
+
+        assert isinstance(resp, HttpResponse)
+        assert resp.status_code == 200
+        assert resp.content == 'Cannot find bag_name'
