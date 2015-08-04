@@ -98,31 +98,31 @@ class TestMakeBagAtomFeed:
     @mock.patch('coda_mdstore.presentation.wrapAtom', lambda *args: etree.Element('atomEntry'))
     def test_with_bag_objects(self, *args):
         title = 'test title'
-        _id = 'test-id'
+        feed_id = 'test-id'
         bag_list = factories.FullBagFactory.create_batch(5)
 
-        result = presentation.makeBagAtomFeed(bag_list, _id, title)
+        result = presentation.makeBagAtomFeed(bag_list, feed_id, title)
         feed = objectify.fromstring(etree.tostring(result))
 
         assert len(feed.atomEntry) == 5
-        assert feed.id == _id
+        assert feed.id == feed_id
         assert feed.title == title
         assert feed.updated.text is None
-        assert feed.link.get('href') == _id
+        assert feed.link.get('href') == feed_id
         assert feed.link.get('rel') == 'self'
 
     def test_without_bag_objects(self):
         title = 'test title'
-        _id = 'test-id'
+        feed_id = 'test-id'
         bag_list = []
 
-        result = presentation.makeBagAtomFeed(bag_list, _id, title)
+        result = presentation.makeBagAtomFeed(bag_list, feed_id, title)
         feed = objectify.fromstring(etree.tostring(result))
 
-        assert feed.id == _id
+        assert feed.id == feed_id
         assert feed.title == title
         assert feed.updated.text is None
-        assert feed.link.get('href') == _id
+        assert feed.link.get('href') == feed_id
         assert feed.link.get('rel') == 'self'
         assert feed.countchildren() == 4
 
