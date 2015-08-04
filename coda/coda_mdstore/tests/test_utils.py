@@ -130,7 +130,7 @@ class TestMakeBagAtomFeed:
 @pytest.mark.django_db
 class TestObjectsToXML:
     """
-    Test for coda_mdstore.presentation.objectsToXML.
+    Tests for coda_mdstore.presentation.objectsToXML.
     """
 
     def test_bag_attribute_conversion(self):
