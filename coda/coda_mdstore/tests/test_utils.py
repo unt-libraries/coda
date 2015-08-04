@@ -202,12 +202,18 @@ class TestNodeEntry:
     Tests for coda_mdstore.presentation.nodeEntry.
     """
 
+    def convert_etree(self, tree):
+        """
+        Test case helper method to convert etree XML to objectify XML.
+        """
+        return objectify.fromstring(etree.tostring(tree))
+
     def test_xml_has_node_attributes(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_str = etree.tostring(tree)
 
-        xml_obj = objectify.fromstring(xml_str)
+        xml_obj = self.convert_etree(tree)
+
         assert xml_obj.content.node.name == node.node_name
         assert xml_obj.content.node.capacity == node.node_capacity
         assert xml_obj.content.node.size == node.node_size
@@ -221,33 +227,26 @@ class TestNodeEntry:
         web_root = 'example.com'
 
         tree = presentation.nodeEntry(node, web_root)
-        xml_str = etree.tostring(tree)
-        xml_obj = objectify.fromstring(xml_str)
+        xml_obj = self.convert_etree(tree)
 
         assert web_root in xml_obj.id.text
 
     def test_xml_title(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_str = etree.tostring(tree)
-
-        xml_obj = objectify.fromstring(xml_str)
+        xml_obj = self.convert_etree(tree)
         assert xml_obj.title == node.node_name
 
     def test_xml_has_author_name_element(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_str = etree.tostring(tree)
-
-        xml_obj = objectify.fromstring(xml_str)
+        xml_obj = self.convert_etree(tree)
         assert hasattr(xml_obj.author, 'name')
 
     def test_xml_has_author_uri_element(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_str = etree.tostring(tree)
-
-        xml_obj = objectify.fromstring(xml_str)
+        xml_obj = self.convert_etree(tree)
         assert hasattr(xml_obj.author, 'uri')
 
 
