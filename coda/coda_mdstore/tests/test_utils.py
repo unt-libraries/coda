@@ -141,7 +141,7 @@ class TestObjectsToXML:
         assert bag_xml.name == bag.name
         assert bag_xml.fileCount == bag.files
         assert bag_xml.payloadSize == bag.size
-        assert bag_xml.payloadSize == bag.size
+        assert str(bag_xml.bagitVersion) == bag.bagit_version
 
     def test_bag_info_attribute_conversion(self):
         bag = factories.FullBagFactory.create()
