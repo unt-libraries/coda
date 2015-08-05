@@ -10,6 +10,7 @@ from .. import factories
 from .. import models
 from .. import presentation
 from .. import views
+from . import CODA_XML
 
 
 def convert_etree(tree):
@@ -447,8 +448,9 @@ class TestXmlToBagObject:
         assert all([isinstance(m, models.Bag_Info) for m in bag_infos])
 
     def test_has_no_bag_info_objects(self, bag_xml):
-        del bag_xml.bagInfo.item
-        del bag_xml.bagInfo.item
+        # Remove all of the bagInfo items from bag_xml.
+        del bag_xml.bagInfo.item[0:]
+
         bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
         assert len(bag_infos) == 0
 
@@ -472,8 +474,8 @@ def bag_xml():
             <bag:lastVerified/>
             <bag:bagInfo>
                 <bag:item>
-                    <bag:name>Payload-Oxum</bag:name>
-                    <bag:body>46259062.43</bag:body>
+                    <bag:name>Bag-Size</bag:name>
+                    <bag:body>51.26M</bag:body>
                 </bag:item>
                 <bag:item>
                     <bag:name>Tag-File-Character-Encoding</bag:name>
@@ -506,16 +508,48 @@ class TestCreateBag:
             presentation.createBag('<root/>')
         assert str(e) == 'No content to parse uploaded XML'
 
-    def test_returns_bag_object(self, bag_xml, rf):
+    @mock.patch('coda_mdstore.presentation.xmlToBagObject')
+    def test_raises_exception_when_xmlToBagObject_reports_error(self, mock, bag_xml):
+        mock.return_value = (None, None, 'Fake error')
+        xml_str = etree.tostring(bag_xml)
+        with pytest.raises(Exception) as e:
+            presentation.createBag(xml_str)
+        assert 'codaXML issue,' in str(e)
+
+    def test_returns_bag_object(self, bag_xml):
         xml_str = etree.tostring(bag_xml)
         created_bag, created_bag_infos = presentation.createBag(xml_str)
         assert isinstance(created_bag, models.Bag)
 
-    def test_returns_bag_info_objects(self, bag_xml, rf):
+    def test_returns_bag_info_objects(self, bag_xml):
         xml_str = etree.tostring(bag_xml)
         created_bag, created_bag_infos = presentation.createBag(xml_str)
         for bag_info in created_bag_infos:
             assert isinstance(bag_info, models.Bag_Info)
+
+    def test_existing_bag_info_objects_are_deleted(self, bag_xml):
+        """
+        Test that existing Bag_Info objects are removed when a Bag is created
+        with createBag.
+
+        This test relies on the fact that the Bag_Info objects created from the
+        FullBagFactory are different from the bagInfo items in the bag_xml
+        fixture.
+        """
+        # Create a bag with the same name as the bag_xml fixture.
+        name = str(bag_xml.content[CODA_XML].name)
+        bag = factories.FullBagFactory.create(name=name)
+
+        # Unpack the queryset now so the query is executed
+        old_bag_info1, old_bag_info2 = bag.bag_info_set.all()
+
+        xml_str = etree.tostring(bag_xml)
+        created_bag, created_bag_infos = presentation.createBag(xml_str)
+
+        # Verify that the each of the previous bag_info objects are not
+        # in the list of created bag_info objects returned from createBag.
+        assert old_bag_info1.field_name not in [b.field_name for b in created_bag_infos]
+        assert old_bag_info2.field_name not in [b.field_name for b in created_bag_infos]
 
 
 @pytest.mark.django_db
@@ -524,13 +558,14 @@ class TestUpdateBag:
     """
     Tests for coda_mdstore.presentation.updateBag.
     """
-    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_returns_bag(self, bag_xml, rf):
         bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
         xml_str = etree.tostring(bag_xml)
 
-        request = rf.post('/APP/bag/{0}/'.format(bag.name), xml_str, 'application/xml')
+        uri = '/APP/bag/{0}/'.format(bag.name)
+        request = rf.post(uri, xml_str, 'application/xml')
+
         updated_bag = presentation.updateBag(request)
         assert isinstance(updated_bag, models.Bag)
 
@@ -538,10 +573,12 @@ class TestUpdateBag:
         bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
         xml_str = etree.tostring(bag_xml)
 
-        request = rf.post('/APP/bag/{0}/'.format(bag.name), xml_str, 'application/xml')
+        uri = '/APP/bag/{0}/'.format(bag.name)
+        request = rf.post(uri, xml_str, 'application/xml')
+
         updated_bag = presentation.updateBag(request)
 
-        bag_tree = bag_xml.content[self.CODA_XML]
+        bag_tree = bag_xml.content[CODA_XML]
         assert updated_bag.name == bag_tree.name
         assert updated_bag.size == bag_tree.payloadSize
         assert updated_bag.bagit_version == str(bag_tree.bagitVersion)
@@ -571,3 +608,32 @@ class TestUpdateBag:
         assert isinstance(resp, HttpResponse)
         assert resp.status_code == 200
         assert resp.content == 'Cannot find bag_name'
+
+    def test_existing_bag_info_objects_are_update(self, bag_xml, rf):
+        """
+        Test that existing Bag_Info objects are removed when a Bag is updated
+        with updateBag.
+
+        This test relies on the fact that the Bag_Info objects created from the
+        FullBagFactory are different from the bagInfo items in the bag_xml
+        fixture.
+        """
+        # Create a bag with the same name as the bag_xml fixture.
+        name = str(bag_xml.content[CODA_XML].name)
+        bag = factories.FullBagFactory.create(name=name)
+
+        # Unpack the queryset now so the query is executed
+        old_bag_info1, old_bag_info2 = bag.bag_info_set.all()
+
+        # Compose the request to be passed to updateBag.
+        xml_str = etree.tostring(bag_xml)
+        uri = '/APP/bag/{0}/'.format(bag.name)
+        request = rf.post(uri, xml_str, 'application/xml')
+
+        updated_bag = presentation.updateBag(request)
+
+        # Verify that the each of the previous bag_info objects are not in the
+        # related set of the new bag object returned from updateBag.
+        update_bag_infos = updated_bag.bag_info_set.all()
+        assert old_bag_info1.field_name not in [b.field_name for b in update_bag_infos]
+        assert old_bag_info2.field_name not in [b.field_name for b in update_bag_infos]
