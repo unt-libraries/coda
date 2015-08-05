@@ -514,7 +514,7 @@ class TestCreateBag:
     def test_raises_exception_when_content_element_not_present(self):
         with pytest.raises(Exception) as e:
             presentation.createBag('<root/>')
-        assert str(e) == 'No content to parse uploaded XML'
+        assert str(e) == 'No content element located'
 
     @mock.patch('coda_mdstore.presentation.xmlToBagObject')
     def test_raises_exception_when_xmlToBagObject_reports_error(self, mock, bag_xml):
