@@ -340,6 +340,7 @@ class TestXmlToBagObject:
             <bag:bagitVersion>0.96</bag:bagitVersion>
             <bag:lastStatus>fail</bag:lastStatus>
             <bag:lastVerified>2015-01-01</bag:lastVerified>
+            <bag:baggingDate>2015-01-01</bag:baggingDate>
             <bag:bagInfo>
                 <bag:item>
                     <bag:name>Bagging-Date</bag:name>
@@ -436,6 +437,13 @@ class TestXmlToBagObject:
         assert error is None
 
     def test_baggingDate_not_set(self, bag_xml):
+        del bag_xml.baggingDate
+        bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
+
+        assert isinstance(bag.bagging_date, datetime)
+        assert error is None
+
+    def test_baggingDate_is_set(self, bag_xml):
         bag, bag_infos, error = presentation.xmlToBagObject(bag_xml)
 
         assert isinstance(bag.bagging_date, datetime)
