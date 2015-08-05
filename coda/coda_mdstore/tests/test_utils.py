@@ -12,6 +12,13 @@ from .. import presentation
 from .. import views
 
 
+def convert_etree(tree):
+    """
+    Convert etree object to an objectify object.
+    """
+    return objectify.fromstring(etree.tostring(tree))
+
+
 class TestPaginateEntries:
     """
     Tests for coda_mdstore.views.paginate_entries.
@@ -102,7 +109,7 @@ class TestMakeBagAtomFeed:
         bag_list = factories.FullBagFactory.create_batch(5)
 
         result = presentation.makeBagAtomFeed(bag_list, feed_id, title)
-        feed = objectify.fromstring(etree.tostring(result))
+        feed = convert_etree(result)
 
         assert len(feed.atomEntry) == 5
         assert feed.id == feed_id
@@ -117,7 +124,7 @@ class TestMakeBagAtomFeed:
         bag_list = []
 
         result = presentation.makeBagAtomFeed(bag_list, feed_id, title)
-        feed = objectify.fromstring(etree.tostring(result))
+        feed = convert_etree(result)
 
         assert feed.id == feed_id
         assert feed.title == title
@@ -135,8 +142,8 @@ class TestObjectsToXML:
 
     def test_bag_attribute_conversion(self):
         bag = factories.FullBagFactory.create()
-        xml = etree.tostring(presentation.objectsToXML(bag))
-        bag_xml = objectify.fromstring(xml)
+        tree = presentation.objectsToXML(bag)
+        bag_xml = convert_etree(tree)
 
         assert bag_xml.name == bag.name
         assert bag_xml.fileCount == bag.files
@@ -145,8 +152,8 @@ class TestObjectsToXML:
 
     def test_bag_info_attribute_conversion(self):
         bag = factories.FullBagFactory.create()
-        xml = etree.tostring(presentation.objectsToXML(bag))
-        bag_xml = objectify.fromstring(xml)
+        tree = presentation.objectsToXML(bag)
+        bag_xml = convert_etree(tree)
 
         for i, bag_info in enumerate(bag.bag_info_set.all()):
             bag_info_xml = bag_xml.bagInfo.item[i]
@@ -202,17 +209,11 @@ class TestNodeEntry:
     Tests for coda_mdstore.presentation.nodeEntry.
     """
 
-    def convert_etree(self, tree):
-        """
-        Test case helper method to convert etree XML to objectify XML.
-        """
-        return objectify.fromstring(etree.tostring(tree))
-
     def test_xml_has_node_attributes(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
 
-        xml_obj = self.convert_etree(tree)
+        xml_obj = convert_etree(tree)
 
         assert xml_obj.content.node.name == node.node_name
         assert xml_obj.content.node.capacity == node.node_capacity
@@ -227,26 +228,26 @@ class TestNodeEntry:
         web_root = 'example.com'
 
         tree = presentation.nodeEntry(node, web_root)
-        xml_obj = self.convert_etree(tree)
+        xml_obj = convert_etree(tree)
 
         assert web_root in xml_obj.id.text
 
     def test_xml_title(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_obj = self.convert_etree(tree)
+        xml_obj = convert_etree(tree)
         assert xml_obj.title == node.node_name
 
     def test_xml_has_author_name_element(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_obj = self.convert_etree(tree)
+        xml_obj = convert_etree(tree)
         assert hasattr(xml_obj.author, 'name')
 
     def test_xml_has_author_uri_element(self):
         node = factories.NodeFactory.build()
         tree = presentation.nodeEntry(node)
-        xml_obj = self.convert_etree(tree)
+        xml_obj = convert_etree(tree)
         assert hasattr(xml_obj.author, 'uri')
 
 
