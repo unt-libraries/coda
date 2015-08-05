@@ -12,6 +12,7 @@ from django import http
 from .. import views
 from .. import models
 from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
+from . import CODA_XML
 
 
 # Add this mark so that we are not loading all the URLs for
@@ -369,7 +370,6 @@ class TestExternalIdentiferSearch:
     """
     Tests for coda_mdstore.views.externalIdentifierSearch.
     """
-    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_no_identifier_renders_html(self, rf):
         request = rf.get('/')
@@ -394,7 +394,7 @@ class TestExternalIdentiferSearch:
         response = views.externalIdentifierSearch(request, bag.name)
 
         bagxml = objectify.fromstring(response.content)
-        bag_entry = bagxml.entry.content[self.CODA_XML]
+        bag_entry = bagxml.entry.content[CODA_XML]
 
         assert str(bag_entry.bagitVersion) == bag.bagit_version
         assert bag_entry.payloadSize == bag.size
@@ -426,7 +426,7 @@ class TestExternalIdentiferSearch:
         response = views.externalIdentifierSearch(request, ext_id.value)
 
         bagxml = objectify.fromstring(response.content)
-        bag_entry = bagxml.entry.content[self.CODA_XML]
+        bag_entry = bagxml.entry.content[CODA_XML]
 
         assert str(bag_entry.bagitVersion) == bag.bagit_version
         assert bag_entry.payloadSize == bag.size
@@ -459,8 +459,8 @@ class TestExternalIdentiferSearch:
 
         bagxml1 = objectify.fromstring(response1.content)
         bagxml2 = objectify.fromstring(response2.content)
-        bag_entry1 = bagxml1.entry.content[self.CODA_XML]
-        bag_entry2 = bagxml2.entry.content[self.CODA_XML]
+        bag_entry1 = bagxml1.entry.content[CODA_XML]
+        bag_entry2 = bagxml2.entry.content[CODA_XML]
 
         assert bag_entry1.name == bag_entry2.name
         assert bag_entry1.fileCount == bag_entry2.fileCount
@@ -494,8 +494,8 @@ class TestExternalIdentiferSearch:
 
         bagxml1 = objectify.fromstring(response1.content)
         bagxml2 = objectify.fromstring(response2.content)
-        bag_entry1 = bagxml1.entry.content[self.CODA_XML]
-        bag_entry2 = bagxml2.entry.content[self.CODA_XML]
+        bag_entry1 = bagxml1.entry.content[CODA_XML]
+        bag_entry2 = bagxml2.entry.content[CODA_XML]
 
         assert bag_entry1.name == bag_entry2.name
         assert bag_entry1.fileCount == bag_entry2.fileCount
@@ -678,7 +678,7 @@ class TestBagFullTextSearchHTMLView:
         context = response.context[-1]
 
         assert context['searchString'] == ''
-        assert context['entries'] == None
+        assert context['entries'] is None
         assert 'query' in context
 
     def test_renders_correct_template(self, client):
@@ -824,7 +824,6 @@ class TestAppBag:
     """
     Tests for coda_mdstore.views.app_bag.
     """
-    CODA_XML = '{http://digital2.library.unt.edu/coda/bagxml/}codaXML'
 
     def test_get_request_returns_not_found(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')
@@ -863,7 +862,7 @@ class TestAppBag:
         assert response['Content-Type'] == 'application/atom+xml'
 
         tree = objectify.fromstring(response.content)
-        bag_xml = tree.content[self.CODA_XML]
+        bag_xml = tree.content[CODA_XML]
         assert bag_xml.name == bag.name
 
     @pytest.mark.xfail(reason='WSGI request objects do not have a ._req '
