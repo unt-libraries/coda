@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from django.core.paginator import Page
@@ -165,6 +167,112 @@ class TestQueueSearch:
         # Verify that the single object has the same identifier.
         result = results.object_list[0]
         assert result.ark == entry.ark
+
+
+class TestQueueSearchJSON:
+    """
+    Test for coda_replication.views.queue_search_JSON.
+    """
+
+    def test_without_entries(self, rf):
+        request = rf.get('/')
+        response = views.queue_search_JSON(request)
+
+        data = json.loads(response.content)
+        assert {} == data
+
+    def test_feed_entry_fields(self, rf):
+        factories.QueueEntryFactory.create_batch(10)
+        request = rf.get('/')
+        response = views.queue_search_JSON(request)
+
+        data = json.loads(response.content)
+        entry = data['feed']['entry'][0]
+
+        assert entry.get('oxum', False)
+        assert entry.get('harvest_start', False)
+        assert entry.get('harvest_end', False)
+        assert entry.get('queue position', False)
+        assert entry.get('identifier', False)
+        assert entry.get('status', False)
+
+    def test_pagination_links_first_page(self, rf):
+        factories.QueueEntryFactory.create_batch(50)
+
+        request = rf.get('/')
+        response = views.queue_search_JSON(request)
+
+        data = json.loads(response.content)
+        links = data['feed']['link']
+
+        assert len(links) == 4
+
+        current_page = links[0]
+        first_page = links[1]
+        last_page = links[2]
+        next_page = links[3]
+
+        assert '?page=1' in current_page['href']
+        assert 'self' == current_page['rel']
+        assert '?page=1' in first_page['href']
+        assert 'first' == first_page['rel']
+        assert '?page=3' in last_page['href']
+        assert 'last' == last_page['rel']
+        assert '?page=2' in next_page['href']
+        assert 'next' == next_page['rel']
+
+    def test_pagination_links_last_page(self, rf):
+        factories.QueueEntryFactory.create_batch(50)
+
+        request = rf.get('/', {'page': 3})
+        response = views.queue_search_JSON(request)
+
+        data = json.loads(response.content)
+        links = data['feed']['link']
+
+        assert len(links) == 4
+
+        current_page = links[0]
+        first_page = links[1]
+        last_page = links[2]
+        previous_page = links[3]
+
+        assert '?page=3' in current_page['href']
+        assert 'self' == current_page['rel']
+        assert '?page=1' in first_page['href']
+        assert 'first' == first_page['rel']
+        assert '?page=3' in last_page['href']
+        assert 'last' == last_page['rel']
+        assert '?page=2' in previous_page['href']
+        assert 'previous' == previous_page['rel']
+
+    def test_pagination_links_middle_page(self, rf):
+        factories.QueueEntryFactory.create_batch(50)
+
+        request = rf.get('/', {'page': 2})
+        response = views.queue_search_JSON(request)
+
+        data = json.loads(response.content)
+        links = data['feed']['link']
+
+        assert len(links) == 5
+
+        current_page = links[0]
+        first_page = links[1]
+        last_page = links[2]
+        previous_page = links[3]
+        next_page = links[4]
+
+        assert '?page=2' in current_page['href']
+        assert 'self' == current_page['rel']
+        assert '?page=1' in first_page['href']
+        assert 'first' == first_page['rel']
+        assert '?page=3' in last_page['href']
+        assert 'last' == last_page['rel']
+        assert '?page=1' in previous_page['href']
+        assert 'previous' == previous_page['rel']
+        assert '?page=3' in next_page['href']
+        assert 'next' == next_page['rel']
 
 
 class TestQueueRecent:
