@@ -309,6 +309,9 @@ class TestQueueRecent:
 
 
 class TestQueue:
+    """
+    Tests for coda_replication.views.queue.
+    """
 
     @pytest.fixture
     def queue_xml(self):
@@ -348,6 +351,7 @@ class TestQueue:
 
         xml = objectify.fromstring(response.content)
         assert len(xml.entry) == 10
+        assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_get_without_identifier_with_not_entries(self, rf):
@@ -356,6 +360,7 @@ class TestQueue:
 
         xml = objectify.fromstring(response.content)
         assert hasattr(xml, 'entry') is False
+        assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_delete(self, rf):
