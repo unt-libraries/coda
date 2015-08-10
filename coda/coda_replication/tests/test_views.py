@@ -152,7 +152,7 @@ class TestQueueSearch:
         assert start_date.day == entry.harvest_start.day
 
     def test_filtering_by_identifier(self, client):
-        # Populate the database with a numerous QueueEntry objects so we can
+        # Populate the database with numerous QueueEntry objects so we can
         # verify that the search will find the correct object among many.
         factories.QueueEntryFactory.create_batch(30)
         entry = factories.QueueEntryFactory.create()
