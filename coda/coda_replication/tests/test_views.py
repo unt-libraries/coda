@@ -341,8 +341,22 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-    def test_get_without_identifier(self):
-        pass
+    def test_get_without_identifier(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue(request)
+
+        xml = objectify.fromstring(response.content)
+        assert len(xml.entry) == 10
+        assert response['Content-Type'] == 'application/atom+xml'
+
+    def test_get_without_identifier_with_not_entries(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue(request)
+
+        xml = objectify.fromstring(response.content)
+        assert hasattr(xml, 'entry') is False
+        assert response['Content-Type'] == 'application/atom+xml'
 
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
