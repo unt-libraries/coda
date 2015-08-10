@@ -10,10 +10,6 @@ from . import models
 
 
 class QueueEntryFactory(factory.django.DjangoModelFactory):
-
-    class Meta:
-        model = models.QueueEntry
-
     ark = factory.Sequence(lambda n: 'ark:/00001/id{0}'.format(n))
     bytes = fuzzy.FuzzyInteger(100000000)
     files = fuzzy.FuzzyInteger(50, 500)
@@ -22,3 +18,6 @@ class QueueEntryFactory(factory.django.DjangoModelFactory):
     harvest_start = fuzzy.FuzzyNaiveDateTime(datetime(2015, 01, 01))
     harvest_end = fuzzy.FuzzyNaiveDateTime(datetime(2015, 06, 01))
     queue_position = fuzzy.FuzzyInteger(1, 100)
+
+    class Meta:
+        model = models.QueueEntry
