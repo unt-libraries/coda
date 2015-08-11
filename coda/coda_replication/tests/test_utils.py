@@ -1,11 +1,32 @@
 import pytest
 from lxml import etree, objectify
 
+from django.core.paginator import Page
+
 from .. import presentation
 from .. import factories
+from .. import views
 from ..models import QueueEntry
 
 QUEUE_ENTRY = '{http://digital2.library.unt.edu/coda/queuexml/}queueEntry'
+
+
+def test_paginate_entries_returns_paginator_object(rf):
+    request = rf.get('/')
+    page = views.paginate_entries(request, [])
+    assert isinstance(page, Page)
+
+
+def test_paginate_entries_page_number_defaults_to_one(rf):
+    request = rf.get('/', {'page': 'foo'})
+    page = views.paginate_entries(request, [])
+    assert page.number == 1
+
+
+def test_paginate_entries_invalid_page_defaults_to_last_page(rf):
+    request = rf.get('/', {'page': 5})
+    page = views.paginate_entries(request, [1, 2, 3], 1)
+    assert page.number == 3
 
 
 @pytest.fixture
@@ -127,9 +148,9 @@ def test_updateQueueEntry_finds_correct_object(queue_xml):
     assert entry.ark == queue_entry_xml.ark
 
 
-@pytest.mark.django_db
 @pytest.mark.xfail(reason='The `queue_position` attribute is not updated because '
                           'xmlToQueueEntry does not correctly set the attribute.')
+@pytest.mark.django_db
 def test_updateQueueEntry_updates_queue_position_attribute(queue_xml):
     xml_obj = objectify.fromstring(queue_xml)
     queue_entry_xml = xml_obj.content[QUEUE_ENTRY]
