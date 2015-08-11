@@ -1,11 +1,13 @@
+import json
+
 import pytest
 
 from django.core.urlresolvers import reverse
 from django import http
 
 from .. import factories
-from .. import models
 from .. import views
+from ..models import Validate
 
 pytestmark = pytest.mark.django_db
 
@@ -114,7 +116,7 @@ class TestPrioritize:
         request = rf.get('/', {'identifier': validate.identifier})
         views.prioritize(request)
 
-        updated_validate = models.Validate.objects.get(identifier=validate.identifier)
+        updated_validate = Validate.objects.get(identifier=validate.identifier)
         assert updated_validate.priority_change_date > validate.priority_change_date
         assert updated_validate.priority == 1
 
@@ -166,7 +168,7 @@ class TestValidate:
             reverse('coda_validate.views.validate', args=[validate.identifier]),
             {'priority': 1})
 
-        updated_validate = models.Validate.objects.get(identifier=validate.identifier)
+        updated_validate = Validate.objects.get(identifier=validate.identifier)
         assert updated_validate.priority == 1
 
     def test_priority_was_not_updated(self, client):
@@ -175,5 +177,59 @@ class TestValidate:
             reverse('coda_validate.views.validate', args=[validate.identifier]),
             {'priority': 2})
 
-        updated_validate = models.Validate.objects.get(identifier=validate.identifier)
+        updated_validate = Validate.objects.get(identifier=validate.identifier)
         assert updated_validate.priority == validate.priority
+
+
+class TestPrioritizeJson:
+    """
+    Tests for coda_validate.views.prioritize_json.
+    """
+
+    def test_returns_ok_with_identifier(self, rf):
+        validate = factories.ValidateFactory.create()
+        request = rf.get('/', {'identifier': validate.identifier})
+        response = views.prioritize_json(request)
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/json'
+
+    def test_returns_ok_with_invalid_identifier(self, rf):
+        request = rf.get('/', {'identifier': 'dne'})
+        response = views.prioritize_json(request)
+        assert response.status_code == 404
+        assert response['Content-Type'] == 'application/json'
+
+    def test_returns_ok_without_identifier(self, rf):
+        request = rf.get('/')
+        response = views.prioritize_json(request)
+        assert response.status_code == 400
+        assert response['Content-Type'] == 'application/json'
+
+    def test_json_response_with_identifier(self, rf):
+        validate = factories.ValidateFactory.create()
+        request = rf.get('/', {'identifier': validate.identifier})
+        response = views.prioritize_json(request)
+        data = json.loads(response.content)
+
+        updated_validate = Validate.objects.get(identifier=validate.identifier)
+
+        assert data.get('status') == 'success'
+        assert data.get('priority') == updated_validate.priority
+        assert data.get('priority_change_date')
+        assert data.get('atom_pub_url')
+
+    def test_json_response_with_invalid_identifier(self, rf):
+        request = rf.get('/', {'identifier': 'dne'})
+        response = views.prioritize_json(request)
+        data = json.loads(response.content)
+
+        assert data.get('response') == 'identifier was not found'
+        assert data.get('requested_identifier') == 'dne'
+
+    def test_json_response_without_identifier(self, rf):
+        request = rf.get('/')
+        response = views.prioritize_json(request)
+        data = json.loads(response.content)
+
+        assert data.get('response') == 'missing identifier parameter'
+        assert data.get('requested_identifier') == ''
