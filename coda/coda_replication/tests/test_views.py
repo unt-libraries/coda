@@ -5,6 +5,7 @@ import pytest
 
 from django.core.paginator import Page
 from django.core.urlresolvers import reverse
+from django import http
 
 from .. import factories
 from .. import views
@@ -110,7 +111,7 @@ class TestQueueSearch:
     def test_sorting_by_size(self, client):
         """
         Tests that the QueueEntry search results are ordered by the bytes
-        attribute in ascending order with the sort query is `size`.
+        attribute in ascending order when the sort query is `size`.
         """
         entries = factories.QueueEntryFactory.create_batch(20)
         response = client.get(
@@ -276,6 +277,27 @@ class TestQueueSearchJSON:
         assert 'next' == next_page['rel']
 
 
+class TestQueueHtml:
+
+    def test_status_ok(self, rf):
+        entry = factories.QueueEntryFactory.create()
+        request = rf.get('/')
+        response = views.queue_html(request, entry.ark)
+        assert response.status_code == 200
+
+    def test_context_has_entry(self, client):
+        entry = factories.QueueEntryFactory.create()
+        response = client.get(reverse('coda_replication.views.queue_html', args=[entry.ark]))
+        context = response.context[-1]
+
+        assert context.get('record').ark == entry.ark
+
+    def test_invalid_identifier_raises_http404(self, rf):
+        request = rf.get('/')
+        with pytest.raises(http.Http404):
+            views.queue_html(request, 'dne')
+
+
 class TestQueueRecent:
     """
     Tests for coda_replication.views.queue_recent.
@@ -344,6 +366,11 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
+    def test_get_with_invalid_identifier_returns_not_found(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue(request, 'dne')
+        assert response.status_code == 404
+
     def test_get_without_identifier(self, rf):
         factories.QueueEntryFactory.create_batch(30)
         request = rf.get('/', HTTP_HOST='example.com')
@@ -354,7 +381,7 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-    def test_get_without_identifier_with_not_entries(self, rf):
+    def test_get_without_identifier_with_no_entries(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.queue(request)
 
