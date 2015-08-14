@@ -415,6 +415,20 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
+    @pytest.mark.xfail(reason="The PUT method with out an identifier should not be allowed.")
+    def test_put_without_identifier(self, queue_xml, rf):
+        factories.QueueEntryFactory.create(ark='ark:/67531/coda4fnk', bytes='4')
+        request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
+        response = views.queue(request)
+
+        assert response.status_code == 404
+
+    @pytest.mark.xfail(reason="The updateQueueEntry subroutine causes an exception to be trown.")
+    def test_put_with_xml_for_entry_that_does_not_exist(self, queue_xml, rf):
+        request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
+        response = views.queue(request, 'ark:/67531/coda4fnk')
+        assert response.status_code == 404
+
     def test_post(self, queue_xml, rf):
         assert QueueEntry.objects.count() == 0
 
