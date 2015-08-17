@@ -12,7 +12,10 @@ from ..models import Validate
 
 VALIDATE_XML = '{http://digital2.library.unt.edu/coda/validatexml/}validate'
 
-pytestmark = pytest.mark.django_db
+pytestmark = [
+    pytest.mark.urls('coda_validate.urls'),
+    pytest.mark.django_db
+]
 
 
 class TestIndex:
