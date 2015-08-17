@@ -31,6 +31,10 @@ class TestIndex:
         response = views.index(request)
         assert response.status_code == 200
 
+    def test_template_used(self, client):
+        response = client.get(reverse('coda_validate.views.index'))
+        assert response.template[0].name == 'coda_validate/index.html'
+
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30)
         response = client.get(reverse('coda_validate.views.index'))
@@ -60,6 +64,10 @@ class TestStats:
         request = rf.get('/')
         response = views.stats(request)
         assert response.status_code == 200
+
+    def test_template_used(self, client):
+        response = client.get(reverse('coda_validate.views.stats'))
+        assert response.template[0].name == 'coda_validate/stats.html'
 
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30)
@@ -122,6 +130,10 @@ class TestPrioritize:
         updated_validate = Validate.objects.get(identifier=validate.identifier)
         assert updated_validate.priority_change_date > validate.priority_change_date
         assert updated_validate.priority == 1
+
+    def test_template_used(self, client):
+        response = client.get(reverse('coda_validate.views.prioritize'))
+        assert response.template[0].name == 'coda_validate/prioritize.html'
 
     def test_context_with_identifier(self, client):
         validate = factories.ValidateFactory.create()
