@@ -276,7 +276,7 @@ class TestAppValidate:
             </entry>
         """
 
-    def test_post(self, validate_xml, rf):
+    def test_post_returns_created(self, validate_xml, rf):
         request = rf.post('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.app_validate(request)
 
@@ -295,13 +295,13 @@ class TestAppValidate:
 
         assert Validate.objects.count() == 1
 
-    def test_head(self, validate_xml, rf):
+    def test_head_returns_ok(self, validate_xml, rf):
         request = rf.head('/')
-        response = views.app_validate(request, 'ark:/00001/codajom1')
+        response = views.app_validate(request)
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-    def test_get_with_identifier(self, rf):
+    def test_get_with_identifier_returns_ok(self, rf):
         validate = factories.ValidateFactory.create(identifier='ark:/00001/codadof3')
 
         request = rf.get('/', HTTP_HOST='example.com')
@@ -317,7 +317,7 @@ class TestAppValidate:
         response = views.app_validate(request, 'ark:/00001/dne')
         assert response.status_code == 404
 
-    def test_get_without_identifier(self, rf):
+    def test_get_without_identifier_returns_ok(self, rf):
         factories.ValidateFactory.create_batch(30)
 
         request = rf.get('/', HTTP_HOST='example.com')
@@ -328,7 +328,7 @@ class TestAppValidate:
         response_xml = objectify.fromstring(response.content)
         assert len(response_xml.entry) == 20
 
-    def test_put_returns(self, validate_xml, rf):
+    def test_put_returns_ok(self, validate_xml, rf):
         validate = factories.ValidateFactory.create(identifier='ark:/00001/codajom1')
 
         request = rf.put('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
@@ -340,7 +340,7 @@ class TestAppValidate:
         response_xml = objectify.fromstring(response.content)
         assert len(response_xml)
 
-    def test_delete(self, rf):
+    def test_delete_returns_ok(self, rf):
         validate = factories.ValidateFactory.create(identifier='ark:/00001/codajom1')
 
         request = rf.delete('/', HTTP_HOST='example.com')
@@ -367,7 +367,7 @@ class TestAppValidate:
         assert Validate.objects.count() == 0
 
     @pytest.mark.xfail(reason='Invalid request is not properly handled.')
-    def test_invalid_method_and_identifier(self, rf):
+    def test_invalid_method_and_identifier_returns_bad_request(self, rf):
         request = rf.put('/', HTTP_HOST='example.com')
         response = views.app_validate(request)
         assert response.status_code == 400
