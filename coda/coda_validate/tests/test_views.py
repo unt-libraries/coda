@@ -1,5 +1,6 @@
 import json
 
+from lxml import objectify
 import pytest
 
 from django.core.urlresolvers import reverse
@@ -8,6 +9,8 @@ from django import http
 from .. import factories
 from .. import views
 from ..models import Validate
+
+VALIDATE_XML = '{http://digital2.library.unt.edu/coda/validatexml/}validate'
 
 pytestmark = pytest.mark.django_db
 
@@ -233,3 +236,126 @@ class TestPrioritizeJson:
 
         assert data.get('response') == 'missing identifier parameter'
         assert data.get('requested_identifier') == ''
+
+
+class TestAppValidate:
+
+    @pytest.fixture
+    def validate_xml(self):
+        return """<?xml version="1.0"?>
+            <entry xmlns="http://www.w3.org/2005/Atom">
+            <title>ark:/000001/codajom1</title>
+            <id>http://coda.library.unt.edu/APP/validate/ark:/67531/codajom1/</id>
+            <updated>2015-08-17T17:13:07Z</updated>
+            <author>
+                <name>Coda</name>
+                <uri>http://digital2.library.unt.edu/name/nm0004311/</uri>
+            </author>
+            <content type="application/xml">
+                <v:validate xmlns:v="http://digital2.library.unt.edu/coda/validatexml/">
+                    <v:identifier>ark:/000001/codajom1</v:identifier>
+                    <v:last_verified>2015-01-01 12:11:43</v:last_verified>
+                    <v:last_verified_status>Passed</v:last_verified_status>
+                    <v:priority_change_date>2000-01-01 00:00:00</v:priority_change_date>
+                    <v:priority>0</v:priority>
+                    <v:server>libdigiarch10.library.unt.edu</v:server>
+                </v:validate>
+            </content>
+            </entry>
+        """
+
+    def test_post_response(self, validate_xml, rf):
+        request = rf.post('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
+        response = views.app_validate(request)
+
+        assert response.status_code == 201
+        assert response['Location']
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        response_xml = objectify.fromstring(response.content)
+        assert len(response_xml)
+
+    def test_post_creates_a_new_validate(self, validate_xml, rf):
+        assert Validate.objects.count() == 0
+
+        request = rf.post('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
+        views.app_validate(request)
+
+        assert Validate.objects.count() == 1
+
+    def test_head(self, validate_xml, rf):
+        request = rf.head('/')
+        response = views.app_validate(request, 'ark:/000001/codajom1')
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+    def test_get_with_identifier(self, rf):
+        validate = factories.ValidateFactory.create(identifier='ark:/000001/codadof3')
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_validate(request, validate.identifier)
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        response_xml = objectify.fromstring(response.content)
+        assert len(response_xml)
+
+    def test_get_with_identifier_returns_not_found(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_validate(request, 'ark:/000001/dne')
+        assert response.status_code == 404
+
+    def test_get_without_identifier(self, rf):
+        factories.ValidateFactory.create_batch(30)
+
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.app_validate(request)
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        response_xml = objectify.fromstring(response.content)
+        assert len(response_xml.entry) == 20
+
+    def test_put_returns(self, validate_xml, rf):
+        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+
+        request = rf.put('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
+        response = views.app_validate(request, validate.identifier)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        response_xml = objectify.fromstring(response.content)
+        assert len(response_xml)
+
+    def test_delete(self, rf):
+        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_validate(request, validate.identifier)
+
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+        response_xml = objectify.fromstring(response.content)
+        assert len(response_xml)
+
+    def test_delete_returns_not_found(self, rf):
+        request = rf.delete('/', HTTP_HOST='example.com')
+        response = views.app_validate(request, 'ark:/000001/dne')
+        assert response.status_code == 404
+
+    def test_delete_removes_validate_object(self, rf):
+        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+        assert Validate.objects.count() == 1
+
+        request = rf.delete('/', HTTP_HOST='example.com')
+        views.app_validate(request, validate.identifier)
+
+        assert Validate.objects.count() == 0
+
+    @pytest.mark.xfail(reason='Invalid request is not properly handled.')
+    def test_invalid_method_and_identifier(self, rf):
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_validate(request)
+        assert response.status_code == 400
