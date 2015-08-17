@@ -208,7 +208,7 @@ class TestPrioritizeJson:
         assert response.status_code == 400
         assert response['Content-Type'] == 'application/json'
 
-    def test_json_response_with_identifier(self, rf):
+    def test_json_response_content_with_identifier(self, rf):
         validate = factories.ValidateFactory.create()
         request = rf.get('/', {'identifier': validate.identifier})
         response = views.prioritize_json(request)
@@ -221,7 +221,7 @@ class TestPrioritizeJson:
         assert data.get('priority_change_date')
         assert data.get('atom_pub_url')
 
-    def test_json_response_with_invalid_identifier(self, rf):
+    def test_json_response_content_with_invalid_identifier(self, rf):
         request = rf.get('/', {'identifier': 'dne'})
         response = views.prioritize_json(request)
         data = json.loads(response.content)
@@ -229,7 +229,7 @@ class TestPrioritizeJson:
         assert data.get('response') == 'identifier was not found'
         assert data.get('requested_identifier') == 'dne'
 
-    def test_json_response_without_identifier(self, rf):
+    def test_json_response_content_without_identifier(self, rf):
         request = rf.get('/')
         response = views.prioritize_json(request)
         data = json.loads(response.content)
@@ -264,7 +264,7 @@ class TestAppValidate:
             </entry>
         """
 
-    def test_post_response(self, validate_xml, rf):
+    def test_post(self, validate_xml, rf):
         request = rf.post('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.app_validate(request)
 
