@@ -471,7 +471,7 @@ class TestQueue:
 
         assert response.status_code == 404
 
-    @pytest.mark.xfail(reason="The updateQueueEntry subroutine causes an exception to be trown.")
+    @pytest.mark.xfail(reason="The updateQueueEntry subroutine causes an exception to be thrown.")
     def test_put_with_xml_for_entry_that_does_not_exist(self, queue_xml, rf):
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.queue(request, 'ark:/67531/coda4fnk')
