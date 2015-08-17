@@ -469,7 +469,8 @@ class TestQueue:
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.queue(request)
 
-        assert response.status_code == 404
+        assert response.status_code == 405
+        assert response.has_header('Allow')
 
     @pytest.mark.xfail(reason="The updateQueueEntry subroutine causes an exception to be thrown.")
     def test_put_with_xml_for_entry_that_does_not_exist(self, queue_xml, rf):
