@@ -18,6 +18,9 @@ pytestmark = [
 ]
 
 
+QUEUE_ENTRY = '{http://digital2.library.unt.edu/coda/queuexml/}queueEntry'
+
+
 class TestQueueStats:
     """
     Tests for coda_replication.views.queue_stats.
@@ -399,6 +402,42 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
+    def test_get_without_identifier_with_status_and_count_parameters(self, rf):
+        factories.QueueEntryFactory.create_batch(30, status=2)
+        request = rf.get('/', {'status': 2, 'count': 20}, HTTP_HOST='example.com')
+        response = views.queue(request)
+        assert response.status_code == 200
+
+        xml_obj = objectify.fromstring(response.content)
+        assert len(xml_obj.entry) == 20
+
+    @pytest.mark.xfail(reason="0 entries should be returned.")
+    def test_get_without_identifier_correctly_filters_by_status(self, rf):
+        factories.QueueEntryFactory.create_batch(30, status=1)
+        request = rf.get('/', {'status': 2}, HTTP_HOST='example.com')
+        response = views.queue(request)
+        assert response.status_code == 200
+
+        xml_obj = objectify.fromstring(response.content)
+        for entry in xml_obj.entry:
+            queue = entry.content[QUEUE_ENTRY]
+            assert queue.status == 2
+
+    @pytest.mark.xfail(reason='This enables a path of execution where the '
+                              'queueEntries variable is accessed before it is set.')
+    def test_get_without_identifier_with_falsy_sort_parameter(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', {'sort': 0}, HTTP_HOST='example.com')
+        response = views.queue(request)
+        assert response.status_code == 200
+
+    @pytest.mark.xfail(reason='Empty Page exception thrown from the makeObjectFeed function.')
+    def test_get_without_identifier_with_invalid_page(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', {'page': 400}, HTTP_HOST='example.com')
+        response = views.queue(request)
+        assert response.status_code == 200
+
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
         request = rf.delete('/')
@@ -439,6 +478,7 @@ class TestQueue:
         assert response.status_code == 404
 
     def test_post(self, queue_xml, rf):
+        # Test the precondition that there are no entries in the db.
         assert QueueEntry.objects.count() == 0
 
         request = rf.post('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
@@ -449,7 +489,7 @@ class TestQueue:
         assert response['Content-Type'] == 'application/atom+xml'
         assert response.has_header('Location')
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Response object is not created.')
     def test_post_with_identifier(self, queue_xml, rf):
         request = rf.post('/', queue_xml, 'application/xml')
         response = views.queue(request, 'ark:/000001/dne')
