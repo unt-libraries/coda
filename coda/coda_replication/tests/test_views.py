@@ -79,6 +79,10 @@ class TestQueueSearch:
         response = views.queue_search(request)
         assert response.status_code == 200
 
+    def test_template_used(self, client):
+        response = client.get(reverse('coda_replication.views.queue_search'))
+        assert response.template[0].name == 'coda_replication/search.html'
+
     def test_entries_context_variable_is_page_object(self, client):
         factories.QueueEntryFactory.create_batch(20)
 
@@ -284,6 +288,11 @@ class TestQueueHtml:
         request = rf.get('/')
         response = views.queue_html(request, entry.ark)
         assert response.status_code == 200
+
+    def test_template_used(self, client):
+        entry = factories.QueueEntryFactory.create()
+        response = client.get(reverse('coda_replication.views.queue_html', args=[entry.ark]))
+        assert response.template[0].name == 'coda_replication/queue_entry.html'
 
     def test_context_has_entry(self, client):
         entry = factories.QueueEntryFactory.create()
