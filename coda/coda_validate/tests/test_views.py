@@ -256,8 +256,8 @@ class TestAppValidate:
     def validate_xml(self):
         return """<?xml version="1.0"?>
             <entry xmlns="http://www.w3.org/2005/Atom">
-            <title>ark:/000001/codajom1</title>
-            <id>http://coda.library.unt.edu/APP/validate/ark:/67531/codajom1/</id>
+            <title>ark:/00001/codajom1</title>
+            <id>http://coda.library.unt.edu/APP/validate/ark:/00001/codajom1/</id>
             <updated>2015-08-17T17:13:07Z</updated>
             <author>
                 <name>Coda</name>
@@ -265,7 +265,7 @@ class TestAppValidate:
             </author>
             <content type="application/xml">
                 <v:validate xmlns:v="http://digital2.library.unt.edu/coda/validatexml/">
-                    <v:identifier>ark:/000001/codajom1</v:identifier>
+                    <v:identifier>ark:/00001/codajom1</v:identifier>
                     <v:last_verified>2015-01-01 12:11:43</v:last_verified>
                     <v:last_verified_status>Passed</v:last_verified_status>
                     <v:priority_change_date>2000-01-01 00:00:00</v:priority_change_date>
@@ -297,12 +297,12 @@ class TestAppValidate:
 
     def test_head(self, validate_xml, rf):
         request = rf.head('/')
-        response = views.app_validate(request, 'ark:/000001/codajom1')
+        response = views.app_validate(request, 'ark:/00001/codajom1')
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_get_with_identifier(self, rf):
-        validate = factories.ValidateFactory.create(identifier='ark:/000001/codadof3')
+        validate = factories.ValidateFactory.create(identifier='ark:/00001/codadof3')
 
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_validate(request, validate.identifier)
@@ -314,7 +314,7 @@ class TestAppValidate:
 
     def test_get_with_identifier_returns_not_found(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')
-        response = views.app_validate(request, 'ark:/000001/dne')
+        response = views.app_validate(request, 'ark:/00001/dne')
         assert response.status_code == 404
 
     def test_get_without_identifier(self, rf):
@@ -329,7 +329,7 @@ class TestAppValidate:
         assert len(response_xml.entry) == 20
 
     def test_put_returns(self, validate_xml, rf):
-        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+        validate = factories.ValidateFactory.create(identifier='ark:/00001/codajom1')
 
         request = rf.put('/', validate_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.app_validate(request, validate.identifier)
@@ -341,7 +341,7 @@ class TestAppValidate:
         assert len(response_xml)
 
     def test_delete(self, rf):
-        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+        validate = factories.ValidateFactory.create(identifier='ark:/00001/codajom1')
 
         request = rf.delete('/', HTTP_HOST='example.com')
         response = views.app_validate(request, validate.identifier)
@@ -354,11 +354,11 @@ class TestAppValidate:
 
     def test_delete_returns_not_found(self, rf):
         request = rf.delete('/', HTTP_HOST='example.com')
-        response = views.app_validate(request, 'ark:/000001/dne')
+        response = views.app_validate(request, 'ark:/00001/dne')
         assert response.status_code == 404
 
     def test_delete_removes_validate_object(self, rf):
-        validate = factories.ValidateFactory.create(identifier='ark:/000001/codajom1')
+        validate = factories.ValidateFactory.create(identifier='ark:/00001/codajom1')
         assert Validate.objects.count() == 1
 
         request = rf.delete('/', HTTP_HOST='example.com')
