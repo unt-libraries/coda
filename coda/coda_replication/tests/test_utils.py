@@ -3,9 +3,7 @@ from lxml import etree, objectify
 
 from django.core.paginator import Page
 
-from .. import presentation
-from .. import factories
-from .. import views
+from .. import presentation, factories, views
 from ..models import QueueEntry
 from . import QUEUE_ENTRY
 
