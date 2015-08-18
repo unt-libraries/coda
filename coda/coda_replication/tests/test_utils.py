@@ -136,6 +136,12 @@ def test_addQueueEntry_calculates_queue_position(queue_xml):
 
 
 @pytest.mark.django_db
+def test_addQueueEntry_calculates_queue_position_without_existing_entries(queue_xml):
+    entry = presentation.addQueueEntry(queue_xml)
+    assert entry.queue_position == 1
+
+
+@pytest.mark.django_db
 def test_updateQueueEntry_finds_correct_object(queue_xml):
     xml_obj = objectify.fromstring(queue_xml)
     queue_entry_xml = xml_obj.content[QUEUE_ENTRY]
