@@ -7,8 +7,7 @@ from .. import presentation
 from .. import factories
 from .. import views
 from ..models import QueueEntry
-
-QUEUE_ENTRY = '{http://digital2.library.unt.edu/coda/queuexml/}queueEntry'
+from . import QUEUE_ENTRY
 
 
 def test_paginate_entries_returns_paginator_object(rf):
