@@ -260,7 +260,7 @@ class TestAppValidate:
         return """<?xml version="1.0"?>
             <entry xmlns="http://www.w3.org/2005/Atom">
             <title>ark:/00001/codajom1</title>
-            <id>http://coda.library.unt.edu/APP/validate/ark:/00001/codajom1/</id>
+            <id>http://example.com/APP/validate/ark:/00001/codajom1/</id>
             <updated>2015-08-17T17:13:07Z</updated>
             <author>
                 <name>Coda</name>
@@ -273,7 +273,7 @@ class TestAppValidate:
                     <v:last_verified_status>Passed</v:last_verified_status>
                     <v:priority_change_date>2000-01-01 00:00:00</v:priority_change_date>
                     <v:priority>0</v:priority>
-                    <v:server>libdigiarch10.library.unt.edu</v:server>
+                    <v:server>arch01.example.com</v:server>
                 </v:validate>
             </content>
             </entry>
