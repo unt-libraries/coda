@@ -1,4 +1,4 @@
-"""Coda MDStore Model factories for test fixtures."""
+"""Coda Validate Model factories for test fixtures."""
 from datetime import datetime, timedelta
 
 import factory
