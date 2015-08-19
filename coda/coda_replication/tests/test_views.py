@@ -103,8 +103,12 @@ class TestQueueSearch:
         assert len(entries) == len(results.object_list)
 
     def test_filtering_by_status(self, client):
-        entries = factories.QueueEntryFactory.create_batch(20)
         status = '2'
+        entries = factories.QueueEntryFactory.create_batch(100)
+
+        # Make sure at least one QueueFactory with the status exists.
+        entries_with_status = factories.QueueEntryFactory.create_batch(1, status=status)
+        entries += entries_with_status
 
         response = client.get(
             reverse('coda_replication.views.queue_search'),
