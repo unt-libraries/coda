@@ -10,15 +10,13 @@ from django import http
 from .. import factories
 from .. import views
 from ..models import STATUS_CHOICES, QueueEntry
+from . import QUEUE_ENTRY
 
 
 pytestmark = [
     pytest.mark.urls('coda_replication.urls'),
     pytest.mark.django_db()
 ]
-
-
-QUEUE_ENTRY = '{http://digital2.library.unt.edu/coda/queuexml/}queueEntry'
 
 
 class TestQueueStats:
