@@ -211,13 +211,13 @@ class TestPrioritizeJson:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/json'
 
-    def test_returns_ok_with_invalid_identifier(self, rf):
+    def test_returns_not_found_with_invalid_identifier(self, rf):
         request = rf.get('/', {'identifier': 'dne'})
         response = views.prioritize_json(request)
         assert response.status_code == 404
         assert response['Content-Type'] == 'application/json'
 
-    def test_returns_ok_without_identifier(self, rf):
+    def test_returns_bad_request_without_identifier(self, rf):
         request = rf.get('/')
         response = views.prioritize_json(request)
         assert response.status_code == 400
