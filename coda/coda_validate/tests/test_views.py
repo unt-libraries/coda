@@ -39,7 +39,7 @@ class TestIndex:
         assert response.template[0].name == 'coda_validate/index.html'
 
     def test_context(self, client):
-        factories.ValidateFactory.create_batch(30)
+        factories.ValidateFactory.create_batch(30, priority=1)
         response = client.get(reverse('coda_validate.views.index'))
         context = response.context[-1]
         assert len(context['recently_prioritized']) == 20
