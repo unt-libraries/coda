@@ -6,11 +6,9 @@ import pytest
 from django.core.urlresolvers import reverse
 from django import http
 
-from .. import factories
-from .. import views
+from .. import factories, views
 from ..models import Validate
 
-VALIDATE_XML = '{http://digital2.library.unt.edu/coda/validatexml/}validate'
 
 pytestmark = [
     pytest.mark.urls('coda_validate.urls'),
