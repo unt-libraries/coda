@@ -130,7 +130,7 @@ def test_xmlToUpdateValidateObject_sets_priority_to_zero(validate_feed):
     updated_validate = views.xmlToUpdateValidateObject(validate_feed)
 
     assert validate_xml.priority > 0
-    assert updated_validate.priority is 0
+    assert updated_validate.priority == 0
 
 
 @pytest.mark.xfail(reason='Exception will never be raised directly from the function.')
