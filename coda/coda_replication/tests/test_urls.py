@@ -28,5 +28,9 @@ def test_queue_search():
     assert resolve('/queue/search/').func == views.queue_search
 
 
+def test_queue_search_JSON():
+    assert resolve('/queue/search.json').func == views.queue_search_JSON
+
+
 def test_queue_stats():
     assert resolve('/queue/stats/').func == views.queue_stats
