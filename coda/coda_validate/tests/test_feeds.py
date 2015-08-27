@@ -15,6 +15,20 @@ pytestmark = [
 
 class TestAtomNextNewsFeed:
 
+    def test_get_object_returns_none(self, rf):
+        request = rf.get('/')
+        feed = views.AtomNextNewsFeed()
+        obj = feed.get_object(request, '')
+        assert obj is None
+
+    def test_get_object_returns_server_name(self, rf):
+        request = rf.get('/')
+        feed = views.AtomNextNewsFeed()
+
+        server = 'example.com'
+        obj = feed.get_object(request, server)
+        assert obj == server
+
     def test_items_filters_by_server(self):
         validate = factories.ValidateFactory.create()
 
@@ -62,3 +76,12 @@ class TestAtomNextNewsFeed:
         feed = views.AtomNextNewsFeed()
         link = feed.item_link(validate)
         assert link == '/APP/validate/{0}/'.format(validate.identifier)
+
+
+class TestAtomNextFeedNoServer:
+
+    def test_get_object(self, rf):
+        request = rf.get('/')
+        feed = views.AtomNextFeedNoServer()
+        obj = feed.get_object(request)
+        assert obj is None
