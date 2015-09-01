@@ -2,6 +2,7 @@ import pytest
 
 from .. import views
 
+
 pytestmark = pytest.mark.django_db()
 
 
