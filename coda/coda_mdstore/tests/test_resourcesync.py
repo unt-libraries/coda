@@ -12,7 +12,7 @@ pytestmark = [
 
 
 class FakeSitemap(Sitemap):
-    """Fake Sitemap object similar to resourcesync.BaseSitemap
+    """Fake Sitemap object similar to resourcesync.BaseSitemap.
 
     This will build but not persist model instances for testing
     purposes.
@@ -55,7 +55,7 @@ def test_index_context(rf):
 def test_sitemap_content(rf):
     """Test the content in the response returned from `sitemap`.
 
-    `sitemap` is essentally the function defined in
+    `sitemap` is essentially the function defined in
     django.contrib.sitemaps.views.sitemap, but it alters the data included
     in the response context slightly. This tests that the data is present
     in the content.
