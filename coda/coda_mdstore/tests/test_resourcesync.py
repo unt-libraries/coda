@@ -53,7 +53,6 @@ def test_sitemap_context(rf):
     factories.FullBagFactory.create_batch(10)
     request = rf.get('/')
     response = resourcesync.sitemap(request, resourcesync.sitemaps, 1, 'mdstore/sitemap.xml')
-    response.render()
 
     urlset = response.context_data['urlset']
 
@@ -76,9 +75,6 @@ def test_changelist(rf):
 
     assert response.template_name == template_name
     assert response.get('Content-Type', False) == content_type
-
-    assert 'MOST_RECENT_BAGGING_DATE' in response.context_data
-    assert 'urlset' in response.context_data
 
 
 def test_changelist_context(rf):
