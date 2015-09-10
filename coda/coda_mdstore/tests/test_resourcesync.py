@@ -27,19 +27,18 @@ def test_index(rf):
     request = rf.get('/')
     response = resourcesync.index(request, sitemaps, 'mdstore/resourceindex.xml')
 
-    content = response.render()
+    resource_list_1 = 'resourcelist-001.xml'
+    resource_list_2 = 'resourcelist-002.xml'
 
-    locations = [
-        'resourcelist-001.xml',
-        'resourcelist-002.xml'
-    ]
+    locations = response.context_data['sitemaps']
 
-    for loc in locations:
-        assert loc in str(content)
+    assert resource_list_1 in locations[0]
+    assert resource_list_2 in locations[1]
 
 
 def test_sitemap(rf):
     bags = factories.FullBagFactory.create_batch(10)
+
     request = rf.get('/')
     response = resourcesync.sitemap(request, resourcesync.sitemaps, 1, 'mdstore/sitemap.xml')
     response.render()
