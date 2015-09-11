@@ -66,6 +66,50 @@ class FullBagFactory(BagFactory):
     )
 
 
+class OAIBagFactory(BagFactory):
+    """
+    Factory to create a Bag object with two related Bag_Info objects, and
+    2 related External_Identifier objects.
+    """
+    info1 = factory.RelatedFactory(
+        Bag_InfoFactory,
+        'bag_name',
+        field_name='External-Description',
+        field_body='Fake description'
+    )
+
+    info2 = factory.RelatedFactory(
+        Bag_InfoFactory,
+        'bag_name',
+        field_name='Bagging-Date',
+        field_body='2015-01-01'
+    )
+
+    info3 = factory.RelatedFactory(
+        Bag_InfoFactory,
+        'bag_name',
+        field_name='Contact-Name',
+        field_body='John Doe'
+    )
+
+    info4 = factory.RelatedFactory(
+        Bag_InfoFactory,
+        'bag_name',
+        field_name='External-Identifier',
+        field_body='-'
+    )
+
+    ext_id1 = factory.RelatedFactory(
+        ExternalIdentifierFactory,
+        'belong_to_bag',
+    )
+
+    ext_id2 = factory.RelatedFactory(
+        ExternalIdentifierFactory,
+        'belong_to_bag',
+    )
+
+
 class NodeFactory(factory.django.DjangoModelFactory):
 
     class Meta:
