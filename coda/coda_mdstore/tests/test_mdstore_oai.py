@@ -8,6 +8,7 @@ from .. import factories
 from .. import mdstore_oai as oai
 
 
+@pytest.mark.django_db
 class Testmd_storeOAIInterface:
 
     @pytest.mark.xfail
@@ -15,7 +16,6 @@ class Testmd_storeOAIInterface:
         """Not used."""
         pass
 
-    @pytest.mark.django_db
     def test_getRecord(self):
         bag = factories.FullBagFactory.create()
         md = oai.md_storeOAIInterface()
@@ -27,35 +27,66 @@ class Testmd_storeOAIInterface:
         assert isinstance(metadata, Metadata)
         assert about is None
 
-    @pytest.mark.django_db
     def test_getRecord_raises_IdDoesNotExistError(self):
         md = oai.md_storeOAIInterface()
 
         with pytest.raises(error.IdDoesNotExistError):
             md.getRecord('oai_dc', 'ark:/00001/dne')
 
-    @pytest.mark.xfail
     def test_listSets_raises_NoSetHierarchyError(self):
         md = oai.md_storeOAIInterface()
 
-        with pytest.raises(error.NoSetHierarchError):
+        with pytest.raises(error.NoSetHierarchyError):
             md.listSets()
 
     @pytest.mark.xfail
     def test_listMetadataFormats(self):
         assert 0
 
-    @pytest.mark.xfail
     def test_listIdentifiers(self):
-        assert 0
+        factories.FullBagFactory.create_batch(30)
+        md = oai.md_storeOAIInterface()
 
-    @pytest.mark.xfail
+        records = md.listIdentifiers('oai_dc')
+        assert len(records) == 10
+        assert all(isinstance(r, Header) for r in records)
+
     def test_listRecords(self):
-        assert 0
+        factories.FullBagFactory.create_batch(30)
+        md = oai.md_storeOAIInterface()
+
+        records = md.listRecords('oai_dc')
+        assert len(records) == 10
+        assert all(True for r in records if len(r) == 3)
+
+    def test_listStuff_raises_CannotDisseminateFormatError(self):
+        md = oai.md_storeOAIInterface()
+        invalid_prefix = 'dne'
+
+        with pytest.raises(error.CannotDisseminateFormatError):
+            md.listStuff(invalid_prefix)
+
+    def test_listStuff_returns_records(self):
+        factories.FullBagFactory.create_batch(30)
+        md = oai.md_storeOAIInterface()
+
+        records = md.listStuff('oai_dc', headersOnly=False)
+        assert len(records) == 10
+        assert all(True for r in records if len(r) == 3)
+
+    def test_listStuff_only_returns_headers(self):
+        factories.FullBagFactory.create_batch(30)
+        md = oai.md_storeOAIInterface()
+
+        records = md.listStuff('oai_dc', headersOnly=True)
+        assert len(records) == 10
+        assert all(isinstance(r, Header) for r in records)
 
     @pytest.mark.xfail
-    def test_listStuff(self):
-        assert 0
+    def test_listStuff_with_default_metadataPrefix(self):
+        factories.FullBagFactory.create_batch(30)
+        md = oai.md_storeOAIInterface()
+        md.listStuff()
 
 
 @pytest.mark.django_db
