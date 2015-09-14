@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from lxml import etree
 import pytest
 from oaipmh.common import Header, Metadata
 from oaipmh import error
@@ -211,6 +212,26 @@ def test_infoToArk_returns_info_uri():
     assert actual == info
 
 
-@pytest.mark.xfail
+@pytest.mark.django_db
 def test_coda_bag_writer():
-    assert 0
+    bag = factories.FullBagFactory.create()
+    md = oai.md_storeOAIInterface()
+
+    _, metadata, _ = md.getRecord('coda_bag', bag.name)
+    element = etree.Element("root")
+
+    oai.coda_bag_writer(element, metadata)
+    assert 'bag:codaXML' in etree.tostring(element)
+
+
+@pytest.mark.django_db
+@pytest.mark.xfail
+def test_coda_bag_writer_with_invalid_metadata():
+    bag = factories.FullBagFactory.create()
+    md = oai.md_storeOAIInterface()
+
+    _, metadata, _ = md.getRecord('oai_dc', bag.name)
+    element = etree.Element("root")
+
+    oai.coda_bag_writer(element, metadata)
+    assert 'bag:codaXML' in etree.tostring(element)
