@@ -4,18 +4,10 @@ import pytest
 from oaipmh.common import Header, Metadata
 
 from .. import factories
-from ..mdstore_oai import (
-    md_storeOAIInterface,
-    makeDataRecord,
-)
+from .. import mdstore_oai as oai
 
 
 class Testmd_storeOAIInterface:
-
-    def test_smoke(self):
-        md = md_storeOAIInterface()
-        print md
-        print md.identify()
 
     @pytest.mark.xfail
     def test__old_solr_getRecord(self):
@@ -59,7 +51,7 @@ class TestMakeDataRecord:
 
     def test_return_values(self):
         bag = factories.FullBagFactory.create()
-        header, metadata, about = makeDataRecord(bag)
+        header, metadata, about = oai.makeDataRecord(bag)
 
         assert isinstance(header, Header)
         assert isinstance(metadata, Metadata)
@@ -67,7 +59,7 @@ class TestMakeDataRecord:
 
     def test_oai_dc_metadata_has_date(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = makeDataRecord(bag)
+        _, metadata, _ = oai.makeDataRecord(bag)
 
         metadata_map = metadata.getMap()
 
@@ -77,7 +69,7 @@ class TestMakeDataRecord:
 
     def test_oai_dc_metadata_has_identifier(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = makeDataRecord(bag)
+        _, metadata, _ = oai.makeDataRecord(bag)
 
         metadata_map = metadata.getMap()
 
@@ -88,7 +80,7 @@ class TestMakeDataRecord:
 
     def test_oai_dc_metadata_has_description(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = makeDataRecord(bag)
+        _, metadata, _ = oai.makeDataRecord(bag)
 
         metadata_map = metadata.getMap()
 
@@ -98,7 +90,7 @@ class TestMakeDataRecord:
 
     def test_oai_dc_metadata_has_creator(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = makeDataRecord(bag)
+        _, metadata, _ = oai.makeDataRecord(bag)
 
         metadata_map = metadata.getMap()
 
@@ -108,7 +100,7 @@ class TestMakeDataRecord:
 
     def test_coda_bag_metadata_has_creator(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = makeDataRecord(bag, metadataPrefix='coda_bag')
+        _, metadata, _ = oai.makeDataRecord(bag, metadataPrefix='coda_bag')
 
         metadata_map = metadata.getMap()
         assert 'bag' in metadata_map
@@ -116,7 +108,7 @@ class TestMakeDataRecord:
 
     def test_header_identifier(self):
         bag = factories.OAIBagFactory.create()
-        header, _, _ = makeDataRecord(bag)
+        header, _, _ = oai.makeDataRecord(bag)
 
         # The bag name will be something like `ark:/00001/id`, but the header
         # identifier should look slightly different. The using the same name,
@@ -128,23 +120,43 @@ class TestMakeDataRecord:
 
     def test_header_datestamp(self):
         bag = factories.OAIBagFactory.create()
-        header, _, _ = makeDataRecord(bag)
+        header, _, _ = oai.makeDataRecord(bag)
         assert isinstance(header.datestamp(), datetime)
 
     def test_header_setSpec(self):
         bag = factories.OAIBagFactory.create()
-        header, _, _ = makeDataRecord(bag)
+        header, _, _ = oai.makeDataRecord(bag)
         assert header.setSpec() == []
 
 
-@pytest.mark.xfail
-def test_arkToInfo():
-    assert 0
+def test_arkToInfo_returns_info_uri():
+    """Test that a info uri is returned."""
+    ark = 'ark:/00001/coda1a'
+    actual = oai.arkToInfo(ark)
+    expected = 'info:ark/00001/coda1a'
+    assert actual == expected
 
 
-@pytest.mark.xfail
-def test_infoToArk():
-    assert 0
+def test_arkToInfo_returns_ark():
+    """Test the return value matches the input argument if the ark does
+    not contain `ark:`.
+    """
+    ark = '00001/coda1a'
+    actual = oai.arkToInfo(ark)
+    assert actual == ark
+
+
+def test_infoToArk_returns_ark():
+    info = 'info:ark/00001/coda1a'
+    actual = oai.infoToArk(info)
+    expected = 'ark:/00001/coda1a'
+    assert actual == expected
+
+
+def test_infoToArk_returns_info_uri():
+    info = '/00001/coda1a'
+    actual = oai.infoToArk(info)
+    assert actual == info
 
 
 @pytest.mark.xfail
