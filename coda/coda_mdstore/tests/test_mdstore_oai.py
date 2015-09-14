@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from oaipmh.common import Header, Metadata
+from oaipmh import error
 
 from .. import factories
 from .. import mdstore_oai as oai
@@ -14,13 +15,31 @@ class Testmd_storeOAIInterface:
         """Not used."""
         pass
 
-    @pytest.mark.xfail
+    @pytest.mark.django_db
     def test_getRecord(self):
-        assert 0
+        bag = factories.FullBagFactory.create()
+        md = oai.md_storeOAIInterface()
+        record = md.getRecord('oai_dc', bag.name)
+
+        header, metadata, about = record
+
+        assert isinstance(header, Header)
+        assert isinstance(metadata, Metadata)
+        assert about is None
+
+    @pytest.mark.django_db
+    def test_getRecord_raises_IdDoesNotExistError(self):
+        md = oai.md_storeOAIInterface()
+
+        with pytest.raises(error.IdDoesNotExistError):
+            md.getRecord('oai_dc', 'ark:/00001/dne')
 
     @pytest.mark.xfail
-    def test_listSets(self):
-        assert 0
+    def test_listSets_raises_NoSetHierarchyError(self):
+        md = oai.md_storeOAIInterface()
+
+        with pytest.raises(error.NoSetHierarchError):
+            md.listSets()
 
     @pytest.mark.xfail
     def test_listMetadataFormats(self):
