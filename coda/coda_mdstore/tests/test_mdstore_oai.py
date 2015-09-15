@@ -89,7 +89,7 @@ class Testmd_storeOAIInterface:
         assert all(isinstance(r, common.Header) for r in records)
 
     def test_listRecords(self):
-        """Test listIdentifiers returns a list of 3 element tuples."""
+        """Test listRecords returns a list of 3 element tuples."""
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
