@@ -57,6 +57,10 @@ class Testmd_storeOAIInterface:
         assert formats[1][0] == CODA_BAG
 
     def test_listMetadataFormats_always_returns_same_data(self):
+        """Test the return value is the same when a valid identifier
+        is passed to the method and when no identifier is passed to the
+        method.
+        """
         bag = factories.FullBagFactory.create()
         md = oai.md_storeOAIInterface()
 
@@ -66,10 +70,14 @@ class Testmd_storeOAIInterface:
         assert formats_with_identifier == formats_without_identifier
 
     def test_listMetadataFormats_raises_IdDoesNotExistError(self):
+        """Test listMetadataFormats raises an IdDoesNotExistError when an
+        invalid identifier is passed.
+        """
         md = oai.md_storeOAIInterface()
+        invalid_identifier = 'dne'
 
         with pytest.raises(error.IdDoesNotExistError):
-            md.listMetadataFormats('dne')
+            md.listMetadataFormats(invalid_identifier)
 
     def test_listIdentifiers(self):
         """Test listIdentifiers returns a list of Header objects."""
@@ -90,7 +98,7 @@ class Testmd_storeOAIInterface:
         assert all(True for r in records if len(r) == 3)
 
     def test_listStuff_raises_CannotDisseminateFormatError(self):
-        """Test list stuff will raise a CannotDisseminateFormatError
+        """Test listStuff will raise a CannotDisseminateFormatError
         when given an invalid prefix.
         """
         md = oai.md_storeOAIInterface()
@@ -100,6 +108,9 @@ class Testmd_storeOAIInterface:
             md.listStuff(invalid_prefix)
 
     def test_listStuff_returns_records(self):
+        """Test listStuff returns complete records when the `headersOnly`
+        keyword arg is False.
+        """
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
@@ -108,6 +119,9 @@ class Testmd_storeOAIInterface:
         assert all(True for r in records if len(r) == 3)
 
     def test_listStuff_only_returns_headers(self):
+        """Test listStuff returns Header objects when the `headersOnly`
+        keyword arg is True.
+        """
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
@@ -256,7 +270,7 @@ def test_coda_bag_writer():
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(reason='Only Metatdata objec ts that have a `bag` key in the map '
+@pytest.mark.xfail(reason='Only Metatdata objects that have a `bag` key in the map '
                           'can be passed to the function.')
 def test_coda_bag_writer_with_invalid_metadata():
     bag = factories.FullBagFactory.create()
