@@ -19,9 +19,8 @@ class Testmd_storeOAIInterface:
         identity = md.identify()
         assert isinstance(identity, common.Identify)
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='Method is never used.')
     def test__old_solr_getRecord(self):
-        """Not used."""
         assert 0
 
     def test_getRecord(self):
@@ -91,6 +90,9 @@ class Testmd_storeOAIInterface:
         assert all(True for r in records if len(r) == 3)
 
     def test_listStuff_raises_CannotDisseminateFormatError(self):
+        """Test list stuff will raise a CannotDisseminateFormatError
+        when given an invalid prefix.
+        """
         md = oai.md_storeOAIInterface()
         invalid_prefix = 'dne'
 
@@ -113,7 +115,8 @@ class Testmd_storeOAIInterface:
         assert len(records) == 10
         assert all(isinstance(r, common.Header) for r in records)
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(reason='When the default metadataPrefix parameter is used, an '
+                              'exception is raised.')
     def test_listStuff_with_default_metadataPrefix(self):
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
@@ -253,14 +256,9 @@ def test_coda_bag_writer():
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail
+@pytest.mark.xfail(reason='Only Metatdata objec ts that have a `bag` key in the map '
+                          'can be passed to the function.')
 def test_coda_bag_writer_with_invalid_metadata():
-    """Only Metadata objects that have a `bag` key in it's map can be passed
-    to `coda_bag_writer`.
-
-    Due to magic strings it is difficult to know when this function will
-    return successfully or raise an exception.
-    """
     bag = factories.FullBagFactory.create()
     md = oai.md_storeOAIInterface()
 
@@ -268,4 +266,3 @@ def test_coda_bag_writer_with_invalid_metadata():
     element = etree.Element("root")
 
     oai.coda_bag_writer(element, metadata)
-    assert 'bag:codaXML' in etree.tostring(element)
