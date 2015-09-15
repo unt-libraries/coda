@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from lxml import etree
+from oaipmh import common, error
 import pytest
-from oaipmh import error, common
 
 from .. import factories
 from .. import mdstore_oai as oai
