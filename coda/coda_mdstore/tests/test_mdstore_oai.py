@@ -155,6 +155,14 @@ class TestMakeDataRecord:
         assert isinstance(metadata, common.Metadata)
         assert about is None
 
+    @pytest.mark.xfail(reason='Exception will never be raised because `dcDict` will '
+                              'never be empty.')
+    def test_raises_exception(self):
+        bag = factories.BagFactory.create(name=None)
+
+        with pytest.raises(Exception):
+            oai.makeDataRecord(bag)
+
     def test_oai_dc_metadata_has_date(self):
         bag = factories.OAIBagFactory.create()
         _, metadata, _ = oai.makeDataRecord(bag)
