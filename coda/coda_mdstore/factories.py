@@ -96,7 +96,7 @@ class OAIBagFactory(BagFactory):
         Bag_InfoFactory,
         'bag_name',
         field_name='External-Identifier',
-        field_body='-'
+        field_body='http://example.com/bag/0001/'
     )
 
     ext_id1 = factory.RelatedFactory(
