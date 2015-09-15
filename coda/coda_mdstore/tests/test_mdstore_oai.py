@@ -2,37 +2,47 @@ from datetime import datetime
 
 from lxml import etree
 import pytest
-from oaipmh.common import Header, Metadata
-from oaipmh import error
+from oaipmh import error, common
 
 from .. import factories
 from .. import mdstore_oai as oai
+
+OAI_DC = 'oai_dc'
+CODA_BAG = 'coda_bag'
 
 
 @pytest.mark.django_db
 class Testmd_storeOAIInterface:
 
+    def test_identify(self):
+        md = oai.md_storeOAIInterface()
+        identity = md.identify()
+        assert isinstance(identity, common.Identify)
+
     @pytest.mark.xfail
     def test__old_solr_getRecord(self):
         """Not used."""
-        pass
+        assert 0
 
     def test_getRecord(self):
         bag = factories.FullBagFactory.create()
         md = oai.md_storeOAIInterface()
-        record = md.getRecord('oai_dc', bag.name)
+        record = md.getRecord(OAI_DC, bag.name)
 
         header, metadata, about = record
 
-        assert isinstance(header, Header)
-        assert isinstance(metadata, Metadata)
+        assert isinstance(header, common.Header)
+        assert isinstance(metadata, common.Metadata)
         assert about is None
 
     def test_getRecord_raises_IdDoesNotExistError(self):
+        """Test that getRecord raises an exception when an object cannot
+        be located with the given identifier.
+        """
         md = oai.md_storeOAIInterface()
 
         with pytest.raises(error.IdDoesNotExistError):
-            md.getRecord('oai_dc', 'ark:/00001/dne')
+            md.getRecord(OAI_DC, 'ark:/00001/dne')
 
     def test_listSets_raises_NoSetHierarchyError(self):
         md = oai.md_storeOAIInterface()
@@ -40,25 +50,43 @@ class Testmd_storeOAIInterface:
         with pytest.raises(error.NoSetHierarchyError):
             md.listSets()
 
-    @pytest.mark.xfail
     def test_listMetadataFormats(self):
-        assert 0
+        md = oai.md_storeOAIInterface()
+
+        formats = md.listMetadataFormats()
+        assert formats[0][0] == OAI_DC
+        assert formats[1][0] == CODA_BAG
+
+    def test_listMetadataFormats_always_returns_same_data(self):
+        bag = factories.FullBagFactory.create()
+        md = oai.md_storeOAIInterface()
+
+        formats_without_identifier = md.listMetadataFormats()
+        formats_with_identifier = md.listMetadataFormats(bag.name)
+
+        assert formats_with_identifier == formats_without_identifier
+
+    def test_listMetadataFormats_raises_IdDoesNotExistError(self):
+        md = oai.md_storeOAIInterface()
+
+        with pytest.raises(error.IdDoesNotExistError):
+            md.listMetadataFormats('dne')
 
     def test_listIdentifiers(self):
         """Test listIdentifiers returns a list of Header objects."""
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
-        records = md.listIdentifiers('oai_dc')
+        records = md.listIdentifiers(OAI_DC)
         assert len(records) == 10
-        assert all(isinstance(r, Header) for r in records)
+        assert all(isinstance(r, common.Header) for r in records)
 
     def test_listRecords(self):
         """Test listIdentifiers returns a list of 3 element tuples."""
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
-        records = md.listRecords('oai_dc')
+        records = md.listRecords(OAI_DC)
         assert len(records) == 10
         assert all(True for r in records if len(r) == 3)
 
@@ -73,7 +101,7 @@ class Testmd_storeOAIInterface:
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
-        records = md.listStuff('oai_dc', headersOnly=False)
+        records = md.listStuff(OAI_DC, headersOnly=False)
         assert len(records) == 10
         assert all(True for r in records if len(r) == 3)
 
@@ -81,9 +109,9 @@ class Testmd_storeOAIInterface:
         factories.FullBagFactory.create_batch(30)
         md = oai.md_storeOAIInterface()
 
-        records = md.listStuff('oai_dc', headersOnly=True)
+        records = md.listStuff(OAI_DC, headersOnly=True)
         assert len(records) == 10
-        assert all(isinstance(r, Header) for r in records)
+        assert all(isinstance(r, common.Header) for r in records)
 
     @pytest.mark.xfail
     def test_listStuff_with_default_metadataPrefix(self):
@@ -106,8 +134,8 @@ class TestMakeDataRecord:
         bag = factories.FullBagFactory.create()
         header, metadata, about = oai.makeDataRecord(bag)
 
-        assert isinstance(header, Header)
-        assert isinstance(metadata, Metadata)
+        assert isinstance(header, common.Header)
+        assert isinstance(metadata, common.Metadata)
         assert about is None
 
     def test_oai_dc_metadata_has_date(self):
@@ -153,7 +181,7 @@ class TestMakeDataRecord:
 
     def test_coda_bag_metadata_has_creator(self):
         bag = factories.OAIBagFactory.create()
-        _, metadata, _ = oai.makeDataRecord(bag, metadataPrefix='coda_bag')
+        _, metadata, _ = oai.makeDataRecord(bag, metadataPrefix=CODA_BAG)
 
         metadata_map = metadata.getMap()
         assert 'bag' in metadata_map
@@ -217,7 +245,7 @@ def test_coda_bag_writer():
     bag = factories.FullBagFactory.create()
     md = oai.md_storeOAIInterface()
 
-    _, metadata, _ = md.getRecord('coda_bag', bag.name)
+    _, metadata, _ = md.getRecord(CODA_BAG, bag.name)
     element = etree.Element("root")
 
     oai.coda_bag_writer(element, metadata)
@@ -227,10 +255,16 @@ def test_coda_bag_writer():
 @pytest.mark.django_db
 @pytest.mark.xfail
 def test_coda_bag_writer_with_invalid_metadata():
+    """Only Metadata objects that have a `bag` key in it's map can be passed
+    to `coda_bag_writer`.
+
+    Due to magic strings it is difficult to know when this function will
+    return successfully or raise an exception.
+    """
     bag = factories.FullBagFactory.create()
     md = oai.md_storeOAIInterface()
 
-    _, metadata, _ = md.getRecord('oai_dc', bag.name)
+    _, metadata, _ = md.getRecord(OAI_DC, bag.name)
     element = etree.Element("root")
 
     oai.coda_bag_writer(element, metadata)
