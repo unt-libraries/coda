@@ -39,7 +39,7 @@ class ExternalIdentifierFactory(factory.django.DjangoModelFactory):
 class FullBagFactory(BagFactory):
     """
     Factory to create a Bag object with two related Bag_Info objects, and
-    2 related External_Identifier objects.
+    two related External_Identifier objects.
     """
     info1 = factory.RelatedFactory(
         Bag_InfoFactory,
@@ -68,8 +68,8 @@ class FullBagFactory(BagFactory):
 
 class OAIBagFactory(BagFactory):
     """
-    Factory to create a Bag object with two related Bag_Info objects, and
-    2 related External_Identifier objects.
+    Factory for creating Bag objects with related Bag_Info objects
+    that are expected from the md_store_oai module.
     """
     info1 = factory.RelatedFactory(
         Bag_InfoFactory,
@@ -97,16 +97,6 @@ class OAIBagFactory(BagFactory):
         'bag_name',
         field_name='External-Identifier',
         field_body='http://example.com/bag/0001/'
-    )
-
-    ext_id1 = factory.RelatedFactory(
-        ExternalIdentifierFactory,
-        'belong_to_bag',
-    )
-
-    ext_id2 = factory.RelatedFactory(
-        ExternalIdentifierFactory,
-        'belong_to_bag',
     )
 
 
