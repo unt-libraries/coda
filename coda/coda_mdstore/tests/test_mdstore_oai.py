@@ -204,7 +204,7 @@ class TestMakeDataRecord:
         assert 'creator' in metadata_map.keys()
         assert contact_name.field_body in metadata_map['creator']
 
-    def test_coda_bag_metadata_has_creator(self):
+    def test_coda_bag_metadata(self):
         bag = factories.OAIBagFactory.create()
         _, metadata, _ = oai.makeDataRecord(bag, metadataPrefix=CODA_BAG)
 
