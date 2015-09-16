@@ -217,7 +217,7 @@ class TestMakeDataRecord:
         header, _, _ = oai.makeDataRecord(bag)
 
         # The bag name will be something like `ark:/00001/id`, but the header
-        # identifier should look slightly different. The using the same name,
+        # identifier should look slightly different. Using the same bag name,
         # the identifier will be `info:ark/00001/id`.
         identifier = ''.join(bag.name.split(':'))
         identifier = 'info:{0}'.format(identifier)
@@ -236,7 +236,7 @@ class TestMakeDataRecord:
 
 
 def test_arkToInfo_returns_info_uri():
-    """Test that a info uri is returned."""
+    """Test that an info URI is returned."""
     ark = 'ark:/00001/coda1a'
     actual = oai.arkToInfo(ark)
     expected = 'info:ark/00001/coda1a'
@@ -271,7 +271,7 @@ def test_coda_bag_writer():
     md = oai.md_storeOAIInterface()
 
     _, metadata, _ = md.getRecord(CODA_BAG, bag.name)
-    element = etree.Element("root")
+    element = etree.Element('root')
 
     oai.coda_bag_writer(element, metadata)
     assert 'bag:codaXML' in etree.tostring(element)
@@ -285,6 +285,6 @@ def test_coda_bag_writer_with_invalid_metadata():
     md = oai.md_storeOAIInterface()
 
     _, metadata, _ = md.getRecord(OAI_DC, bag.name)
-    element = etree.Element("root")
+    element = etree.Element('root')
 
     oai.coda_bag_writer(element, metadata)
