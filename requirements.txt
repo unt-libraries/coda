@@ -11,5 +11,5 @@ mock
 factory_boy
 codalib==1.0.0
 
-git+git://github.com/unt-libraries/django-premis-event-service
+git+git://github.com/unt-libraries/django-premis-event-service@1.0.0
 git+git://github.com/unt-libraries/pypairtree
