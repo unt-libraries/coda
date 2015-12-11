@@ -432,7 +432,7 @@ def json_stats(request):
         Sum('files'),
     )
     # dump the dict to as an HttpResponse
-    response = HttpResponse(mimetype='application/json')
+    response = HttpResponse(content_type='application/json')
     # construct the dictionary with values from aggregates
     if bags['bagging_date__max'] != None:
         jsonDict = {
@@ -467,7 +467,7 @@ def shooRobot(request):
 
     return HttpResponse(
         'User-agent: *' + "\n" + 'Disallow: /',
-        mimetype='text/plain'
+        content_type='text/plain'
     )
 
 
@@ -571,7 +571,7 @@ def bagURLList(request, identifier):
         # throw the final path into a list
         transList.append(uni)
     outputText = "\n".join(reversed(transList))
-    resp = HttpResponse(outputText, mimetype="text/plain")
+    resp = HttpResponse(outputText, content_type="text/plain")
     resp.status_code = 200
     return resp
 
@@ -609,9 +609,10 @@ def bagProxy(request, identifier, filePath):
         )
     handle = getFileHandle(identifier, filePath)
     if handle:
+        pass
         resp = HttpResponse(
             FileWrapper(handle),
-            mimetype=handle.info().getheader('Content-Type')
+            content_type=handle.info().getheader('Content-Type')
         )
         resp['Content-Length'] = handle.info().getheader('Content-Length')
     else:
@@ -635,11 +636,11 @@ def externalIdentifierSearch(request, identifier=None):
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
         if 'metadc' in identifier or 'metapth' in identifier:
-            bagInfoObjectList = External_Identifier.objects.select_related('bag').filter(
+            bagInfoObjectList = External_Identifier.objects.select_related('belong_to_bag').filter(
                 value=identifier
             )
         elif 'coda' in identifier:
-            bagInfoObjectList = External_Identifier.objects.select_related('bag').filter(
+            bagInfoObjectList = External_Identifier.objects.select_related('belong_to_bag').filter(
                 belong_to_bag=identifier
             )
         bagList = []
@@ -653,7 +654,7 @@ def externalIdentifierSearch(request, identifier=None):
             title="Bags matching external identifier of %s" % identifier,
         )
         feedText = XML_HEADER % etree.tostring(feedTag, pretty_print=True)
-        resp = HttpResponse(feedText, mimetype="application/atom+xml")
+        resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     else:
@@ -677,7 +678,7 @@ def externalIdentifierSearchJSON(request):
         ark = 'ark:/67531/%s' % ark
     # get data for json dictionary
     externalIdBagInfoList = External_Identifier.objects.select_related(
-        'bag'
+        'belong_to_bag'
     ).filter(
         value=ark
     )
@@ -694,7 +695,7 @@ def externalIdentifierSearchJSON(request):
         }
         if ext_id_dict not in jsonList:
             jsonList.append(ext_id_dict)
-    response = HttpResponse(mimetype='application/json')
+    response = HttpResponse(content_type='application/json')
     # construct the dictionary with values from aggregates
     # dump to response
     json.dump(
@@ -749,7 +750,7 @@ def bagFullTextSearchATOM(request):
         "Bags found by search string '%s'" % searchString
     )
     feedText = XML_HEADER % etree.tostring(feedTag, pretty_print=True)
-    resp = HttpResponse(feedText, mimetype="application/atom+xml")
+    resp = HttpResponse(feedText, content_type="application/atom+xml")
     resp.status_code = 200
     return resp
 
@@ -879,7 +880,7 @@ def app_bag(request, identifier=None):
             author_uri=APP_AUTHOR.get('uri', None)
         )
         entryText = XML_HEADER % etree.tostring(returnEntry, pretty_print=True)
-        resp = HttpResponse(entryText, mimetype="application/atom+xml")
+        resp = HttpResponse(entryText, content_type="application/atom+xml")
         return resp
     elif request.method == 'GET' and not identifier:
         requestString = request.path
@@ -901,12 +902,12 @@ def app_bag(request, identifier=None):
             author=APP_AUTHOR
         )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
-        resp = HttpResponse(feedText, mimetype="application/atom+xml")
+        resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     elif request.method == 'POST' and not identifier:
         # attempt to parse POST'd XML
-        xml = request.raw_post_data
+        xml = request.body
         bagObject, bagInfos = createBag(xml)
         loc = 'http://%s/APP/bag/%s/' % (
             request.META['HTTP_HOST'], bagObject.name
@@ -918,7 +919,7 @@ def app_bag(request, identifier=None):
             title=bagObject.name
         )
         entryText = XML_HEADER % etree.tostring(returnEntry, pretty_print=True)
-        resp = HttpResponse(entryText, mimetype="application/atom+xml")
+        resp = HttpResponse(entryText, content_type="application/atom+xml")
         resp.status_code = 201
         resp['Location'] = loc
         return resp
@@ -931,7 +932,7 @@ def app_bag(request, identifier=None):
             returnXML, bagObject.name, bagObject.name
         )
         entryText = XML_HEADER % etree.tostring(returnEntry, pretty_print=True)
-        resp = HttpResponse(entryText, mimetype="application/atom+xml")
+        resp = HttpResponse(entryText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     elif request.method == 'DELETE' and identifier:
@@ -965,7 +966,7 @@ def app_node(request, identifier=None):
             )
         atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     # FEED
@@ -990,7 +991,7 @@ def app_node(request, identifier=None):
             author=APP_AUTHOR
         )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
-        resp = HttpResponse(feedText, mimetype="application/atom+xml")
+        resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     # NEW ENTRY
@@ -1002,7 +1003,7 @@ def app_node(request, identifier=None):
         )
         atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 201
         resp['Location'] = loc
         return resp
@@ -1014,7 +1015,7 @@ def app_node(request, identifier=None):
         node.save()
         atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
         return resp
     # DELETE ENTRY
