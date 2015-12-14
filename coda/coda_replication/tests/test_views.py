@@ -61,7 +61,7 @@ class TestQueueStats:
 
     def test_template_used(self, client):
         response = client.get(reverse('coda_replication.views.queue_stats'))
-        assert response.template[0].name == 'coda_replication/stats.html'
+        assert response.templates[0].name == 'coda_replication/stats.html'
 
 
 class TestQueueSearch:
@@ -82,7 +82,7 @@ class TestQueueSearch:
 
     def test_template_used(self, client):
         response = client.get(reverse('coda_replication.views.queue_search'))
-        assert response.template[0].name == 'coda_replication/search.html'
+        assert response.templates[0].name == 'coda_replication/search.html'
 
     def test_entries_context_variable_is_page_object(self, client):
         factories.QueueEntryFactory.create_batch(20)
@@ -297,7 +297,7 @@ class TestQueueHtml:
     def test_template_used(self, client):
         entry = factories.QueueEntryFactory.create()
         response = client.get(reverse('coda_replication.views.queue_html', args=[entry.ark]))
-        assert response.template[0].name == 'coda_replication/queue_entry.html'
+        assert response.templates[0].name == 'coda_replication/queue_entry.html'
 
     def test_context_has_entry(self, client):
         entry = factories.QueueEntryFactory.create()
@@ -341,7 +341,7 @@ class TestQueueRecent:
         response = client.get(
             reverse('coda_replication.views.queue_recent'))
 
-        assert response.template[0].name == 'coda_replication/queue.html'
+        assert response.templates[0].name == 'coda_replication/queue.html'
 
 
 class TestQueue:

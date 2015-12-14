@@ -199,8 +199,8 @@ def stats(request):
             sums_by_date['%s, %s, %s' % (v.last_verified.year,
                                          v.last_verified.month - 1,
                                          v.last_verified.day)] = \
-                sums_by_date['%s, %s, %s' % (v.last_verified.year, 
-                                             v.last_verified.month - 1, 
+                sums_by_date['%s, %s, %s' % (v.last_verified.year,
+                                             v.last_verified.month - 1,
                                              v.last_verified.day)] + 1
         else:
             # otherwise, create it and set it to 1
@@ -310,7 +310,7 @@ def prioritize_json(request):
         json_dict['response'] = 'missing identifier parameter'
         json_dict['requested_identifier'] = ''
         status = 400
-    response = HttpResponse(mimetype='application/json', status=status)
+    response = HttpResponse(content_type='application/json', status=status)
     json.dump(
         json_dict,
         fp=response,
@@ -418,7 +418,7 @@ def app_validate(request, identifier=None):
     # are we POSTing a new identifier here?
     if request.method == 'POST' and not identifier:
         # to object
-        validateObject = xmlToValidateObject(request.raw_post_data)
+        validateObject = xmlToValidateObject(request.body)
         validateObject.save()
         # and back to xml
         validateObjectXML = validateToXML(validateObject)
@@ -429,12 +429,12 @@ def app_validate(request, identifier=None):
             title=validateObject.identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 201
         resp['Location'] = 'http://%s/APP/validate/%s/' % \
             (request.META['HTTP_HOST'], validateObject.identifier)
     elif request.method == 'HEAD':
-        resp = HttpResponse(mimetype="application/atom+xml")
+        resp = HttpResponse(content_type="application/atom+xml")
         resp.status_code = 200
     # if not, return a feed
     elif request.method == 'GET' and not identifier:
@@ -458,11 +458,11 @@ def app_validate(request, identifier=None):
             },
         )
         atomFeedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
-        resp = HttpResponse(atomFeedText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomFeedText, content_type="application/atom+xml")
         resp.status_code = 200
     # updating an existing record
     elif request.method == 'PUT' and identifier:
-        returnValidate = xmlToUpdateValidateObject(request.raw_post_data)
+        returnValidate = xmlToUpdateValidateObject(request.body)
         validateObjectXML = validateToXML(returnValidate)
         atomXML = wrapAtom(
             xml=validateObjectXML,
@@ -471,7 +471,7 @@ def app_validate(request, identifier=None):
             title=identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
     elif request.method == 'GET' and identifier:
         # attempt to retrieve record -- error if unable
@@ -492,7 +492,7 @@ def app_validate(request, identifier=None):
             author_uri=APP_AUTHOR.get('uri', None)
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
     elif request.method == 'DELETE' and identifier:
         # attempt to retrieve record -- error if unable
@@ -512,6 +512,6 @@ def app_validate(request, identifier=None):
             title=identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
     return resp

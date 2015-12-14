@@ -322,7 +322,6 @@ class TestBagHTMLView:
         assert key in response.context[-1]
 
 
-# @pytest.mark.skipif(True, reason='These are blocking')
 class TestBagProxyView:
     """
     Tests for coda_mdstore.views.bagProxy.

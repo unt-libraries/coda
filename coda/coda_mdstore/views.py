@@ -609,7 +609,6 @@ def bagProxy(request, identifier, filePath):
         )
     handle = getFileHandle(identifier, filePath)
     if handle:
-        pass
         resp = HttpResponse(
             FileWrapper(handle),
             content_type=handle.info().getheader('Content-Type')
