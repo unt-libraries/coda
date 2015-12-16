@@ -44,7 +44,9 @@ class TestAtomNextNewsFeed:
         assert 'Item was chosen because it is the oldest' in feed.reason
 
     def test_items_chooses_a_random_validate(self):
-        last_verified = datetime.now() - settings.VALIDATION_PERIOD
+        # Make the last_verified time twice less than the validation period time
+        # to ensure that we always randomly select a Validate object.
+        last_verified = datetime.now() - (settings.VALIDATION_PERIOD * 2)
         factories.ValidateFactory.create_batch(30, priority=0, last_verified=last_verified)
 
         feed = views.AtomNextNewsFeed()

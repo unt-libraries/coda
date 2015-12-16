@@ -1,5 +1,7 @@
 from .base import *
 
+SECRET_KEY = 'test-secret'
+
 SITE_ID = 1
 
 DATABASES = {

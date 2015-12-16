@@ -130,7 +130,7 @@ def updateBag(request):
     updates a bag record with new information from an xml file
     """
 
-    xmlText = request.raw_post_data
+    xmlText = request.body
     entryRoot = None
     entryRoot = etree.XML(xmlText)
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
@@ -446,7 +446,7 @@ def updateNode(request):
     Parse the XML in a PUT request and update the node stat based on that
     """
 
-    nodeXML = request.raw_post_data
+    nodeXML = request.body
     entryRoot = etree.fromstring(nodeXML)
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     nodeXML = contentElement.xpath("*[local-name() = 'node']")[0]
@@ -487,7 +487,7 @@ def createNode(request):
     Parse the XML in a POST request and create the node stat based on that
     """
 
-    nodeXML = request.raw_post_data
+    nodeXML = request.body
     entryRoot = etree.fromstring(nodeXML)
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     nodeXML = contentElement.xpath("*[local-name() = 'node']")[0]

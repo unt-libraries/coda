@@ -5,7 +5,7 @@ db:
         - MYSQL_DATABASE=coda_local
 coda: 
     build: .
-    command: python coda/coda_project/manage.py runserver 0.0.0.0:80
+    command: python manage.py runserver 0.0.0.0:80
     volumes:
         - .:/app/
     ports:

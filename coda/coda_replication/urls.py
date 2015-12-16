@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 urlpatterns = patterns('coda_replication.views',
 #    (r'^servicedocument/$', 'serviceDocument'),

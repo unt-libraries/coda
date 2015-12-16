@@ -80,7 +80,7 @@ class TestIndexView:
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.index'))
-        assert response.template[0].name == 'mdstore/index.html'
+        assert response.templates[0].name == 'mdstore/index.html'
 
     def test_totals_files__sum_key_is_none(self, client):
         """
@@ -104,7 +104,7 @@ class TestAboutView:
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.about'))
-        assert response.template[0].name == 'mdstore/about.html'
+        assert response.templates[0].name == 'mdstore/about.html'
 
 
 class TestStatsView:
@@ -207,13 +207,13 @@ class TestAllBagsView:
     @pytest.fixture(autouse=True)
     def mock_pe(self, monkeypatch):
         """Patches the paginate_entries with a Mock object."""
-        self.mock_paginate_entries = mock.Mock()
+        self.mock_paginate_entries = mock.MagicMock()
         monkeypatch.setattr(
             'coda_mdstore.views.paginate_entries', self.mock_paginate_entries)
 
     def test_renders_correct_template(self, client):
         response = client.get(reverse('coda_mdstore.views.all_bags'))
-        assert response.template[0].name == 'mdstore/bag_search_results.html'
+        assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
     def test_uses_paginated_entries(self, client, monkeypatch):
         """
@@ -302,7 +302,7 @@ class TestBagHTMLView:
         response = client.get(
             reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
 
-        assert response.template[0].name == 'mdstore/bag_info.html'
+        assert response.templates[0].name == 'mdstore/bag_info.html'
 
     @pytest.mark.parametrize('key', [
         'site_title',
@@ -338,6 +338,8 @@ class TestBagProxyView:
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
             'coda_mdstore.views.getFileHandle', self.getFileHandle)
+
+        monkeypatch.setattr('coda_mdstore.views.FileWrapper', mock.Mock())
 
     def test_returns_status_code_200(self, rf):
         request = rf.get('/')
@@ -684,7 +686,7 @@ class TestBagFullTextSearchHTMLView:
     def test_renders_correct_template(self, client):
         response = client.get(
             reverse('coda_mdstore.views.bagFullTextSearchHTML'))
-        assert response.template[0].name == 'mdstore/bag_search_results.html'
+        assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
 
 class TestShowNodeStatusView:

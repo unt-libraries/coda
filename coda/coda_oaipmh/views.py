@@ -62,4 +62,4 @@ def index(request):
     )
 
     response = oaiServer.handleRequest(request.REQUEST)
-    return HttpResponse(response, mimetype="text/xml")
+    return HttpResponse(response, content_type="text/xml")

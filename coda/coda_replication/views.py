@@ -265,7 +265,7 @@ def queue_search_JSON(request):
                 "title": "Queue Entries"
             }
         }
-    response = HttpResponse(mimetype='application/json')
+    response = HttpResponse(content_type='application/json')
     json.dump(
         queue_json,
         fp=response,
@@ -333,7 +333,7 @@ def queue(request, identifier=None):
         )
     # respond to a POST request
     if request.method == 'POST' and not identifier:
-        queueObject = addQueueEntry(request.raw_post_data)
+        queueObject = addQueueEntry(request.body)
         identifier = queueObject.ark
         queueObjectXML = queueEntryToXML(queueObject)
         loc = 'http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark)
@@ -347,13 +347,13 @@ def queue(request, identifier=None):
         )
         resp = HttpResponse(
             atomText,
-            mimetype="application/atom+xml",
+            content_type="application/atom+xml",
             status=201
         )
         resp['Location'] = loc
     # respond to PUT request
     if request.method == 'PUT':
-        queueObject = updateQueueEntry(request.raw_post_data)
+        queueObject = updateQueueEntry(request.body)
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,
@@ -363,7 +363,7 @@ def queue(request, identifier=None):
         atomText = '<?xml version="1.0"?>\n%s' % etree.tostring(
             atomXML, pretty_print=True
         )
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
     # respond to GET request
     if request.method == 'GET' and identifier:
         # if it's a GET, or if we've just PUT or POST'd
@@ -384,7 +384,7 @@ def queue(request, identifier=None):
         atomText = '<?xml version="1.0"?>\n%s' % etree.tostring(
             atomXML, pretty_print=True
         )
-        resp = HttpResponse(atomText, mimetype="application/atom+xml")
+        resp = HttpResponse(atomText, content_type="application/atom+xml")
     elif request.method == 'GET' and not identifier:
         # return a feed of entries
         # the value 'start' indicates the first entry, defaults to 1
@@ -432,6 +432,6 @@ def queue(request, identifier=None):
         feedText = '<?xml version="1.0"?>\n%s' % etree.tostring(
             atomFeed, pretty_print=True
         )
-        resp = HttpResponse(feedText, mimetype="application/atom+xml")
+        resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
     return resp
