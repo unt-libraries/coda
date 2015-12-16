@@ -1,17 +1,15 @@
-from django.conf.urls import url, patterns, include
-from .models import Validate
-from .views import AtomNextNewsFeed, AtomNextFeedNoServer
+from django.conf.urls import url
+from . import views
 
 
-urlpatterns = patterns(
-    '',
-    (r'^APP/validate/(?P<identifier>.+?)/$', 'coda_validate.views.app_validate'),
-    (r'^APP/validate/$', 'coda_validate.views.app_validate'),
-    (r'^validate/$', 'coda_validate.views.index'),
-    (r'^validate/stats/$', 'coda_validate.views.stats'),
-    (r'^validate/prioritize/$', 'coda_validate.views.prioritize'),
-    url(r'^validate/prioritize.json', 'coda_validate.views.prioritize_json', name='prioritize_json'),
-    (r'^validate/next/$', AtomNextFeedNoServer()),
-    (r'^validate/next/(?P<server>.+)/$', AtomNextNewsFeed()),
-    (r'^validate/(?P<identifier>.+?)/$', 'coda_validate.views.validate'),
-)
+urlpatterns = [
+    url(r'^APP/validate/(?P<identifier>.+?)/$', views.app_validate, name='app-detail'),
+    url(r'^APP/validate/$', views.app_validate, name='app-list'),
+    url(r'^validate/$', views.index, name='index'),
+    url(r'^validate/stats/$', views.stats, name='stats'),
+    url(r'^validate/prioritize/$', views.prioritize, name='prioritize'),
+    url(r'^validate/prioritize.json', views.prioritize_json, name='prioritize-json'),
+    url(r'^validate/next/$', views.AtomNextFeedNoServer(), name='feed-next'),
+    url(r'^validate/next/(?P<server>.+)/$', views.AtomNextNewsFeed(), name='feed-next-server'),
+    url(r'^validate/(?P<identifier>.+?)/$', views.validate, name='detail'),
+]
