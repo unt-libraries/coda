@@ -1,5 +1,8 @@
 from .base import *
 
+
+SECRET_KEY = 'local-secret'
+
 SITE_ID = 1
 
 # Database settings for the Dockerized dev environment.
