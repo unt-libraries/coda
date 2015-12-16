@@ -17,10 +17,18 @@ $ git clone https://github.com/unt-libraries/coda.git
 $ cd coda
 ```
 
+Warm up the MySQL database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
+```sh
+$ docker-compose up -d db
+```
+
 Start the app and run the migrations.
 ```sh
 # start the app
 $ docker-compose up -d
+
+# run the migrations
+$ docker-compose run --rm coda ./manage.py migrate
 ```
 
 The code is in a volume that is shared between your workstation and the coda container, which means any edits you make on your workstation will also be reflected in the Docker container. No need to rebuild the container to pick up changes in the code.
