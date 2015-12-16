@@ -1,35 +1,33 @@
-from django.conf.urls import *
-from .views import AtomSiteNewsFeed
+from django.conf.urls import url, patterns
+from . import views
 from .resourcesync import sitemaps
 
-urlpatterns = patterns(
-    'coda_mdstore.views',
-    # bag urls
-    (r'^bag/$', 'all_bags'),
-    (r'^APP/bag/$', 'app_bag'),
-    (r'^APP/bag/(?P<identifier>.+?)/$', 'app_bag'),
-    (r'^bag/(?P<identifier>.+?)/$', 'bagHTML'),
-    (r'^bag/(?P<identifier>ark:\/\d+\/.+?).urls$', 'bagURLList'),
-    (r'^bag/(?P<identifier>ark:\/\d+\/.+?)/(?P<filePath>.+)$', 'bagProxy'),
-    # stats urls
-    (r'^stats/$', 'stats'),
-    (r'^stats.json$', 'json_stats'),
-    # node urls
-    (r'^APP/node/$', 'app_node'),
-    (r'^APP/node/(?P<identifier>coda-.*\d+)/$', 'app_node'),
-    (r'^node/$', 'showNodeStatus'),
-    (r'^node/(?P<identifier>coda-.*\d+)/$', 'showNodeStatus'),
-    (r'^extidentifier/(?P<identifier>.+?)/$', 'externalIdentifierSearch'),
-    (r'^extidentifier/$', 'externalIdentifierSearch'),
-    (r'^extidentifier.json$', 'externalIdentifierSearchJSON'),
-    (r'^search/$', 'bagFullTextSearchHTML'),
-    # Here's some static pages
-    (r'^about/$', 'about'),
-    (r'^robots.txt$', 'shooRobot'),
-    (r'^feed/$', AtomSiteNewsFeed()),
-    (r'^$', 'index'),
-)
-urlpatterns += patterns('django.contrib.sitemaps.views',
+urlpatterns = [
+    url(r'^bag/$', views.all_bags, name='bag-list'),
+    url(r'^APP/bag/$', views.app_bag, name='app-bag-list'),
+    url(r'^APP/bag/(?P<identifier>.+?)/$', views.app_bag, name='app-bag-detail'),
+    url(r'^bag/(?P<identifier>.+?)/$', views.bagHTML, name='bag-detail'),
+    url(r'^bag/(?P<identifier>ark:\/\d+\/.+?).urls$', views.bagURLList, name='bag-urls'),
+    url(r'^bag/(?P<identifier>ark:\/\d+\/.+?)/(?P<filePath>.+)$', views.bagProxy, name='bag-proxy'),
+    url(r'^stats/$', views.stats, name='stats'),
+    url(r'^stats.json$', views.json_stats, name='stats-json'),
+    url(r'^APP/node/$', views.app_node, name='app-node-list'),
+    url(r'^APP/node/(?P<identifier>coda-.*\d+)/$', views.app_node, name='app-node-list'),
+    url(r'^node/$', views.showNodeStatus, name='node-list'),
+    url(r'^node/(?P<identifier>coda-.*\d+)/$', views.showNodeStatus, name='node-detail'),
+    url(r'^extidentifier/(?P<identifier>.+?)/$', views.externalIdentifierSearch, name='identifier-detail'),
+    url(r'^extidentifier/$', views.externalIdentifierSearch, name='identifier-search'),
+    url(r'^extidentifier.json$', views.externalIdentifierSearchJSON, name='identifier-search-json'),
+    url(r'^search/$', views.bagFullTextSearchHTML, name='search'),
+    url(r'^about/$', views.about, name='about'),
+    url(r'^robots.txt$', views.shooRobot, name='robots'),
+    url(r'^feed/$', views.AtomSiteNewsFeed(), name='feed'),
+    url(r'^$', views.index, name='index'),
+]
+
+
+urlpatterns += patterns(
+    'django.contrib.sitemaps.views',
     (
         r'^resourceindex\.xml$',
         'index',
@@ -47,7 +45,8 @@ urlpatterns += patterns('django.contrib.sitemaps.views',
         },
     ),
 )
-urlpatterns += patterns('coda_mdstore.resourcesync',
+urlpatterns += patterns(
+    'coda_mdstore.resourcesync',
     (
         r'^changelist\.xml$',
         'changelist',
