@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 # Absolute path to the settings module
 SETTINGS_ROOT = os.path.dirname(__file__)
 
-# Absolute path to the project 
+# Absolute path to the project
 PROJECT_ROOT = os.path.dirname(SETTINGS_ROOT)
 
 # Absolute path to the site directory
@@ -44,11 +44,11 @@ LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-MEDIA_ROOT = site_path('media')
+STATIC_URL = '/static/'
 
-MEDIA_URL = '/media/'
+STATICFILES_DIRS = [
+    os.path.join(SITE_ROOT, 'static')]
 
-ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 SECRET_KEY = get_secret("SECRET_KEY")
 
@@ -94,6 +94,7 @@ DJANGO_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.sitemaps',
     'django.contrib.admindocs',
