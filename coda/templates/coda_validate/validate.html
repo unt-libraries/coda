@@ -6,7 +6,7 @@ $(document).ready(function() {
     $('#priority').click(function(){
         $.ajax({
             type: "GET",
-            url: "{% url 'prioritize_json' %}",
+            url: "{% url 'prioritize-json' %}",
             data: {'identifier': $(this).attr('name')},
             dataType: "text",
             success: function(response) {

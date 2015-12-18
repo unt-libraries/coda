@@ -1,14 +1,12 @@
-from django.conf.urls import *
+from django.conf.urls import url
+from . import views
 
-urlpatterns = patterns('coda_replication.views',
-#    (r'^servicedocument/$', 'serviceDocument'),
-    (r'^APP/queue/(?P<identifier>ark:\/\d+\/.+?)/$', 'queue'),
-    (r'^APP/queue/$', 'queue'),
-    (r'^queue/$', 'queue_recent'),
-    (r'^queue/(?P<identifier>ark:\/\d+\/.+?)/$', 'queue_html'),
-    (r'^queue/search/$', 'queue_search'),
-    (r'^queue/search.json$', 'queue_search_JSON'),
-    (r'^queue/stats/$', 'queue_stats'),
-#    (r"^robots.txt$", 'shooRobot'),
-#    (r'^$','index'),
-)
+urlpatterns = [
+    url(r'^APP/queue/(?P<identifier>ark:\/\d+\/.+?)/$', views.queue, name='app-detail'),
+    url(r'^APP/queue/$', views.queue, name='app-list'),
+    url(r'^queue/$', views.queue_recent, name='index'),
+    url(r'^queue/(?P<identifier>ark:\/\d+\/.+?)/$', views.queue_html, name='detail'),
+    url(r'^queue/search/$', views.queue_search, name='search'),
+    url(r'^queue/search.json$', views.queue_search_JSON, name='search-json'),
+    url(r'^queue/stats/$', views.queue_stats, name='stats'),
+]
