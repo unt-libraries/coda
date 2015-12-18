@@ -34,6 +34,9 @@ $ docker-compose up -d
 
 # run the migrations
 $ docker-compose run --rm coda ./manage.py migrate
+
+# Optional: add a superuser in order to log in to the admin interface
+$ docker-compose run --rm web ./manage.py createsuperuser
 ```
 
 The code is in a volume that is shared between your workstation and the coda container, which means any edits you make on your workstation will also be reflected in the Docker container. No need to rebuild the container to pick up changes in the code.
