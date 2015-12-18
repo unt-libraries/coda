@@ -7,28 +7,31 @@ from django.core.exceptions import ImproperlyConfigured
 # Absolute path to the settings module
 SETTINGS_ROOT = os.path.dirname(__file__)
 
-# Absolute path to the project
-PROJECT_ROOT = os.path.dirname(SETTINGS_ROOT)
+# Absolute path to the config app
+CONFIG_ROOT = os.path.dirname(SETTINGS_ROOT)
 
 # Absolute path to the site directory
-SITE_ROOT = os.path.dirname(PROJECT_ROOT)
+SITE_ROOT = os.path.dirname(CONFIG_ROOT)
+
+# Absolute path to the root of the project
+PROJECT_ROOT = os.path.dirname(SITE_ROOT)
 
 # Compose a path from the project root
-project_path = lambda path: os.path.join(PROJECT_ROOT, path)
+project_path = lambda path: os.path.join(CONFIG_ROOT, path)
 
 # Compose path from the site root
 site_path = lambda path: os.path.join(SITE_ROOT, path)
 
 # Get our secrets from a file outside of version control.
 # This helps to keep the settings files generic.
-with open(os.path.join(SETTINGS_ROOT, "secrets.json")) as f:
+with open(os.path.join(PROJECT_ROOT, "settings.json")) as f:
     secrets = json.loads(f.read())
 
 def get_secret(setting, secrets=secrets):
     try:
         return secrets[setting]
     except KeyError:
-        error_msg = "The {0} secret is not set.".format(setting)
+        error_msg = "The {0} setting is not set.".format(setting)
         raise ImproperlyConfigured(error_msg)
 
 
