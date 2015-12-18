@@ -17,6 +17,11 @@ $ git clone https://github.com/unt-libraries/coda.git
 $ cd coda
 ```
 
+Create a `settings.json`.
+```sh
+$ cp settings.json.template settings.json
+```
+
 Warm up the MySQL database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
 ```sh
 $ docker-compose up -d db
