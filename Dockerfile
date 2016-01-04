@@ -7,7 +7,6 @@ RUN apt-get update -qq && apt-get install -y \
     mysql-client
 
 ADD requirements.txt /requirements.txt
-# ADD coda/coda_project/requirements/requirements.txt /
 RUN pip install --upgrade pip==1.5.6
 RUN pip install -r /requirements.txt
 

@@ -1,4 +1,4 @@
-# Base settings for coda_project
+# Base settings for coda
 import os
 import json
 from datetime import timedelta
@@ -77,7 +77,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',)
 
-ROOT_URLCONF = 'coda_project.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATE_DIRS = (
     site_path('templates'),)
