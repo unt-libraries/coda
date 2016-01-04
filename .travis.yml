@@ -12,7 +12,7 @@ env:
 before_script:
     - mysql -e 'create database coda_local;'
     - cp settings.json.template settings.json
-    - python manage.py migrate --settings=coda_project.settings.test
+    - python manage.py migrate --settings=config.settings.test
 script:
     - py.test --create-db --cov coda --cov-report html
 
