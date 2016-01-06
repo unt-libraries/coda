@@ -1,10 +1,7 @@
 from django.contrib.sites.models import Site
-from django.conf import settings
 from django.http import HttpResponse
 from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
 from codalib import anvl, APP_AUTHOR
-from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, \
-    queueEntryToXML, getValueByName, getNodeByName
 from pypairtree import pairtree
 from BeautifulSoup import BeautifulSoup as BSoup
 from lxml import etree
@@ -15,6 +12,10 @@ import urllib
 import urllib2
 import StringIO
 from datetime import datetime
+
+from codalib.bagatom import (wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP,
+                             getValueByName, getNodeByName)
+from . import exceptions
 
 pairtreeCandidateList = [
     "http://example.com/data3/coda-001/store/pairtree_root/",
@@ -451,19 +452,12 @@ def updateNode(request):
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     nodeXML = contentElement.xpath("*[local-name() = 'node']")[0]
     node_name = nodeXML.xpath("*[local-name() = 'name']")[0].text.strip()
-    try:
-        node = Node.objects.get(node_name=node_name)
-    except Exception, e:
-        resp = HttpResponse(
-            'This is not a node. Perhaps you want to POST instead of PUT?'
-        )
-        resp.status_code = 404
-        return resp
-    # lets make sure the url id we gave is the same as in the XML
-    if request.path.split('/')[-2] != node_name:
-        return HttpResponse(
-            'The node name supplied in the URL does not match the XML'
-        )
+
+    if node_name not in request.path:
+        raise exceptions.BadNodeName('The node name supplied in the URL does not match the XML')
+
+    node = Node.objects.get(node_name=node_name)
+
     # we need capacity and size
     node_capacity = nodeXML.xpath(
         "*[local-name() = 'capacity']"

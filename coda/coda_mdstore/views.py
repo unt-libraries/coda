@@ -38,6 +38,8 @@ from datetime import datetime
 from django.contrib.sites.models import Site
 from django.db import connection
 
+from . import exceptions
+
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
 utf8_decoder = codecs.getdecoder("utf-8")
 latin_decoder = codecs.getdecoder("latin_1")
@@ -1008,9 +1010,13 @@ def app_node(request, identifier=None):
         return resp
     # UPDATE ENTRY
     elif request.method == 'PUT' and identifier:
-        node = updateNode(request)
-        if type(node) == HttpResponse:
-            return node
+        try:
+            node = updateNode(request)
+        except Node.DoesNotExist as e:
+            return HttpResponseNotFound(str(e))
+        except exceptions.BadNodeName as e:
+            return HttpResponseBadRequest(str(e))
+
         node.save()
         atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)

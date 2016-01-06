@@ -6,10 +6,7 @@ from lxml import etree, objectify
 import mock
 import pytest
 
-from .. import factories
-from .. import models
-from .. import presentation
-from .. import views
+from .. import factories, models, presentation, views, exceptions
 from . import CODA_XML
 
 
@@ -258,17 +255,18 @@ class TestUpdateNode:
     Tests for coda_mdstore.presentation.updateNode.
     """
 
-    def test_node_not_found(self, rf):
+    def test_node_not_found_raises_exceptions(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
         node_xml = etree.tostring(node_tree)
 
-        request = rf.post('/', node_xml, 'application/xml')
-        response = presentation.updateNode(request)
-        assert response.status_code == 404
+        url = '/node/{0}/'.format(node.node_name)
+        request = rf.post(url, node_xml, 'application/xml')
 
-    @pytest.mark.xfail(reason='Response should not have status code 200.')
-    def test_node_found_and_path_does_not_include_node_name(self, rf):
+        with pytest.raises(models.Node.DoesNotExist):
+            presentation.updateNode(request)
+
+    def test_raises_bad_node_name_exception(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
         node_xml = etree.tostring(node_tree)
@@ -276,10 +274,8 @@ class TestUpdateNode:
         node.save()
 
         request = rf.post('/', node_xml, 'application/xml')
-        response = presentation.updateNode(request)
-
-        assert response.status_code != 200
-        assert 'URL does not match the XML' in response.content
+        with pytest.raises(exceptions.BadNodeName):
+            presentation.updateNode(request)
 
     def test_node_updated(self, rf):
         node = factories.NodeFactory.build()
