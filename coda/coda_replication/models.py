@@ -76,3 +76,6 @@ class QueueEntry(models.Model):
     def oxum(self):
         return u'%s.%s' % (self.bytes, self.files)
     oxum = property(oxum)
+
+    class Meta:
+        verbose_name_plural = "queue entries"
