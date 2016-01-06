@@ -137,17 +137,12 @@ def updateBag(request):
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     codaXML = contentElement.xpath("*[local-name() = 'codaXML']")[0]
     bag_name = codaXML.xpath("*[local-name() = 'name']")[0].text.strip()
-    try:
-        bag = Bag.objects.get(name=bag_name)
-    except Exception, e:
-        resp = HttpResponse('Cannot find bag_name')
-        return resp
-    # lets make sure the url id we gave is the same as in the XML
-    if request.path[9:-1] != bag_name:
-        resp = HttpResponse(
-            'The node name supplied in the URL does not match the XML'
-        )
-        return resp
+
+    if bag_name not in request.path:
+        raise exceptions.BadBagName('The bag name supplied in the URL does not match the XML')
+
+    bag = Bag.objects.get(name=bag_name)
+
     # delete old info objects
     old_bag_infos = Bag_Info.objects.filter(bag_name=bag)
     old_bag_infos.delete()

@@ -925,9 +925,13 @@ def app_bag(request, identifier=None):
         resp['Location'] = loc
         return resp
     elif request.method == 'PUT' and identifier:
-        bagObject = updateBag(request)
-        if type(bagObject) == HttpResponse:
-            return bagObject
+        try:
+            bagObject = updateBag(request)
+        except Bag.DoesNotExist as e:
+            return HttpResponseNotFound(str(e))
+        except exceptions.BadBagName as e:
+            return HttpResponseBadRequest(str(e))
+
         returnXML = objectsToXML(bagObject)
         returnEntry = bagatom.wrapAtom(
             returnXML, bagObject.name, bagObject.name

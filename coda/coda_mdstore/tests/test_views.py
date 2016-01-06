@@ -917,15 +917,35 @@ class TestAppBag:
         )
 
     @mock.patch('coda_mdstore.views.updateBag')
-    def test_put_request(self, mock_updateBag, rf):
+    def test_put_request(self, updateBag, rf):
         bag = FullBagFactory.create()
-        mock_updateBag.return_value = bag
+        updateBag.return_value = bag
 
         request = rf.put('/', HTTP_HOST='example.com')
         response = views.app_bag(request, bag.name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
+
+    @mock.patch('coda_mdstore.views.updateBag')
+    def test_put_request_returns_not_found(self, updateBag, rf):
+        bag = FullBagFactory.create()
+        updateBag.side_effect = models.Bag.DoesNotExist
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 404
+
+    @mock.patch('coda_mdstore.views.updateBag')
+    def test_put_request_returns_bad_request(self, updateBag, rf):
+        bag = FullBagFactory.create()
+        updateBag.side_effect = exceptions.BadBagName
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 400
 
     def test_delete_request_is_successful(self, rf):
         bag = FullBagFactory.create()

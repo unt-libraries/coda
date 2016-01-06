@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from django.core.paginator import Paginator, Page
-from django.http import HttpResponse
 from lxml import etree, objectify
 import mock
 import pytest
@@ -591,27 +590,25 @@ class TestUpdateBag:
         assert updated_bag.bag_info_set.count() == 2
         assert updated_bag.external_identifier_set.count() == 0
 
-    def test_request_path_does_not_match_name(self, bag_xml, rf):
+    def test_raises_bad_bag_name_exception(self, bag_xml, rf):
         factories.FullBagFactory.create(name='ark:/67531/coda2')
         xml_str = etree.tostring(bag_xml)
 
         request = rf.post('/', xml_str, 'application/xml')
-        resp = presentation.updateBag(request)
 
-        assert isinstance(resp, HttpResponse)
-        assert resp.status_code == 200
-        assert 'name supplied in the URL does not match' in resp.content
+        with pytest.raises(exceptions.BadBagName):
+            presentation.updateBag(request)
 
-    def test_bag_object_not_found(self, bag_xml, rf):
+    def test_bag_object_not_found_raises_exception(self, bag_xml, rf):
         factories.FullBagFactory.create()
         xml_str = etree.tostring(bag_xml)
 
-        request = rf.post('/', xml_str, 'application/xml')
-        resp = presentation.updateBag(request)
+        # FIXME: Duplication between the test and the test fixture
+        uri = '/APP/bag/ark:/67531/coda2/'
+        request = rf.post(uri, xml_str, 'application/xml')
 
-        assert isinstance(resp, HttpResponse)
-        assert resp.status_code == 200
-        assert resp.content == 'Cannot find bag_name'
+        with pytest.raises(models.Bag.DoesNotExist):
+            presentation.updateBag(request)
 
     def test_existing_bag_info_objects_are_update(self, bag_xml, rf):
         """

@@ -5,3 +5,7 @@ class MDStoreException(Exception):
 
 class BadNodeName(MDStoreException):
     pass
+
+
+class BadBagName(MDStoreException):
+    pass
