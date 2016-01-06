@@ -668,42 +668,26 @@ def externalIdentifierSearch(request, identifier=None):
 
 
 def externalIdentifierSearchJSON(request):
-    """
-    Return a json based on an ext identifier search
-    """
-
-    ark = request.REQUEST.get('ark')
+    """External_Identifier search formatted in JSON."""
+    ark = request.GET.get('ark', '')
     if 'ark:/67531' not in ark:
         ark = 'ark:/67531/%s' % ark
-    # get data for json dictionary
-    externalIdBagInfoList = External_Identifier.objects.select_related(
-        'belong_to_bag'
-    ).filter(
-        value=ark
-    )
-    jsonList = []
-    for ext_id in externalIdBagInfoList.distinct():
-        ext_id_dict = {
-            'name': ext_id.belong_to_bag.name,
-            'oxum': '%s.%s' % (
-                ext_id.belong_to_bag.size, ext_id.belong_to_bag.files
-            ),
-            'bagging_date': ext_id.belong_to_bag.bagging_date.strftime(
-                '%Y-%m-%d'
-            ),
+
+    identifiers = (External_Identifier.objects
+                                      .select_related('belong_to_bag')
+                                      .filter(value=ark)
+                                      .distinct())
+    data = [
+        {
+            'name': exid.belong_to_bag.name,
+            'oxum': '{0}.{1}'.format(exid.belong_to_bag.size, exid.belong_to_bag.files),
+            'bagging_date': exid.belong_to_bag.bagging_date.strftime('%Y-%m-%d')
         }
-        if ext_id_dict not in jsonList:
-            jsonList.append(ext_id_dict)
-    response = HttpResponse(content_type='application/json')
-    # construct the dictionary with values from aggregates
-    # dump to response
-    json.dump(
-        jsonList,
-        fp=response,
-        indent=4,
-        sort_keys=True,
-    )
-    return response
+        for exid in identifiers
+    ]
+
+    data = json.dumps(data, indent=4, sort_keys=True)
+    return HttpResponse(data, content_type='application/json')
 
 
 def bagFullTextSearchHTML(request):
