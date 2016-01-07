@@ -680,7 +680,7 @@ def externalIdentifierSearchJSON(request):
     data = [
         {
             'name': exid.belong_to_bag.name,
-            'oxum': '{0}.{1}'.format(exid.belong_to_bag.size, exid.belong_to_bag.files),
+            'oxum': exid.belong_to_bag.oxum,
             'bagging_date': exid.belong_to_bag.bagging_date.strftime('%Y-%m-%d')
         }
         for exid in identifiers
