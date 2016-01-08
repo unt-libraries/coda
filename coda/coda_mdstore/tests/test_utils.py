@@ -1,15 +1,11 @@
 from datetime import datetime
 
 from django.core.paginator import Paginator, Page
-from django.http import HttpResponse
 from lxml import etree, objectify
 import mock
 import pytest
 
-from .. import factories
-from .. import models
-from .. import presentation
-from .. import views
+from .. import factories, models, presentation, views, exceptions
 from . import CODA_XML
 
 
@@ -258,17 +254,18 @@ class TestUpdateNode:
     Tests for coda_mdstore.presentation.updateNode.
     """
 
-    def test_node_not_found(self, rf):
+    def test_node_not_found_raises_exceptions(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
         node_xml = etree.tostring(node_tree)
 
-        request = rf.post('/', node_xml, 'application/xml')
-        response = presentation.updateNode(request)
-        assert response.status_code == 404
+        url = '/node/{0}/'.format(node.node_name)
+        request = rf.post(url, node_xml, 'application/xml')
 
-    @pytest.mark.xfail(reason='Response should not have status code 200.')
-    def test_node_found_and_path_does_not_include_node_name(self, rf):
+        with pytest.raises(models.Node.DoesNotExist):
+            presentation.updateNode(request)
+
+    def test_raises_bad_node_name_exception(self, rf):
         node = factories.NodeFactory.build()
         node_tree = presentation.nodeEntry(node)
         node_xml = etree.tostring(node_tree)
@@ -276,10 +273,8 @@ class TestUpdateNode:
         node.save()
 
         request = rf.post('/', node_xml, 'application/xml')
-        response = presentation.updateNode(request)
-
-        assert response.status_code != 200
-        assert 'URL does not match the XML' in response.content
+        with pytest.raises(exceptions.BadNodeName):
+            presentation.updateNode(request)
 
     def test_node_updated(self, rf):
         node = factories.NodeFactory.build()
@@ -595,27 +590,25 @@ class TestUpdateBag:
         assert updated_bag.bag_info_set.count() == 2
         assert updated_bag.external_identifier_set.count() == 0
 
-    def test_request_path_does_not_match_name(self, bag_xml, rf):
+    def test_raises_bad_bag_name_exception(self, bag_xml, rf):
         factories.FullBagFactory.create(name='ark:/67531/coda2')
         xml_str = etree.tostring(bag_xml)
 
         request = rf.post('/', xml_str, 'application/xml')
-        resp = presentation.updateBag(request)
 
-        assert isinstance(resp, HttpResponse)
-        assert resp.status_code == 200
-        assert 'name supplied in the URL does not match' in resp.content
+        with pytest.raises(exceptions.BadBagName):
+            presentation.updateBag(request)
 
-    def test_bag_object_not_found(self, bag_xml, rf):
+    def test_bag_object_not_found_raises_exception(self, bag_xml, rf):
         factories.FullBagFactory.create()
         xml_str = etree.tostring(bag_xml)
 
-        request = rf.post('/', xml_str, 'application/xml')
-        resp = presentation.updateBag(request)
+        # FIXME: Duplication between the test and the test fixture
+        uri = '/APP/bag/ark:/67531/coda2/'
+        request = rf.post(uri, xml_str, 'application/xml')
 
-        assert isinstance(resp, HttpResponse)
-        assert resp.status_code == 200
-        assert resp.content == 'Cannot find bag_name'
+        with pytest.raises(models.Bag.DoesNotExist):
+            presentation.updateBag(request)
 
     def test_existing_bag_info_objects_are_update(self, bag_xml, rf):
         """

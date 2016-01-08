@@ -9,8 +9,7 @@ import pytest
 from django.core.urlresolvers import reverse
 from django import http
 
-from .. import views
-from .. import models
+from .. import views, models, exceptions
 from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 from . import CODA_XML
 
@@ -800,15 +799,35 @@ class TestAppNode:
         )
 
     @mock.patch('coda_mdstore.views.updateNode')
-    def test_put_request(self, mock_updateNode, rf):
+    def test_put_request(self, updateNode, rf):
         node = NodeFactory.create()
-        mock_updateNode.return_value = node
+        updateNode.return_value = node
 
         request = rf.put('/', HTTP_HOST='example.com')
         response = views.app_node(request, node.node_name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
+
+    @mock.patch('coda_mdstore.views.updateNode')
+    def test_put_request_returns_not_found(self, updateNode, rf):
+        node = NodeFactory.create()
+        updateNode.side_effect = models.Node.DoesNotExist
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_node(request, node.node_name)
+
+        assert response.status_code == 404
+
+    @mock.patch('coda_mdstore.views.updateNode')
+    def test_put_request_returns_bad_request(self, updateNode, rf):
+        node = NodeFactory.create()
+        updateNode.side_effect = exceptions.BadNodeName
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_node(request, node.node_name)
+
+        assert response.status_code == 400
 
     def test_delete_request(self, rf):
         node = NodeFactory.create()
@@ -898,15 +917,35 @@ class TestAppBag:
         )
 
     @mock.patch('coda_mdstore.views.updateBag')
-    def test_put_request(self, mock_updateBag, rf):
+    def test_put_request(self, updateBag, rf):
         bag = FullBagFactory.create()
-        mock_updateBag.return_value = bag
+        updateBag.return_value = bag
 
         request = rf.put('/', HTTP_HOST='example.com')
         response = views.app_bag(request, bag.name)
 
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
+
+    @mock.patch('coda_mdstore.views.updateBag')
+    def test_put_request_returns_not_found(self, updateBag, rf):
+        bag = FullBagFactory.create()
+        updateBag.side_effect = models.Bag.DoesNotExist
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 404
+
+    @mock.patch('coda_mdstore.views.updateBag')
+    def test_put_request_returns_bad_request(self, updateBag, rf):
+        bag = FullBagFactory.create()
+        updateBag.side_effect = exceptions.BadBagName
+
+        request = rf.put('/', HTTP_HOST='example.com')
+        response = views.app_bag(request, bag.name)
+
+        assert response.status_code == 400
 
     def test_delete_request_is_successful(self, rf):
         bag = FullBagFactory.create()
