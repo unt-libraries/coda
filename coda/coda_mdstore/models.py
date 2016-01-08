@@ -4,29 +4,32 @@ from django.db import models
 class Bag(models.Model):
     name = models.CharField(
         max_length=255,
-        help_text="Name of Bag",
-        primary_key=True
-    )
+        primary_key=True,
+        help_text='Name of Bag')
+
     files = models.IntegerField(
-        help_text="Number of files in Bag"
-    )
+        help_text='Number of files in Bag')
+
     size = models.BigIntegerField(
-        help_text="Size of Bag's Payload (in bytes)"
-    )
+        help_text="Size of Bag's Payload (in bytes)")
+
     bagit_version = models.CharField(
         max_length=10,
-        help_text="BagIt version number"
-    )
+        help_text='BagIt version number')
+
     last_verified_date = models.DateField(
-        help_text="Date of last Bag Verification"
-    )
+        help_text='Date of last Bag Verification')
+
     last_verified_status = models.CharField(
         max_length=25,
-        help_text="Status of last bag Verification"
-    )
+        help_text='Status of last bag Verification')
+
     bagging_date = models.DateField(
-        help_text="Date of Bag Creation"
-    )
+        help_text='Date of Bag Creation')
+
+    @property
+    def oxum(self):
+        return '{size}.{files}'.format(**vars(self))
 
     def __unicode__(self):
         return self.name

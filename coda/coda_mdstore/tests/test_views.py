@@ -513,8 +513,6 @@ class TestExternalIdentiferSearchJSON:
     Tests for coda_mdstore.views.externalIdentifierSearchJSON.
     """
 
-    @pytest.mark.xfail(reason='Exception raised without the `ark` query'
-                              ' parameter.')
     def test_without_ark_parameter(self, rf):
         request = rf.get('/')
         response = views.externalIdentifierSearchJSON(request)
@@ -542,23 +540,6 @@ class TestExternalIdentiferSearchJSON:
         assert 'bagging_date' in content[0]
         assert content[0]['name'] == bag.name
         assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
-
-    def test_with_multiple_identifiers(self, rf):
-        bag = FullBagFactory.create()
-        ext_id = ExternalIdentifierFactory.create(
-            belong_to_bag=bag,
-            value='ark:/67531/metadc000001'
-        )
-        ExternalIdentifierFactory.create(
-            belong_to_bag=bag,
-            value='ark:/67531/metadc000001'
-        )
-
-        request = rf.get('/', {'ark': ext_id.value})
-        response = views.externalIdentifierSearchJSON(request)
-        content = json.loads(response.content)
-
-        assert len(content) == 1
 
 
 class TestBagURLListView:
