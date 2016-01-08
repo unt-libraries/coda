@@ -10,6 +10,7 @@ pytest-django==2.9.1
 mock
 factory_boy
 codalib==1.0.0
+sqlparse==0.1.18
 
 git+git://github.com/unt-libraries/django-premis-event-service@1.0.0
 git+git://github.com/unt-libraries/pypairtree
