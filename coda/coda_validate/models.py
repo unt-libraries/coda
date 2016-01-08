@@ -15,7 +15,7 @@ class Validate(models.Model):
         max_length=25, choices=VERIFIED_STATUS_CHOICES, default="Unverified"
     )
     priority_change_date = models.DateTimeField(default=datetime(2000,01,01))
-    priority = models.IntegerField(max_length=1, default=0)
+    priority = models.IntegerField(default=0)
     server = models.CharField(max_length=255)
 
     def __unicode__(self):
