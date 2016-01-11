@@ -56,7 +56,7 @@ class TestBagFullTextSearch:
     Tests for coda_mdstore.views.bagFullTextSearch.
     """
 
-    @pytest.mark.xfail(reason='FULLTEXT index is required.')
+    @pytest.mark.django_db
     def test_returns_paginator_object(self):
         factories.FullBagFactory.create_batch(15)
         paginator = views.bagFullTextSearch('test search')

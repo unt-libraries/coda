@@ -647,7 +647,6 @@ class TestBagFullTextSearchHTMLView:
     Tests for coda_mdstore.views.bagFullTextSearchHTML.
     """
 
-    @pytest.mark.xfail(reason='FULLTEXT index is required.')
     def test_response_with_search_query(self, client):
         client.get(
             reverse('coda_mdstore.views.bagFullTextSearchHTML'),
