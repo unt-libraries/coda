@@ -29,30 +29,40 @@ $ docker-compose up -d db
 
 Start the app and run the migrations.
 ```sh
-# start the app
-$ docker-compose up -d
-
 # run the migrations
-$ docker-compose run --rm coda ./manage.py migrate
+$ docker-compose run --rm manage migrate
+
+# start the app
+$ docker-compose up -d app
 
 # Optional: add a superuser in order to log in to the admin interface
-$ docker-compose run --rm web ./manage.py createsuperuser
+$ docker-compose run --rm manage createsuperuser
 ```
 
 The code is in a volume that is shared between your workstation and the coda container, which means any edits you make on your workstation will also be reflected in the Docker container. No need to rebuild the container to pick up changes in the code.
 
-However, if the requirements files change, it is important that you rebuild the coda image for those packages to be installed. This is something that could happen when switching between feature branches, or when pulling updates from the remote.
+However, if the requirements files change, it is important that you rebuild the images for those packages to be installed. This is something that could happen when switching between feature branches, or when pulling updates from the remote.
 
 ```sh
 # stop the app
 $ docker-compose stop
 
-# remove the coda container
-$ docker-compose rm coda
+# remove the app container
+$ docker-compose rm app test manage
 
-# rebuild the coda container
-$ docker-compose build coda
+# rebuild the app, manage, and test containers
+$ docker-compose build 
 
 # start the app
-$ docker-compose up -d
+$ docker-compose up -d app
+```
+
+## Running the tests
+
+```sh
+# On the initial run or if the schema changes
+$ docker-compose run --rm test --create-db
+
+# Subsequent runs
+$ docker-compose run --rm test 
 ```
