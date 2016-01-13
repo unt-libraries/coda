@@ -3,14 +3,31 @@ db:
     environment:
         - MYSQL_ROOT_PASSWORD=root
         - MYSQL_DATABASE=coda_local
-coda: 
+
+base:        
     build: .
-    command: python manage.py runserver 0.0.0.0:80
     volumes:
         - .:/app/
+
+app:
+    extends:
+        service: base
+    command: python manage.py runserver 0.0.0.0:80
     ports:
         - "8000:80"
     links:
         - db
 
+test:
+    extends:
+        service: base
+    entrypoint: py.test
+    links:
+        - db
 
+manage:
+    extends:
+        service: base
+    entrypoint: /app/manage.py
+    links:
+        - db
