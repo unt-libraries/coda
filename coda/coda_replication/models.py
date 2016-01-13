@@ -44,7 +44,8 @@ class QueueEntry(models.Model):
     # )
     # like this, so we can access for statistics.
     bytes = models.BigIntegerField(
-        help_text="The total size of the queued entry",
+        db_index=True,
+        help_text="The total size of the queued entry"
     )
     files = models.IntegerField(
         help_text="The number of files that the queued entry contains",
