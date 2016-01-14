@@ -28,7 +28,6 @@ from codalib.bagatom import wrapAtom, makeObjectFeed
 
 
 XML_HEADER = "<?xml version=\"1.0\"?>\n%s"
-DOMAIN = Site.objects.get_current().domain
 
 
 class CorrectMimeTypeFeed(Atom1Feed):
@@ -283,6 +282,7 @@ def prioritize_json(request):
     prioritize json view
     """
 
+    DOMAIN = Site.objects.get_current().domain
     identifier = request.GET.get('identifier')
     json_dict = {}
     json_dict['status'] = 'failure'
