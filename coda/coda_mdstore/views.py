@@ -31,8 +31,8 @@ from coda_validate.models import Validate
 from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
 from presentation import getFileList, getFileHandle, bagSearch, \
-    makeBagAtomFeed, createBag, updateBag, objectsToXML, getERC, \
-    getERCSupport, updateNode, nodeEntry, createNode
+    makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
+    nodeEntry, createNode
 from dateutil import rrule
 from datetime import datetime
 from django.contrib.sites.models import Site
@@ -832,28 +832,6 @@ def app_bag(request, identifier=None):
                 "There is no bag with id \'%s\'." % identifier
             )
         bagInfoObjectList = Bag_Info.objects.filter(bag_name=identifier)
-        try:
-            url_test = len(re.compile("\w*/\?{2}$").search(
-                request._req.unparsed_uri, 1
-            ).group())
-        except:
-            pass
-        else:
-            if url_test > 2:
-                return HttpResponse(getERC(request, bagObject) + "\n" +\
-                    getERCSupport(request), mimetype='text/plain')
-        # Test url for ERC structure (?)
-        try:
-            url_test = len(re.compile("\w*/\?{1}$").search(
-                request._req.unparsed_uri, 1
-            ).group())
-        except:
-            pass
-        else:
-            if url_test > 1:
-                return HttpResponse(
-                    getERC(request, bagObject), mimetype='text/plain'
-                )
         returnXML = objectsToXML(bagObject)
         returnEntry = bagatom.wrapAtom(
             xml=returnXML,
