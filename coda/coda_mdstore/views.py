@@ -38,6 +38,8 @@ from datetime import datetime
 from django.contrib.sites.models import Site
 from django.db import connection
 
+from django.core.urlresolvers import reverse
+
 from . import exceptions
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
@@ -826,25 +828,20 @@ def app_bag(request, identifier=None):
 
     if request.method == 'GET' and identifier:
         try:
-            bagObject = Bag.objects.get(name=identifier)
+            bag = Bag.objects.get(name=identifier)
         except Bag.DoesNotExist:
-            return HttpResponseNotFound(
-                "There is no bag with id \'%s\'." % identifier
-            )
-        bagInfoObjectList = Bag_Info.objects.filter(bag_name=identifier)
-        returnXML = objectsToXML(bagObject)
-        returnEntry = bagatom.wrapAtom(
-            xml=returnXML,
-            id='http://%s/APP/bag/%s/' % (
-                request.META['HTTP_HOST'], identifier
-            ),
-            title=identifier,
-            author=APP_AUTHOR.get('name', None),
-            author_uri=APP_AUTHOR.get('uri', None)
-        )
-        entryText = XML_HEADER % etree.tostring(returnEntry, pretty_print=True)
-        resp = HttpResponse(entryText, content_type="application/atom+xml")
-        return resp
+            return HttpResponseNotFound("There is no bag with id '{0}'.".format(identifier))
+
+        object_xml = objectsToXML(bag)
+        url = request.build_absolute_uri(reverse('app-bag-detail', args=[identifier]))
+
+        entries = bagatom.wrapAtom(xml=object_xml, id=url, title=identifier,
+                                   author=APP_AUTHOR.get('name', None),
+                                   author_uri=APP_AUTHOR.get('uri', None))
+
+        entry_text = XML_HEADER % etree.tostring(entries, pretty_print=True)
+        return HttpResponse(entry_text, content_type="application/atom+xml")
+
     elif request.method == 'GET' and not identifier:
         requestString = request.path
         bags = Paginator(Bag.objects.order_by('-bagging_date'), 20)
