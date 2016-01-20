@@ -1,11 +1,6 @@
-import pytest
-
 from django.core.urlresolvers import resolve
 
 from .. import views
-
-
-pytestmark = pytest.mark.urls('coda_replication.urls')
 
 
 def test_queue():

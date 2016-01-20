@@ -7,10 +7,7 @@ from django.conf import settings
 from .. import views, factories
 
 
-pytestmark = [
-    pytest.mark.urls('coda_validate.urls'),
-    pytest.mark.django_db()
-]
+pytestmark = pytest.mark.django_db()
 
 
 class TestAtomNextNewsFeed:

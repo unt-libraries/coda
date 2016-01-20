@@ -31,12 +31,14 @@ from coda_validate.models import Validate
 from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
 from presentation import getFileList, getFileHandle, bagSearch, \
-    makeBagAtomFeed, createBag, updateBag, objectsToXML, getERC, \
-    getERCSupport, updateNode, nodeEntry, createNode
+    makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
+    nodeEntry, createNode
 from dateutil import rrule
 from datetime import datetime
 from django.contrib.sites.models import Site
 from django.db import connection
+
+from django.core.urlresolvers import reverse
 
 from . import exceptions
 
@@ -826,47 +828,20 @@ def app_bag(request, identifier=None):
 
     if request.method == 'GET' and identifier:
         try:
-            bagObject = Bag.objects.get(name=identifier)
+            bag = Bag.objects.get(name=identifier)
         except Bag.DoesNotExist:
-            return HttpResponseNotFound(
-                "There is no bag with id \'%s\'." % identifier
-            )
-        bagInfoObjectList = Bag_Info.objects.filter(bag_name=identifier)
-        try:
-            url_test = len(re.compile("\w*/\?{2}$").search(
-                request._req.unparsed_uri, 1
-            ).group())
-        except:
-            pass
-        else:
-            if url_test > 2:
-                return HttpResponse(getERC(request, bagObject) + "\n" +\
-                    getERCSupport(request), mimetype='text/plain')
-        # Test url for ERC structure (?)
-        try:
-            url_test = len(re.compile("\w*/\?{1}$").search(
-                request._req.unparsed_uri, 1
-            ).group())
-        except:
-            pass
-        else:
-            if url_test > 1:
-                return HttpResponse(
-                    getERC(request, bagObject), mimetype='text/plain'
-                )
-        returnXML = objectsToXML(bagObject)
-        returnEntry = bagatom.wrapAtom(
-            xml=returnXML,
-            id='http://%s/APP/bag/%s/' % (
-                request.META['HTTP_HOST'], identifier
-            ),
-            title=identifier,
-            author=APP_AUTHOR.get('name', None),
-            author_uri=APP_AUTHOR.get('uri', None)
-        )
-        entryText = XML_HEADER % etree.tostring(returnEntry, pretty_print=True)
-        resp = HttpResponse(entryText, content_type="application/atom+xml")
-        return resp
+            return HttpResponseNotFound("There is no bag with id '{0}'.".format(identifier))
+
+        object_xml = objectsToXML(bag)
+        url = request.build_absolute_uri(reverse('app-bag-detail', args=[identifier]))
+
+        entries = bagatom.wrapAtom(xml=object_xml, id=url, title=identifier,
+                                   author=APP_AUTHOR.get('name', None),
+                                   author_uri=APP_AUTHOR.get('uri', None))
+
+        entry_text = XML_HEADER % etree.tostring(entries, pretty_print=True)
+        return HttpResponse(entry_text, content_type="application/atom+xml")
+
     elif request.method == 'GET' and not identifier:
         requestString = request.path
         bags = Paginator(Bag.objects.order_by('-bagging_date'), 20)

@@ -5,10 +5,7 @@ from django.contrib.sitemaps import Sitemap
 from .. import factories
 from .. import resourcesync
 
-pytestmark = [
-    pytest.mark.urls('coda_mdstore.urls'),
-    pytest.mark.django_db()
-]
+pytestmark = pytest.mark.django_db()
 
 
 class FakeSitemap(Sitemap):

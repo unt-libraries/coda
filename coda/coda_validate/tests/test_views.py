@@ -10,10 +10,7 @@ from .. import factories, views
 from ..models import Validate
 
 
-pytestmark = [
-    pytest.mark.urls('coda_validate.urls'),
-    pytest.mark.django_db
-]
+pytestmark = pytest.mark.django_db
 
 
 class TestIndex:
