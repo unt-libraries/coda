@@ -283,7 +283,7 @@ def objectsToXML(bagObject):
     bagitVersion.text = bagObject.bagit_version
     try:
         lastVerified = etree.SubElement(codaXML, BAG + "lastVerified")
-        lastVerified.text = str(bagObject.last_verified)
+        lastVerified.text = str(bagObject.last_verified_date)
         lastStatus = etree.SubElement(codaXML, BAG + "lastStatus")
         lastStatus.text = bagObject.last_verified_status
     except:
