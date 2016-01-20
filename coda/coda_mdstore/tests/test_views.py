@@ -14,12 +14,7 @@ from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 from . import CODA_XML
 
 
-# Add this mark so that we are not loading all the URLs for
-# the entire project when using reverse.
-pytestmark = [
-    pytest.mark.urls('coda_mdstore.urls'),
-    pytest.mark.django_db()
-]
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture(autouse=True)
@@ -854,7 +849,7 @@ class TestAppBag:
         response = views.app_bag(request, 'ark:/000002/id1')
         assert response.status_code == 404
 
-    def test_get_request_with_identifier_without_erc(self, rf):
+    def test_get_request_with_identifier(self, rf):
         bag = FullBagFactory.create()
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_bag(request, bag.name)

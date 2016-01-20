@@ -5,9 +5,6 @@ from django.core.urlresolvers import resolve
 from .. import views
 
 
-pytestmark = pytest.mark.urls('coda_validate.urls')
-
-
 def test_app_validate():
     assert resolve('/APP/validate/ark:/00001/codajom1/').func == views.app_validate
 

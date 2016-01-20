@@ -13,10 +13,7 @@ from ..models import STATUS_CHOICES, QueueEntry
 from . import QUEUE_ENTRY
 
 
-pytestmark = [
-    pytest.mark.urls('coda_replication.urls'),
-    pytest.mark.django_db()
-]
+pytestmark = pytest.mark.django_db()
 
 
 class TestQueueStats:
