@@ -386,52 +386,39 @@ def queue(request, identifier=None):
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
     elif request.method == 'GET' and not identifier:
-        # return a feed of entries
-        # the value 'start' indicates the first entry, defaults to 1
-        if "page" in request.REQUEST:
-            page = int(request.REQUEST["page"])
-        else:
-            page = 1
-        # see if we have a sort value.  If not, sort by queue_position
-        if "status" in request.REQUEST:
-            # to further filter our queueEntries based on a given status
-            statusCode = request.REQUEST["status"]
-            if statusCode:
-                queueEntries = QueueEntry.objects.filter(status=statusCode)
-        if request.GET.get('sort'):
-            if request.GET['sort'] == 'size':
-                queueEntries = queueEntries.order_by('bytes')
-        else:
-            queueEntries = QueueEntry.objects.order_by("queue_position")
-        # see if we have a sort value.  If not, sort by queue_position
-        if "count" in request.REQUEST:
-            # to further filter our queueEntries based on a given status
-            count = int(request.REQUEST["count"])
-        else:
-            count = 10
-        queueCount = int(queueEntries.count())
-        if page > queueCount:
-            resultSet = queueEntries.none()
-        elif (page - 1) + count > queueCount:
-            resultSet = queueEntries[page - 1:]
-        else:
-            resultSet = queueEntries[page - 1:count]
-        paginator = Paginator(queueEntries, count)
+        return queue_list(request)
+    return resp
+
+
+def queue_list(request):
+    """Get a list of Queues."""
+    status = request.GET.get('status')
+    sort = request.GET.get('sort')
+    page = int(request.GET.get('page', 1))
+    count = int(request.GET.get('count', 10))
+
+    queues = QueueEntry.objects.all().order_by('queue_position')
+    queues = queues.filter(status=status) if status else queues
+    queues = queues.order_by('bytes') if sort == 'size' else queues
+
+    paginator = Paginator(queues, count)
+
+    try:
         atomFeed = makeObjectFeed(
             paginator=paginator,
             objectToXMLFunction=queueEntryToXML,
             feedId=request.path[1:],
-            title="Queue Entry Feed",
+            title='Queue Entry Feed',
             webRoot='http://%s' % request.META['HTTP_HOST'],
-            idAttr="ark",
-            nameAttr="ark",
+            idAttr='ark',
+            nameAttr='ark',
             request=request,
             page=page,
-            author=APP_AUTHOR
-        )
-        feedText = '<?xml version="1.0"?>\n%s' % etree.tostring(
-            atomFeed, pretty_print=True
-        )
-        resp = HttpResponse(feedText, content_type="application/atom+xml")
-        resp.status_code = 200
-    return resp
+            author=APP_AUTHOR)
+    except EmptyPage:
+        return HttpResponseBadRequest('Page does not exist.')
+
+    feedText = etree.tostring(atomFeed, pretty_print=True)
+    feedText = '<?xml version="1.0"?>\n{0}'.format(feedText)
+
+    return HttpResponse(feedText, content_type='application/atom+xml')
