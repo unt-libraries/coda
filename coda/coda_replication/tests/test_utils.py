@@ -79,14 +79,12 @@ def test_xmlToQueueEntry_sets_status_attribute(queue_entry_xml):
     assert str(xml_obj.status) == entry_obj.status
 
 
-@pytest.mark.xfail(reason='xmlToQueueEntry incorrectly set the position attribute '
-                          'instead of the queue_position attribute.')
 def test_xmlToQueueEntry_sets_queue_position_attribute(queue_entry_xml):
     tree = etree.fromstring(queue_entry_xml)
     entry_obj = presentation.xmlToQueueEntry(tree)
 
     xml_obj = objectify.fromstring(queue_entry_xml)
-    assert str(xml_obj.position) == entry_obj.queue_position
+    assert xml_obj.position == entry_obj.queue_position
 
 
 @pytest.fixture
@@ -151,8 +149,6 @@ def test_updateQueueEntry_finds_correct_object(queue_xml):
     assert entry.ark == queue_entry_xml.ark
 
 
-@pytest.mark.xfail(reason='The `queue_position` attribute is not updated because '
-                          'xmlToQueueEntry does not correctly set the attribute.')
 @pytest.mark.django_db
 def test_updateQueueEntry_updates_queue_position_attribute(queue_xml):
     xml_obj = objectify.fromstring(queue_xml)
@@ -160,7 +156,7 @@ def test_updateQueueEntry_updates_queue_position_attribute(queue_xml):
     factories.QueueEntryFactory.create(ark=queue_entry_xml.ark)
 
     entry = presentation.updateQueueEntry(queue_xml)
-    assert entry.queue_position == str(queue_entry_xml.position)
+    assert entry.queue_position == queue_entry_xml.position
 
 
 @pytest.mark.django_db
