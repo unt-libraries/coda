@@ -1,21 +1,19 @@
-from django.contrib.sites.models import Site
-from django.http import HttpResponse
-from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
-from codalib import anvl, APP_AUTHOR
-from pypairtree import pairtree
-from BeautifulSoup import BeautifulSoup as BSoup
-from lxml import etree
-import re
 import os
-import urlparse
+import re
 import urllib
 import urllib2
-import StringIO
-from datetime import datetime
+import urlparse
 
-from codalib.bagatom import (wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP,
-                             getValueByName, getNodeByName)
+from BeautifulSoup import BeautifulSoup as BSoup
+from codalib import APP_AUTHOR
+from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP
+from datetime import datetime
+from lxml import etree
+from pypairtree import pairtree
+
 from . import exceptions
+from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
+
 
 pairtreeCandidateList = [
     "http://example.com/data3/coda-001/store/pairtree_root/",
