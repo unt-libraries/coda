@@ -299,34 +299,6 @@ def objectsToXML(bagObject):
     return codaXML
 
 
-def getValueByName(node, name):
-    """
-    A helper function to pull the values out of those annoying namespace
-    prefixed tags
-    """
-
-    try:
-        value = node.xpath("*[local-name() = '%s']" % name)[0].text.strip()
-    #prolly should narrow this down
-    except:
-        return None
-    return value
-
-
-def getNodeByName(node, name):
-    """
-    A helper function to pull the values out of those annoying namespace
-    prefixed tags
-    """
-
-    try:
-        childNode = node.xpath("*[local-name() = '%s']" % name)[0]
-    #prolly should narrow this down
-    except:
-        return None
-    return childNode
-
-
 def nodeEntry(node, webRoot=None):
     """
     Form an atom xml for a given node object.
