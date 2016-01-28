@@ -33,32 +33,35 @@ def queue_object_to_xml(queue_entry, webRoot=None):
     return atomXML
 
 
-def xmlToQueueEntry(queueXML):
-    """
-    Given some XML, create a Queue entry with it
-    """
+def xmlToQueueEntry(queue_xml):
+    """Convert XML to a QueueEntry object."""
 
-    queueEntryNode = queueXML
-    entry = QueueEntry()
-    #contentNode = getNodeByName(qX, "content")
-    #queueEntryNode = getNodeByName(contentNode, "queueEntry")
-    entry.ark = getValueByName(queueEntryNode, "ark")
-    entry.bytes = getValueByName(queueEntryNode, "oxum").split('.')[0]
-    entry.files = getValueByName(queueEntryNode, "oxum").split('.')[1]
-    entry.url_list = getValueByName(queueEntryNode, "urlListLink")
-    status = getValueByName(queueEntryNode, "status")
-    if status:
-        entry.status = status
-    harvest_start = getValueByName(queueEntryNode, "start")
-    if harvest_start:
-        entry.harvest_start = datetime.strptime(harvest_start, TIME_FORMAT)
-    harvest_end = getValueByName(queueEntryNode, "end")
-    if harvest_end:
-        entry.harvest_end = datetime.strptime(harvest_end, TIME_FORMAT)
-    position = getValueByName(queueEntryNode, "position")
-    if position:
-        entry.position = int(getValueByName(queueEntryNode, "position"))
-    return entry
+    ark = getValueByName(queue_xml, "ark")
+    bytes_, files = getValueByName(queue_xml, "oxum").split('.')
+    url_list = getValueByName(queue_xml, "urlListLink")
+    status = getValueByName(queue_xml, "status")
+
+    # The next three assignment statement groupings protect against converting
+    # a possible None or empty string return value to another type,
+    # which could result in an exception.
+    queue_position = getValueByName(queue_xml, "position")
+    queue_position = int(queue_position) if queue_position else None
+
+    harvest_start = getValueByName(queue_xml, "start")
+    harvest_start = datetime.strptime(harvest_start, TIME_FORMAT) if harvest_start else None
+
+    harvest_end = getValueByName(queue_xml, "end")
+    harvest_end = datetime.strptime(harvest_end, TIME_FORMAT) if harvest_end else None
+
+    return QueueEntry(
+        ark=ark,
+        bytes=bytes_,
+        files=files,
+        url_list=url_list,
+        status=status,
+        queue_position=queue_position,
+        harvest_start=harvest_start,
+        harvest_end=harvest_end)
 
 
 def addQueueEntry(rawXML):
