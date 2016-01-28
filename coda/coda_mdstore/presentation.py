@@ -1,21 +1,19 @@
-from django.contrib.sites.models import Site
-from django.http import HttpResponse
-from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
-from codalib import anvl, APP_AUTHOR
-from pypairtree import pairtree
-from BeautifulSoup import BeautifulSoup as BSoup
-from lxml import etree
-import re
 import os
-import urlparse
+import re
 import urllib
 import urllib2
-import StringIO
-from datetime import datetime
+import urlparse
 
-from codalib.bagatom import (wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP,
-                             getValueByName, getNodeByName)
+from BeautifulSoup import BeautifulSoup as BSoup
+from codalib import APP_AUTHOR
+from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP
+from datetime import datetime
+from lxml import etree
+from pypairtree import pairtree
+
 from . import exceptions
+from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
+
 
 pairtreeCandidateList = [
     "http://example.com/data3/coda-001/store/pairtree_root/",
@@ -297,34 +295,6 @@ def objectsToXML(bagObject):
         bodyTag = etree.SubElement(item, BAG + "body")
         bodyTag.text = bagInfoObject.field_body
     return codaXML
-
-
-def getValueByName(node, name):
-    """
-    A helper function to pull the values out of those annoying namespace
-    prefixed tags
-    """
-
-    try:
-        value = node.xpath("*[local-name() = '%s']" % name)[0].text.strip()
-    #prolly should narrow this down
-    except:
-        return None
-    return value
-
-
-def getNodeByName(node, name):
-    """
-    A helper function to pull the values out of those annoying namespace
-    prefixed tags
-    """
-
-    try:
-        childNode = node.xpath("*[local-name() = '%s']" % name)[0]
-    #prolly should narrow this down
-    except:
-        return None
-    return childNode
 
 
 def nodeEntry(node, webRoot=None):
