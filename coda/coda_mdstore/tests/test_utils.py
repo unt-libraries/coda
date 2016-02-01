@@ -64,32 +64,29 @@ class TestBagFullTextSearch:
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(reason='FULLTEXT index is required.')
 class TestBagSearch:
     """
     Tests for coda_mdstore.presentation.bagSearch.
     """
 
     def test_searches_bag_info_objects(self):
-        factories.FullBagFactory.create_batch(10)
-        bag_list = presentation.bagSearch('3.14')
-        assert len(bag_list) == 10
+        bags = factories.FullBagFactory.create_batch(10)
+        bag = bags[0]
+
+        search_term = bag.bag_info_set.first().field_body
+        results = presentation.bagSearch(search_term)
+        assert len(results) == 10
 
     def test_search_bags_only(self):
-        # The BagFactory will not create any assocated Bag_Info objects.
-        factories.BagFactory.create_batch(10)
-        bag_list = presentation.bagSearch('id')
-        assert len(bag_list) == 10
+        bags = factories.BagFactory.create_batch(10)
+        bag = bags[0]
+
+        results = presentation.bagSearch(bag.name)
+        assert len(results) == 10
 
     def test_search_returns_no_bags(self):
         bag_list = presentation.bagSearch('')
         assert len(bag_list) == 0
-
-    def test_search_finds_bag_by_name():
-        assert 0
-
-    def test_search_finds_bag_by_bag_info():
-        assert 0
 
 
 @pytest.mark.django_db
