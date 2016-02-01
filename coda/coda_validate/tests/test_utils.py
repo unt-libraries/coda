@@ -40,9 +40,9 @@ def validate_feed():
         <content type="application/xml">
             <v:validate xmlns:v="http://digital2.library.unt.edu/coda/validatexml/">
                 <v:identifier>ark:/00001/codajom1</v:identifier>
-                <v:last_verified>2015-01-01 12:11:43</v:last_verified>
+                <v:last_verified>2015-01-01T12:11:43</v:last_verified>
                 <v:last_verified_status>Passed</v:last_verified_status>
-                <v:priority_change_date>2000-01-01 00:00:00</v:priority_change_date>
+                <v:priority_change_date>2000-01-01T00:00:00</v:priority_change_date>
                 <v:priority>1</v:priority>
                 <v:server>arch01.example.com</v:server>
             </v:validate>
@@ -57,9 +57,9 @@ def test_xmlToValidateObject(validate_feed):
     validate_xml = xml_obj.content[VALIDATE_XML]
 
     assert validate_xml.identifier == validate.identifier
-    assert validate_xml.last_verified == str(validate.last_verified)
+    assert validate_xml.last_verified == validate.last_verified.isoformat()
     assert validate_xml.last_verified_status == str(validate.last_verified_status)
-    assert validate_xml.priority_change_date == str(validate.priority_change_date)
+    assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority.text == validate.priority
     assert validate_xml.server == validate.server
 
@@ -147,8 +147,8 @@ def test_validateToXML():
     validate_xml = objectify.fromstring(xml_str)
 
     assert validate_xml.identifier == validate.identifier
-    assert validate_xml.last_verified == str(validate.last_verified)
+    assert validate_xml.last_verified == validate.last_verified.isoformat()
     assert validate_xml.last_verified_status == str(validate.last_verified_status)
-    assert validate_xml.priority_change_date == str(validate.priority_change_date)
+    assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority == validate.priority
     assert validate_xml.server == validate.server

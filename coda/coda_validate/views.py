@@ -1,30 +1,21 @@
-import datetime
+import json
 import random
-try:
-    # the json module was included in the stdlib in python 2.6
-    # http://docs.python.org/library/json.html
-    import json
-except ImportError:
-    # simplejson 2.0.9 is available for python 2.4+
-    # http://pypi.python.org/pypi/simplejson/2.0.9
-    # simplejson 1.7.3 is available for python 2.3+
-    # http://pypi.python.org/pypi/simplejson/1.7.3
-    import simplejson as json
+import datetime
 
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.core.paginator import Paginator
+from codalib import APP_AUTHOR
+from codalib.bagatom import wrapAtom, makeObjectFeed
+from dateutil import parser
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotFound
-from django.contrib.syndication.views import Feed
-from django.utils.feedgenerator import Atom1Feed
-from django.shortcuts import get_object_or_404
 from django.contrib.sites.models import Site
+from django.contrib.syndication.views import Feed
+from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template import RequestContext
+from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
 
 from .models import Validate
-from codalib import APP_AUTHOR
-from codalib.bagatom import wrapAtom, makeObjectFeed
 
 
 XML_HEADER = "<?xml version=\"1.0\"?>\n%s"
@@ -331,23 +322,28 @@ def validateToXML(validateObject):
     validate_namespace = "http://digital2.library.unt.edu/coda/validatexml/"
     val = "{%s}" % validate_namespace
     validate_nsmap = {"validate": validate_namespace}
+
     # build xml from object and return
     XML = etree.Element("{0}validate".format(val), nsmap=validate_nsmap)
+
     label = etree.SubElement(XML, "{0}identifier".format(val))
     label.text = validateObject.identifier
-    last_verified = etree.SubElement(XML,
-        "{0}last_verified".format(val))
-    last_verified.text = str(validateObject.last_verified)
-    last_verified_status = etree.SubElement(XML,
-        "{0}last_verified_status".format(val))
+
+    last_verified = etree.SubElement(XML, "{0}last_verified".format(val))
+    last_verified.text = validateObject.last_verified.isoformat()
+
+    last_verified_status = etree.SubElement(XML, "{0}last_verified_status".format(val))
     last_verified_status.text = validateObject.last_verified_status
-    priority_change_date = etree.SubElement(XML,
-        "{0}priority_change_date".format(val))
-    priority_change_date.text = str(validateObject.priority_change_date)
+
+    priority_change_date = etree.SubElement(XML, "{0}priority_change_date".format(val))
+    priority_change_date.text = validateObject.priority_change_date.isoformat()
+
     priority = etree.SubElement(XML, "{0}priority".format(val))
     priority.text = str(validateObject.priority)
+
     server = etree.SubElement(XML, "{0}server".format(val))
     server.text = validateObject.server
+
     return XML
 
 
@@ -357,22 +353,30 @@ def xmlToValidateObject(validateXML):
     """
 
     entryRoot = etree.XML(validateXML)
-    if entryRoot == None:
+    if entryRoot is None:
         raise Exception("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     validateXML = contentElement.xpath("*[local-name() = 'validate']")[0]
     identifier = validateXML.xpath(
         "*[local-name() = 'identifier']")[0].text.strip()
+
     last_verified = validateXML.xpath(
-        "*[local-name() = 'last_verified']")[0].text.strip()
+            "*[local-name() = 'last_verified']")[0].text.strip()
+    last_verified = parser.parse(last_verified)
+
     last_verified_status = validateXML.xpath(
         "*[local-name() = 'last_verified_status']")[0].text.strip()
+
     priority_change_date = validateXML.xpath(
         "*[local-name() = 'priority_change_date']")[0].text.strip()
+    priority_change_date = parser.parse(priority_change_date)
+
     priority = validateXML.xpath(
         "*[local-name() = 'priority']")[0].text.strip()
+
     server = validateXML.xpath("*[local-name() = 'server']")[0].text.strip()
+
     # make the object and return
     validate = Validate(
         identifier=identifier,
