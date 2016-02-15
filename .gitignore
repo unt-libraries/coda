@@ -2,7 +2,7 @@
 *.swp
 *.swo
 
-settings.json
+secrets.json
 .coverage
 htmlcov/*
 

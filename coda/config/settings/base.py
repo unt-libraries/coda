@@ -24,7 +24,7 @@ site_path = lambda path: os.path.join(SITE_ROOT, path)
 
 # Get our secrets from a file outside of version control.
 # This helps to keep the settings files generic.
-with open(os.path.join(PROJECT_ROOT, "settings.json")) as f:
+with open(os.path.join(PROJECT_ROOT, "secrets.json")) as f:
     secrets = json.loads(f.read())
 
 def get_secret(setting, secrets=secrets):
