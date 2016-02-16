@@ -1,6 +1,8 @@
 from .base import *  # noqa
 
 
+SITE_ID = get_secret('SITE_ID')
+
 SECRET_KEY = get_secret('SECRET_KEY')
 
 DEBUG = False
