@@ -13,7 +13,7 @@ before_install:
     - pip install codecov pytest-cov
 before_script:
     - mysql -e 'create database coda_local;'
-    - cp settings.json.template settings.json
+    - cp secrets.json.template secrets.json
 script:
     - py.test --create-db --cov coda --cov-report html
 after_success:
