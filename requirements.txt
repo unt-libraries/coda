@@ -13,5 +13,5 @@ codalib==1.0.0
 sqlparse==0.1.18
 django-debug-toolbar==1.4
 
-git+https://github.com/unt-libraries/django-premis-event-service@1.0.0
+git+https://github.com/unt-libraries/django-premis-event-service@1.1.0
 git+https://github.com/unt-libraries/pypairtree
