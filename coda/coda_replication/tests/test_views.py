@@ -382,61 +382,6 @@ class TestQueue:
         response = views.queue(request, 'dne')
         assert response.status_code == 404
 
-    def test_get_without_identifier(self, rf):
-        factories.QueueEntryFactory.create_batch(30)
-        request = rf.get('/', HTTP_HOST='example.com')
-        response = views.queue(request)
-
-        xml = objectify.fromstring(response.content)
-        assert len(xml.entry) == 10
-        assert response.status_code == 200
-        assert response['Content-Type'] == 'application/atom+xml'
-
-    def test_get_without_identifier_with_no_entries(self, rf):
-        request = rf.get('/', HTTP_HOST='example.com')
-        response = views.queue(request)
-
-        xml = objectify.fromstring(response.content)
-        assert hasattr(xml, 'entry') is False
-        assert response.status_code == 200
-        assert response['Content-Type'] == 'application/atom+xml'
-
-    def test_get_without_identifier_with_status_and_count_parameters(self, rf):
-        factories.QueueEntryFactory.create_batch(30, status=2)
-        request = rf.get('/', {'status': 2, 'count': 20}, HTTP_HOST='example.com')
-        response = views.queue(request)
-        assert response.status_code == 200
-
-        xml_obj = objectify.fromstring(response.content)
-        assert len(xml_obj.entry) == 20
-
-    @pytest.mark.xfail(reason="0 entries should be returned.")
-    def test_get_without_identifier_correctly_filters_by_status(self, rf):
-        factories.QueueEntryFactory.create_batch(30, status=1)
-        request = rf.get('/', {'status': 2}, HTTP_HOST='example.com')
-        response = views.queue(request)
-        assert response.status_code == 200
-
-        xml_obj = objectify.fromstring(response.content)
-        for entry in xml_obj.entry:
-            queue = entry.content[QUEUE_ENTRY]
-            assert queue.status == 2
-
-    @pytest.mark.xfail(reason='This enables a path of execution where the '
-                              'queueEntries variable is accessed before it is set.')
-    def test_get_without_identifier_with_falsy_sort_parameter(self, rf):
-        factories.QueueEntryFactory.create_batch(30)
-        request = rf.get('/', {'sort': 0}, HTTP_HOST='example.com')
-        response = views.queue(request)
-        assert response.status_code == 200
-
-    @pytest.mark.xfail(reason='Empty Page exception thrown from the makeObjectFeed function.')
-    def test_get_without_identifier_with_invalid_page(self, rf):
-        factories.QueueEntryFactory.create_batch(30)
-        request = rf.get('/', {'page': 400}, HTTP_HOST='example.com')
-        response = views.queue(request)
-        assert response.status_code == 200
-
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
         request = rf.delete('/')
@@ -493,4 +438,65 @@ class TestQueue:
     def test_post_with_identifier(self, queue_xml, rf):
         request = rf.post('/', queue_xml, 'application/xml')
         response = views.queue(request, 'ark:/000001/dne')
+        assert response.status_code == 400
+
+    def test_get_without_identifier(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue(request)
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+
+class TestQueueList:
+
+    def test_with_entries(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue_list(request)
+
+        xml = objectify.fromstring(response.content)
+        assert len(xml.entry) == 10
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+    def test_with_no_entries(self, rf):
+        request = rf.get('/', HTTP_HOST='example.com')
+        response = views.queue_list(request)
+
+        xml = objectify.fromstring(response.content)
+        assert hasattr(xml, 'entry') is False
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'application/atom+xml'
+
+    def test_with_status_and_count_parameters(self, rf):
+        factories.QueueEntryFactory.create_batch(30, status=2)
+        request = rf.get('/', {'status': 2, 'count': 20}, HTTP_HOST='example.com')
+        response = views.queue_list(request)
+        assert response.status_code == 200
+
+        xml_obj = objectify.fromstring(response.content)
+        assert len(xml_obj.entry) == 20
+
+    def test_filters_by_status(self, rf):
+        factories.QueueEntryFactory.create_batch(30, status=1)
+        factories.QueueEntryFactory.create_batch(10, status=2)
+        request = rf.get('/', {'status': 2}, HTTP_HOST='example.com')
+        response = views.queue_list(request)
+        assert response.status_code == 200
+
+        xml_obj = objectify.fromstring(response.content)
+        for entry in xml_obj.entry:
+            queue = entry.content[QUEUE_ENTRY]
+            assert queue.status == 2
+
+    def test_with_falsy_sort_parameter(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', {'sort': 0}, HTTP_HOST='example.com')
+        response = views.queue_list(request)
+        assert response.status_code == 200
+
+    def test_with_invalid_page_number(self, rf):
+        factories.QueueEntryFactory.create_batch(30)
+        request = rf.get('/', {'page': 400}, HTTP_HOST='example.com')
+        response = views.queue_list(request)
         assert response.status_code == 400
