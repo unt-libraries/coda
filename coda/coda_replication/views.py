@@ -409,7 +409,7 @@ def queue_list(request):
             objectToXMLFunction=queueEntryToXML,
             feedId=request.path[1:],
             title='Queue Entry Feed',
-            webRoot='http://%s' % request.META['HTTP_HOST'],
+            webRoot='http://{0}'.format(request.META['HTTP_HOST']),
             idAttr='ark',
             nameAttr='ark',
             request=request,
