@@ -519,3 +519,8 @@ def app_validate(request, identifier=None):
         resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
     return resp
+
+
+def check_json(request):
+    counts = Validate.objects.last_verified_status_counts()
+    return HttpResponse(json.dumps(counts), content_type='application/json')
