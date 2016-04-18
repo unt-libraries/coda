@@ -6,23 +6,29 @@ class ValidateManager(models.Manager):
 
     def last_verified_status_counts(self):
         results = self._verified_counts()
-        results = self._format_count_results(results)
-        return self._set_default_status_counts(results)
-
-    def _set_default_status_counts(self, counts):
-        for _, value in Validate.VERIFIED_STATUS_CHOICES:
-            counts.setdefault(value, 0)
-        return counts
-
-    def _format_count_results(self, results):
-        return {
-            c['last_verified_status']: c['count']
-            for c in results
-        }
+        return VerifiedCountsResultFormatter(results).format()
 
     def _verified_counts(self):
         return (self.values('last_verified_status')
                     .annotate(count=models.Count('last_verified_status')))
+
+
+class VerifiedCountsResultFormatter(object):
+
+    def __init__(self, results):
+        self.results = results
+
+    def format(self):
+        results = self._format_count_results(self.results)
+        return self._set_default_counts(results)
+
+    def _set_default_counts(self, results):
+        for _, value in Validate.VERIFIED_STATUS_CHOICES:
+            results.setdefault(value, 0)
+        return results
+
+    def _format_count_results(self, results):
+        return {c['last_verified_status']: c['count'] for c in results}
 
 
 class Validate(models.Model):

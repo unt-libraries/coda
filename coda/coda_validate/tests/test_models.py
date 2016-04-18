@@ -1,7 +1,10 @@
 import pytest
 
 from .. import factories
-from ..models import ValidateManager, Validate
+from ..models import (
+        ValidateManager,
+        Validate,
+        VerifiedCountsResultFormatter)
 
 
 class TestValidate:
@@ -35,3 +38,24 @@ class TestValidateManager(object):
         assert counts['Passed'] == 0
         assert counts['Failed'] == 0
         assert counts['Unverified'] == 0
+
+
+class TestLastVerifiedStatusFormatter(object):
+
+    def test_format(self):
+        results = [{'last_verified_status': 'Failed', 'count': 3}]
+        formatter = VerifiedCountsResultFormatter(results)
+        formatted_results = formatter.format()
+
+        expected = {'Failed': 3, 'Passed': 0, 'Unverified': 0}
+
+        assert formatted_results == expected
+
+    def test_format_with_empty_result_set(self):
+        results = []
+        formatter = VerifiedCountsResultFormatter(results)
+        formatted_results = formatter.format()
+
+        expected = {'Failed': 0, 'Passed': 0, 'Unverified': 0}
+
+        assert formatted_results == expected
