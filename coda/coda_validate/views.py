@@ -10,7 +10,7 @@ from django.contrib.sites.models import Site
 from django.contrib.syndication.views import Feed
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, render
 from django.template import RequestContext
 from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
@@ -111,21 +111,14 @@ class AtomNextFeedNoServer(AtomNextNewsFeed):
 
 
 def index(request):
-    """
-    Just a standard base page
-    """
+    context = {
+        'site_title': Site.objects.get_current().name,
+        'recently_prioritized': Validate.objects.filter(priority__gt=0).order_by('-priority_change_date')[:20],
+        'recently_verified': Validate.objects.all().order_by('-last_verified')[:20],
+        'verified_counts': Validate.objects.last_verified_status_counts()
+    }
 
-    return render_to_response(
-        'coda_validate/index.html',
-        {
-            'site_title': Site.objects.get_current().name,
-            'recently_prioritized': Validate.objects.filter(
-                priority__gt=0).order_by('-priority_change_date')[:20],
-            'recently_verified': Validate.objects.all().order_by(
-               '-last_verified')[:20],
-        },
-        context_instance=RequestContext(request)
-    )
+    return render(request, 'coda_validate/index.html', context)
 
 
 def last_day_of_month(year, month):

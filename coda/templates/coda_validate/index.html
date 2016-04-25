@@ -6,6 +6,13 @@
 <div class="well pagination-centered">
     <h1>Coda <i class="icon-ok"></i>alidate</h1>
 </div>
+
+<ul class="well pull-right inline">
+    <li>Passed <span class="badge badge-success">{{ verified_counts.Passed }}</span></li>
+    <li>Failed <span class="badge badge-important">{{ verified_counts.Failed }}</span></li>
+    <li>Unverified <span class="badge badge-warning">{{ verified_counts.Unverified }}</span></li>
+</ul>
+
 {% if recently_prioritized.count > 0 %}
 <div>
     <table class='table table-hover table-striped table-bordered'>
