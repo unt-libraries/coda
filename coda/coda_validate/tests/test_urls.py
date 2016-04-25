@@ -1,5 +1,3 @@
-import pytest
-
 from django.core.urlresolvers import resolve
 
 from .. import views
@@ -15,6 +13,10 @@ def test_app_validate_collection():
 
 def test_index():
     assert resolve('/validate/').func == views.index
+
+
+def test_check_json():
+    assert resolve('/validate/check.json').func == views.check_json
 
 
 def test_stats():

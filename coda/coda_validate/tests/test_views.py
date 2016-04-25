@@ -369,3 +369,30 @@ class TestAppValidate:
         request = rf.put('/', HTTP_HOST='example.com')
         response = views.app_validate(request)
         assert response.status_code == 400
+
+
+class TestCheckJson(object):
+
+    def test_with_no_statuses(self, rf):
+        request = rf.get('/')
+        response = views.check_json(request)
+        assert response.status_code == 200
+
+        counts = json.loads(response.content)
+        assert counts['Passed'] == 0
+        assert counts['Failed'] == 0
+        assert counts['Unverified'] == 0
+
+    def test_with_statuses(self, rf):
+        factories.ValidateFactory.create_batch(3, last_verified_status="Passed")
+        factories.ValidateFactory.create_batch(3, last_verified_status="Failed")
+        factories.ValidateFactory.create_batch(3, last_verified_status="Unverified")
+
+        request = rf.get('/')
+        response = views.check_json(request)
+        assert response.status_code == 200
+
+        counts = json.loads(response.content)
+        assert counts['Passed'] == 3
+        assert counts['Failed'] == 3
+        assert counts['Unverified'] == 3
