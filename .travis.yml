@@ -9,12 +9,8 @@ env:
         - DB_MYSQL_USER=travis
         - DB_PASSWORD=''
         - PYTHONPATH=`pwd`/coda
-before_install:
-    - pip install codecov pytest-cov
 before_script:
     - mysql -e 'create database coda_local;'
     - cp secrets.json.template secrets.json
 script:
-    - py.test --create-db --cov coda --cov-report html
-after_success:
-    - codecov
+    - py.test --create-db
