@@ -15,6 +15,8 @@ from django.template import RequestContext
 from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
 
+from django.views.generic import ListView
+
 from .models import Validate
 
 
@@ -517,3 +519,19 @@ def app_validate(request, identifier=None):
 def check_json(request):
     counts = Validate.objects.last_verified_status_counts()
     return HttpResponse(json.dumps(counts), content_type='application/json')
+
+
+class ValidateListView(ListView):
+    model = Validate
+    template_name = 'coda_validate/list.html'
+    context_object_name = 'validation_list'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super(ValidateListView, self).get_queryset()
+
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(last_verified_status=status)
+
+        return queryset

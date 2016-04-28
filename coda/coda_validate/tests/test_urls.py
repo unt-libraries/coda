@@ -15,6 +15,10 @@ def test_index():
     assert resolve('/validate/').func == views.index
 
 
+def test_ValidateListView():
+    assert resolve('/validate/list/').func.__name__ == views.ValidateListView.as_view().__name__
+
+
 def test_check_json():
     assert resolve('/validate/check.json').func == views.check_json
 

@@ -396,3 +396,38 @@ class TestCheckJson(object):
         assert counts['Passed'] == 3
         assert counts['Failed'] == 3
         assert counts['Unverified'] == 3
+
+
+class TestListByStatus(object):
+
+    def test_status_ok(self, rf):
+        factories.ValidateFactory.create_batch(50)
+        view = views.ValidateListView.as_view()
+        request = rf.get('/')
+        response = view(request)
+
+        assert response.status_code == 200
+
+    def test_status_ok_without_validate_objects(self, rf):
+        view = views.ValidateListView.as_view()
+        request = rf.get('/')
+        response = view(request)
+        assert response.status_code == 200
+
+    def test_get_queryset_without_filter(self, rf):
+        factories.ValidateFactory.create_batch(10, last_verified_status="Passed")
+        factories.ValidateFactory.create_batch(1, last_verified_status="Unverified")
+
+        view = views.ValidateListView(request=rf.get('/'))
+        queryset = view.get_queryset()
+
+        assert len(queryset) == 11
+
+    def test_get_queryset_with_filter(self, rf):
+        factories.ValidateFactory.create_batch(10, last_verified_status="Passed")
+        factories.ValidateFactory.create_batch(1, last_verified_status="Unverified")
+
+        view = views.ValidateListView(request=rf.get('/?status=Unverified'))
+        queryset = view.get_queryset()
+
+        assert len(queryset) == 1
