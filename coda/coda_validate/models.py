@@ -10,7 +10,8 @@ class ValidateManager(models.Manager):
 
     def _verified_counts(self):
         return (self.values('last_verified_status')
-                    .annotate(count=models.Count('last_verified_status')))
+                    .annotate(count=models.Count('last_verified_status'))
+                    .order_by())
 
 
 class VerifiedCountsResultFormatter(object):
