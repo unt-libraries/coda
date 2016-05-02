@@ -1,0 +1,89 @@
+{% extends 'mdstore/base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+    <div class="btn-group pull-right">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Filter <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+            <li><a tabindex="-1" href="?status=Passed">Passed</a></li>
+            <li><a tabindex="-1" href="?status=Failed">Failed</a></li>
+            <li><a tabindex="-1" href="?status=Unverified">Unverified</a></li>
+            <li class="divider"></li>
+            <li><a tabindex="-1" href="?">All</a></li>
+        </ul>
+    </div>
+
+    <h2>Validated Items</h2>
+
+    {% if validation_list.exists %}
+        <div>
+            <table class='table table-hover table-striped table-bordered'>
+                <thead>
+                    <tr class="info">
+                        <th><i class="icon-info"></i> Identifier</th>
+                        <th><i class="icon-calendar"></i> Added</th>
+                        <th><i class="icon-calendar"></i> Last Verified</th>
+                        <th><i class="icon-calendar"></i> Date Prioritized</th>
+                        <th><i class="icon-info-sign"></i> Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in validation_list %}
+                        <tr>
+                            <td><a href='/validate/{{ v.identifier }}/'>{{ v.identifier }}</a></td>
+                            <td>{{ v.added }}</td>
+                            <td>{{ v.last_verified }}</td>
+                            <td>{{ v.priority_change_date }}</td>
+                            <td>
+                            <span title="{{ v.last_verified_status }}" class="disabled btn btn-block btn-mini btn-{% if v.last_verified_status == "Failed" %}danger{% else %}{% if v.last_verified_status == "Unverified"%}warning{% else %}success{% endif %}{% endif %}">{{ v.last_verified_status }}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center">
+            <div class="pagination">
+                <ul>
+                    {% if page_obj.number != 1 %}
+                        <li><a href="?status={{ request.GET.status }}&amp;page=1">first</a></li>
+                    {% else %}
+                        <li class="disabled"><span>first</span></li>
+                    {% endif %}
+
+                    {% if page_obj.has_previous %}
+                        <li><a href="?status={{ request.GET.status }}&amp;page={{ page_obj.previous_page_number }}">prev</a></li>
+                    {% else %}
+                        <li class="disabled"><span>prev</span></li>
+                    {% endif %}
+
+                    {% for page in page_obj.paginator.page_range %}
+                        {% if page_obj.number == page %}
+                            <li class="active"><span>{{ page }}</span></li>
+
+                        {% elif page > page_obj.number|add:"-6" and page < page_obj.number|add:"6"  %}
+                            <li>
+                                <a href="?status={{ request.GET.status }}&amp;page={{ page }}">
+                                    {{ page }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li><a href="?status={{ request.GET.status }}&amp;page={{ page_obj.next_page_number }}">next</a></li>
+                    {% else %}
+                        <li class="disabled"><span>next</span></li>
+                    {% endif %}
+
+                    {% if page_obj.number != page_obj.paginator.num_pages %}
+                        <li><a href="?status={{ request.GET.status }}&amp;page={{ page_obj.paginator.num_pages }}">last</a></li>
+                    {% else %}
+                        <li class="disabled"><span>last</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

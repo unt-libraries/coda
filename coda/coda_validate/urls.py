@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^APP/validate/(?P<identifier>.+?)/$', views.app_validate, name='app-detail'),
     url(r'^APP/validate/$', views.app_validate, name='app-list'),
     url(r'^validate/$', views.index, name='index'),
+    url(r'^validate/list/$', views.ValidateListView.as_view(), name='validate_list'),
     url(r'^validate/check.json', views.check_json, name='check_json'),
     url(r'^validate/stats/$', views.stats, name='stats'),
     url(r'^validate/prioritize/$', views.prioritize, name='prioritize'),
