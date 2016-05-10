@@ -935,7 +935,8 @@ def app_node(request, identifier=None):
         return resp
     # FEED
     elif request.method == 'GET' and not identifier:
-        nodes = Paginator(Node.objects.all(), Node.objects.count())
+        nodes = Node.objects.all()
+        paginator = Paginator(nodes, len(nodes))
         requestString = request.path
         if len(request.GET):
             requestString = "%s?%s" % (request.path, request.GET.urlencode())
@@ -943,7 +944,7 @@ def app_node(request, identifier=None):
         else:
             page = 1
         atomFeed = bagatom.makeObjectFeed(
-            paginator=nodes,
+            paginator=paginator,
             objectToXMLFunction=bagatom.nodeToXML,
             feedId=request.path[1:],
             title="Node Feed",
