@@ -19,7 +19,7 @@ $ cd coda
 
 Create a `settings.json`.
 ```sh
-$ cp settings.json.template settings.json
+$ cp secrets.json.template secrets.json
 ```
 
 Warm up the MySQL database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
