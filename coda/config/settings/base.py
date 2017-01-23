@@ -69,11 +69,24 @@ DATABASES = {
     }
 }
 
-
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+             site_path('templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'coda_mdstore.context.site_info',
+                'django.contrib.auth.context_processors.auth',
+                'django.core.context_processors.i18n',
+                'django.core.context_processors.media',
+                'django.core.context_processors.request',
+            ],
+        },
+    },
+]
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -82,16 +95,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',)
 
 ROOT_URLCONF = 'config.urls'
-
-TEMPLATE_DIRS = (
-    site_path('templates'),)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'coda_mdstore.context.site_info',
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',)
 
 # Let the view know if we are in "proxy mode" or not.
 # this uses the coda instance as a reverse proxy for the archival storage nodes
