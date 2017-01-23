@@ -173,7 +173,7 @@ class TestNodeEntry:
         assert xml_obj.content.node.size == node.node_size
         assert xml_obj.content.node.path == node.node_path
         assert xml_obj.content.node.url == node.node_url
-        assert xml_obj.content.node.last_checked == str(node.last_checked)
+        assert xml_obj.content.node.last_checked == node.last_checked.isoformat()
         assert xml_obj.content.node.countchildren() == 6
 
     def test_xml_id(self):
