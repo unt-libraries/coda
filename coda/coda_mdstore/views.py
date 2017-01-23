@@ -151,7 +151,6 @@ def index(request):
     return render_to_response(
         'mdstore/index.html',
         {
-            'site_title': Site.objects.get_current().name,
             'totals': totals,
             'queue_total': queue_total,
             'validation_total': validation_total,
@@ -171,7 +170,6 @@ def about(request):
     return render_to_response(
         'mdstore/about.html',
         {
-            'site_title': Site.objects.get_current().name,
             'maintenance_message': MAINTENANCE_MSG,
         },
         context_instance=RequestContext(request)
@@ -193,7 +191,6 @@ def all_bags(request):
     return render_to_response(
         'mdstore/bag_search_results.html',
         {
-            'site_title': Site.objects.get_current().name,
             'entries': paginated_entries,
             'maintenance_message': MAINTENANCE_MSG,
         },
@@ -393,7 +390,6 @@ def stats(request):
         return render_to_response(
             'mdstore/stats.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'totals': totals,
                 'monthly_bags': monthly_bags,
                 'monthly_files': monthly_files,
@@ -410,7 +406,6 @@ def stats(request):
         return render_to_response(
             'mdstore/stats.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'totals': 0,
                 'monthly_bags': [],
                 'monthly_files': [],
@@ -506,7 +501,6 @@ def bagHTML(request, identifier):
     return render_to_response(
         'mdstore/bag_info.html',
         {
-            'site_title': Site.objects.get_current().name,
             'json_events': json_events,
             'payload_oxum_file_count': payload_oxum_file_count,
             'payload_oxum_size': payload_oxum_size,
@@ -664,7 +658,6 @@ def externalIdentifierSearch(request, identifier=None):
         return render_to_response(
             'mdstore/external_identifier.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'maintenance_message': MAINTENANCE_MSG,
             },
             context_instance=RequestContext(request)
@@ -709,7 +702,6 @@ def bagFullTextSearchHTML(request):
     return render_to_response(
         'mdstore/bag_search_results.html',
         {
-            'site_title': Site.objects.get_current().name,
             'searchString': searchString,
             'entries': paginated_entries,
             'maintenance_message': MAINTENANCE_MSG,
@@ -774,7 +766,6 @@ def showNodeStatus(request, identifier=None):
         return render_to_response(
             'mdstore/node.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'node': node,
                 'filled': percent(node.node_size, node.node_capacity),
                 'available': node.node_capacity - node.node_size,
@@ -808,7 +799,6 @@ def showNodeStatus(request, identifier=None):
         return render_to_response(
             'mdstore/node_status.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'status_list': status_list,
                 'total_capacity': total_capacity,
                 'total_size': total_size,

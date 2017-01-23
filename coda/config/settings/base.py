@@ -87,6 +87,7 @@ TEMPLATE_DIRS = (
     site_path('templates'),)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
+    'coda_mdstore.context.site_info',
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',

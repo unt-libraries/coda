@@ -114,7 +114,6 @@ class AtomNextFeedNoServer(AtomNextNewsFeed):
 
 def index(request):
     context = {
-        'site_title': Site.objects.get_current().name,
         'recently_prioritized': Validate.objects.filter(priority__gt=0).order_by('-priority_change_date')[:20],
         'recently_verified': Validate.objects.all().order_by('-last_verified')[:20],
         'verified_counts': Validate.objects.last_verified_status_counts()
@@ -144,7 +143,6 @@ def stats(request):
         return render_to_response(
             'coda_validate/stats.html',
             {
-                'site_title': Site.objects.get_current().name,
                 'sums_by_date': {},
                 'validations': None,
                 'this_month': None,
@@ -196,7 +194,6 @@ def stats(request):
     return render_to_response(
         'coda_validate/stats.html',
         {
-            'site_title': Site.objects.get_current().name,
             'sums_by_date': sums_by_date,
             'validations': Validate.objects.all(),
             'this_month': Validate.objects.filter(
@@ -232,7 +229,6 @@ def prioritize(request):
     return render_to_response(
         'coda_validate/prioritize.html',
         {
-            'site_title': Site.objects.get_current().name,
             'identifier': identifier,
             'prioritized': prioritized,
         },
@@ -256,7 +252,6 @@ def validate(request, identifier):
     return render_to_response(
         'coda_validate/validate.html',
         {
-            'site_title': Site.objects.get_current().name,
             'validate': v,
         },
         context_instance=RequestContext(request)
