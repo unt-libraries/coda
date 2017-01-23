@@ -39,7 +39,8 @@ class TestIndexView:
         """
 
         self.mock_bag = mock.Mock()
-        self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1}
+        self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1, 
+                'pk__count': 1, 'size_sum': 1000000}
         monkeypatch.setattr('coda_mdstore.views.Bag', self.mock_bag)
 
         self.mock_queue_entry = mock.Mock()
@@ -55,8 +56,9 @@ class TestIndexView:
         self.mock_event.objects.count.return_value = 10
         monkeypatch.setattr('coda_mdstore.views.Event', self.mock_event)
 
+    @pytest.mark.ignore_template_errors
     def test_returns_status_code_200(self, rf):
-        request = rf.get('/')
+        request = rf.get('/', HTTP_HOST="example.com")
         response = views.index(request)
         assert response.status_code == 200
 
@@ -68,11 +70,11 @@ class TestIndexView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
-        response = client.get(reverse('coda_mdstore.views.index'))
+        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
         assert key in response.context[-1]
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.index'))
+        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/index.html'
 
     def test_totals_files__sum_key_is_none(self, client):
@@ -83,10 +85,12 @@ class TestIndexView:
         # Re-patch the Bag entity to modify the return value from the
         # database query.
         self.mock_bag.objects.all().aggregate.return_value = {
-            'files__sum': None
+            'files__sum': None,
+            'pk__count': 0,
+            'size__sum': 0,
         }
 
-        response = client.get(reverse('coda_mdstore.views.index'))
+        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
         assert response.context[-1]['totals']['files__sum'] == 0
 
 
@@ -96,7 +100,7 @@ class TestAboutView:
     """
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.about'))
+        response = client.get(reverse('coda_mdstore.views.about'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/about.html'
 
 
@@ -109,7 +113,7 @@ class TestStatsView:
         """
         Test the context values when no bags are in the database.
         """
-        response = client.get(reverse('coda_mdstore.views.stats'))
+        response = client.get(reverse('coda_mdstore.views.stats'), HTTP_HOST="example.com")
 
         assert response.status_code == 200
         assert response.context[-1]['totals'] == 0
@@ -124,7 +128,7 @@ class TestStatsView:
         """
         FullBagFactory.create_batch(20)
 
-        response = client.get(reverse('coda_mdstore.views.stats'))
+        response = client.get(reverse('coda_mdstore.views.stats'), HTTP_HOST="example.com")
         context = response.context[-1]
 
         assert response.status_code == 200
@@ -155,7 +159,7 @@ class TestJSONStatsView:
             'files__sum': 0
         }
 
-        response = client.get(reverse('coda_mdstore.views.json_stats'))
+        response = client.get(reverse('coda_mdstore.views.json_stats'), HTTP_HOST="example.com")
         payload = json.loads(response.content)
 
         assert len(payload) == 5
@@ -181,7 +185,7 @@ class TestJSONStatsView:
             'files__sum': 1000,
         }
 
-        response = client.get(reverse('coda_mdstore.views.json_stats'))
+        response = client.get(reverse('coda_mdstore.views.json_stats'), HTTP_HOST="example.com")
         payload = json.loads(response.content)
 
         assert len(payload) == 5
@@ -205,15 +209,16 @@ class TestAllBagsView:
             'coda_mdstore.views.paginate_entries', self.mock_paginate_entries)
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.all_bags'))
+        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
+    @pytest.mark.ignore_template_errors
     def test_uses_paginated_entries(self, client, monkeypatch):
         """
         Verify that the view calls paginate_entries.
         """
         self.mock_paginate_entries.return_value = 'fake data'
-        response = client.get(reverse('coda_mdstore.views.all_bags'))
+        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
 
         assert self.mock_paginate_entries.call_count == 1
         assert response.context[-1]['entries'] == 'fake data'
@@ -223,7 +228,7 @@ class TestAllBagsView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
-        response = client.get(reverse('coda_mdstore.views.all_bags'))
+        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
         assert key in response.context[-1]
 
 
@@ -233,12 +238,12 @@ class TestRobotsView:
     """
 
     def test_user_agent_is_all(self, rf):
-        request = rf.get('/')
+        request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
         assert 'User-agent: *' in response.content
 
     def test_disallow(self, rf):
-        request = rf.get('/')
+        request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
         assert 'Disallow: /' in response.content
 
@@ -260,7 +265,7 @@ class TestBagHTMLView:
         payload.field_name = ''
         payload.save()
 
-        response = views.bagHTML(rf.get('/'), bag.name)
+        response = views.bagHTML(rf.get('/', HTTP_HOST="example.com"), bag.name)
         assert response.status_code in (200, 404)
 
     @pytest.mark.xfail(reason='View cannot handle bag without a member '
@@ -275,7 +280,7 @@ class TestBagHTMLView:
         bagging_date.field_name = ''
         bagging_date.save()
 
-        response = views.bagHTML(rf.get('/'), bag.name)
+        response = views.bagHTML(rf.get('/', HTTP_HOST="example.com"), bag.name)
         assert response.status_code in (200, 404)
 
     @mock.patch('coda_mdstore.views.urllib2.urlopen')
@@ -284,7 +289,7 @@ class TestBagHTMLView:
         mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
 
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
 
         assert mock_urlopen.call_count == 1
         assert response.context[-1]['json_events'] == {}
@@ -292,7 +297,7 @@ class TestBagHTMLView:
     def test_renders_correct_template(self, client):
         bag = FullBagFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
 
         assert response.templates[0].name == 'mdstore/bag_info.html'
 
@@ -308,7 +313,7 @@ class TestBagHTMLView:
     def test_context_has_key(self, key, client):
         bag = FullBagFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]))
+            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
 
         assert key in response.context[-1]
 
@@ -333,12 +338,12 @@ class TestBagProxyView:
         monkeypatch.setattr('coda_mdstore.views.FileWrapper', mock.Mock())
 
     def test_returns_status_code_200(self, rf):
-        request = rf.get('/')
+        request = rf.get('/', HTTP_HOST="example.com")
         response = views.bagProxy(request, self.bag.name, '/foo/bar')
         assert response.status_code == 200
 
     def test_response_has_correct_headers(self, rf):
-        request = rf.get('/')
+        request = rf.get('/', HTTP_HOST="example.com")
         response = views.bagProxy(request, self.bag.name, '/foo/bar')
 
         assert response['Content-Length'] == '255'
@@ -642,12 +647,13 @@ class TestBagFullTextSearchHTMLView:
     def test_response_with_search_query(self, client):
         client.get(
             reverse('coda_mdstore.views.bagFullTextSearchHTML'),
-            {'search': 'metadc000001'}
+            {'search': 'metadc000001'}, HTTP_HOST="example.com"
         )
 
     def test_with_no_search_query(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'))
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'), 
+            HTTP_HOST="example.com")
         context = response.context[-1]
 
         assert context['searchString'] == ''
@@ -656,7 +662,8 @@ class TestBagFullTextSearchHTMLView:
 
     def test_renders_correct_template(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'))
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'), 
+            HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
 
@@ -678,7 +685,7 @@ class TestShowNodeStatusView:
         #       reverse.
         node = NodeFactory.create()
         url = '/node/{0}/'.format(node.node_name)
-        response = client.get(url)
+        response = client.get(url, HTTP_HOST="example.com")
 
         assert response.context[-1].get('node', False)
         assert response.context[-1].get('filled', False)
@@ -695,7 +702,8 @@ class TestShowNodeStatusView:
     def test_context_with_all_nodes(self, client):
         NodeFactory.create_batch(10)
 
-        response = client.get(reverse('coda_mdstore.views.showNodeStatus'))
+        response = client.get(reverse('coda_mdstore.views.showNodeStatus'),
+                HTTP_HOST="example.com")
         context = response.context[-1]
 
         assert len(context.get('status_list')) == 10
