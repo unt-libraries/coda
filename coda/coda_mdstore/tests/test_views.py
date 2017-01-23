@@ -61,7 +61,6 @@ class TestIndexView:
         assert response.status_code == 200
 
     @pytest.mark.parametrize('key', [
-        'site_title',
         'totals',
         'queue_total',
         'validation_total',
@@ -220,7 +219,6 @@ class TestAllBagsView:
         assert response.context[-1]['entries'] == 'fake data'
 
     @pytest.mark.parametrize('key', [
-        'site_title',
         'entries',
         'maintenance_message'
     ])
@@ -299,7 +297,6 @@ class TestBagHTMLView:
         assert response.templates[0].name == 'mdstore/bag_info.html'
 
     @pytest.mark.parametrize('key', [
-        'site_title',
         'json_events',
         'payload_oxum_file_count',
         'payload_oxum_size',

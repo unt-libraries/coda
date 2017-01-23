@@ -51,7 +51,6 @@ def queue_stats(request):
     return render_to_response(
         'coda_replication/stats.html',
         {
-            'site_title': Site.objects.get_current().name,
             'totals': totals,
             'status_counts': status_counts,
             'maintenance_message': MAINTENANCE_MSG,
@@ -131,7 +130,6 @@ def queue_search(request):
         'coda_replication/search.html',
         {
             'queue_search_form': QueueSearchForm(initial=initial),
-            'site_title': Site.objects.get_current().name,
             'start_date': start_date,
             'status_list': STATUS_CHOICES,
             'status': status,
@@ -284,7 +282,6 @@ def queue_html(request, identifier=None):
     return render_to_response(
         'coda_replication/queue_entry.html',
         {
-            'site_title': Site.objects.get_current().name,
             'status_list': STATUS_CHOICES,
             'record': queue_object,
             'maintenance_message': MAINTENANCE_MSG,
@@ -303,7 +300,6 @@ def queue_recent(request):
     return render_to_response(
         'coda_replication/queue.html',
         {
-            'site_title': Site.objects.get_current().name,
             'entries': queue_entries,
             'status_list': STATUS_CHOICES,
             'num_events': QueueEntry.objects.count(),
