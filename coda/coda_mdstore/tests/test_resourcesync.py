@@ -35,7 +35,7 @@ def test_index_context(rf):
     correct form.
     """
     sitemaps = {'001': FakeSitemap}
-    request = rf.get('/')
+    request = rf.get('/', HTTP_HOST="example.com")
     response = resourcesync.index(request, sitemaps, 'mdstore/resourceindex.xml')
 
     # Expected filenames. The full location would look something like
@@ -113,7 +113,7 @@ def test_changelist_context(rf):
     `changelist`.
     """
     factories.FullBagFactory.create_batch(10)
-    request = rf.get('/')
+    request = rf.get('/', HTTP_HOST="example.com")
     response = resourcesync.changelist(request, resourcesync.sitemaps, None,
                                        'mdstore/changelist.xml')
     response.render()
