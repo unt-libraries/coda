@@ -37,8 +37,6 @@ def get_secret(setting, secrets=secrets):
 
 DEBUG = True
 
-TEMPLATE_DEBUG = DEBUG
-
 MAINTENANCE_MSG = get_secret("MAINTENANCE_MSG")
 
 TIME_ZONE = 'America/Chicago'
@@ -80,9 +78,9 @@ TEMPLATES = [
             'context_processors': [
                 'coda_mdstore.context.site_info',
                 'django.contrib.auth.context_processors.auth',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.media',
-                'django.core.context_processors.request',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
             ],
         },
     },
