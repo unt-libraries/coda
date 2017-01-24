@@ -17,7 +17,7 @@ $ git clone https://github.com/unt-libraries/coda.git
 $ cd coda
 ```
 
-Create a `settings.json`.
+Create a `secrets.json`.
 ```sh
 $ cp secrets.json.template secrets.json
 ```
