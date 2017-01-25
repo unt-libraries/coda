@@ -820,7 +820,10 @@ def app_bag(request, identifier=None):
         try:
             bag = Bag.objects.get(name=identifier)
         except Bag.DoesNotExist:
-            return HttpResponseNotFound("There is no bag with id '{0}'.".format(identifier))
+            return HttpResponseNotFound(
+                "There is no bag with id '{0}'.\n".format(identifier),
+                content_type="text/plain"
+            )
 
         object_xml = objectsToXML(bag)
         url = request.build_absolute_uri(reverse('app-bag-detail', args=[identifier]))
@@ -831,8 +834,7 @@ def app_bag(request, identifier=None):
 
         entry_text = XML_HEADER % etree.tostring(entries, pretty_print=True)
         return HttpResponse(entry_text, content_type="application/atom+xml")
-
-    elif request.method == 'GET' and not identifier:
+    elif request.method == 'GET':
         requestString = request.path
         bags = Paginator(Bag.objects.order_by('-bagging_date'), 20)
         if len(request.GET):
@@ -877,9 +879,11 @@ def app_bag(request, identifier=None):
         try:
             bagObject = updateBag(request)
         except Bag.DoesNotExist as e:
-            return HttpResponseNotFound(str(e))
+            return HttpResponseNotFound("%s\n" % (e,), 
+                content_type="text/plain")
         except exceptions.BadBagName as e:
-            return HttpResponseBadRequest(str(e))
+            return HttpResponseBadRequest("%s\n" % (e,), 
+                content_type="text/plain")
 
         returnXML = objectsToXML(bagObject)
         returnEntry = bagatom.wrapAtom(
@@ -890,18 +894,35 @@ def app_bag(request, identifier=None):
         resp.status_code = 200
         return resp
     elif request.method == 'DELETE' and identifier:
-        bagObject = get_object_or_404(Bag, name=identifier)
-        bag_ext_ids = get_list_or_404(
-            External_Identifier, belong_to_bag=bagObject
-        )
+        try:
+            bag = Bag.objects.get(name=identifier)
+        except Bag.DoesNotExist:
+            return HttpResponse(
+                "There is no bag with id '{0}'.\n".format(identifier),
+                content_type="text/plain", status=404
+            )
+        try:
+            bag_ext_ids = External_Identifier.objects.select_related('belong_to_bag')
+        except:
+            return HttpResponse(
+                "Could not retrieve external ids for this bag.\n",
+                content_type="text/plain", status=500
+            )
         for ext_id in bag_ext_ids:
             ext_id.delete()
-        bagObject.delete()
+        bag.delete()
         resp = HttpResponse("Deleted %s.\n" % identifier)
         resp.status_code = 200
         return resp
     else:
-        return HttpResponseBadRequest("Invalid method.")
+        if identifier:
+            allow = ('GET', 'PUT', 'DELETE')
+        else:
+            allow = ('GET', 'POST')
+        resp = HttpResponse("Invalid method.\n", status=405, 
+            content_type="text/plain")
+        resp['Allow'] = ', '.join(allow)
+        return resp
 
 
 def app_node(request, identifier=None):
