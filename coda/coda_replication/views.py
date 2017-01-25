@@ -2,7 +2,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
 from presentation import xmlToQueueEntry, addQueueEntry, updateQueueEntry
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db.models import Sum, Count, Max, Min, Avg
