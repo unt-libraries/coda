@@ -945,9 +945,9 @@ def app_node(request, identifier=None):
         resp.status_code = 200
         return resp
     # FEED
-    elif request.method == 'GET' and not identifier:
+    elif request.method == 'GET':
         nodes = Node.objects.all()
-        paginator = Paginator(nodes, len(nodes))
+        paginator = Paginator(nodes, max(1, len(nodes)))
         requestString = request.path
         if len(request.GET):
             requestString = "%s?%s" % (request.path, request.GET.urlencode())
