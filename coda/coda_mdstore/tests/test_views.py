@@ -926,7 +926,7 @@ class TestAppBag:
         """
         request = rf.head('/', HTTP_HOST='example.com')
         response = views.app_bag(request)
-        assert response.status_code == 400
+        assert response.status_code == 405
 
     def test_delete_request_removes_member_ext_identifier_objects(self, rf):
         bag = FullBagFactory.create()
