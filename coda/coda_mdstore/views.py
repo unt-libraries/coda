@@ -827,10 +827,12 @@ def app_bag(request, identifier=None):
 
         object_xml = objectsToXML(bag)
         url = request.build_absolute_uri(reverse('app-bag-detail', args=[identifier]))
+        althref = request.build_absolute_uri(reverse('bag-detail', args=[identifier]))
 
         entries = bagatom.wrapAtom(xml=object_xml, id=url, title=identifier,
                                    author=APP_AUTHOR.get('name', None),
-                                   author_uri=APP_AUTHOR.get('uri', None))
+                                   author_uri=APP_AUTHOR.get('uri', None),
+                                   alt=althref)
 
         entry_text = XML_HEADER % etree.tostring(entries, pretty_print=True)
         return HttpResponse(entry_text, content_type="application/atom+xml")
