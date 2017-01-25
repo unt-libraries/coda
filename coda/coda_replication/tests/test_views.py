@@ -384,7 +384,8 @@ class TestQueue:
 
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
-        request = rf.delete('/')
+        print entry.ark
+        request = rf.delete('/'+entry.ark)
         response = views.queue(request, entry.ark)
 
         assert response.status_code == 200
@@ -407,7 +408,6 @@ class TestQueue:
         assert response.status_code == 200
         assert response['Content-Type'] == 'application/atom+xml'
 
-    @pytest.mark.xfail(reason="The PUT method with out an identifier should not be allowed.")
     def test_put_without_identifier(self, queue_xml, rf):
         factories.QueueEntryFactory.create(ark='ark:/67531/coda4fnk', bytes='4')
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
@@ -416,7 +416,6 @@ class TestQueue:
         assert response.status_code == 405
         assert response.has_header('Allow')
 
-    @pytest.mark.xfail(reason="The updateQueueEntry subroutine causes an exception to be thrown.")
     def test_put_with_xml_for_entry_that_does_not_exist(self, queue_xml, rf):
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.queue(request, 'ark:/67531/coda4fnk')
@@ -434,11 +433,12 @@ class TestQueue:
         assert response['Content-Type'] == 'application/atom+xml'
         assert response.has_header('Location')
 
-    @pytest.mark.xfail(reason='Response object is not created.')
     def test_post_with_identifier(self, queue_xml, rf):
         request = rf.post('/', queue_xml, 'application/xml')
         response = views.queue(request, 'ark:/000001/dne')
-        assert response.status_code == 400
+
+        assert response.status_code == 405
+        assert response.has_header('Allow')
 
     def test_get_without_identifier(self, rf):
         request = rf.get('/', HTTP_HOST='example.com')

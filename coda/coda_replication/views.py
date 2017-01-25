@@ -2,6 +2,8 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
 from presentation import xmlToQueueEntry, addQueueEntry, updateQueueEntry
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from django.shortcuts import render_to_response, get_object_or_404
 from django.db.models import Sum, Count, Max, Min, Avg
 from django.conf import settings
@@ -320,16 +322,22 @@ def queue(request, identifier=None):
             queueObject = QueueEntry.objects.get(ark=identifier)
         except:
             return HttpResponseNotFound(
-                "There is no Queue Entry for ark '%s'." % identifier
+                "There is no Queue Entry for ark '%s'.\n" % identifier
             )
         queueObject.delete()
         resp = HttpResponse(
-            "Queue Entry for ark %s successfully deleted.\n" % identifier,
-            status=200
+            "Queue entry for ark %s deleted.\n" % identifier,
+            status=200, content_type="text/plain"
         )
     # respond to a POST request
-    if request.method == 'POST' and not identifier:
-        queueObject = addQueueEntry(request.body)
+    elif request.method == 'POST' and not identifier:
+        try:
+            queueObject = addQueueEntry(request.body)
+        except IntegrityError as e:
+            return HttpResponse(
+                "Conflict with already-existing resource.\n",
+                status=409
+            )
         identifier = queueObject.ark
         queueObjectXML = queueEntryToXML(queueObject)
         loc = 'http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark)
@@ -348,8 +356,15 @@ def queue(request, identifier=None):
         )
         resp['Location'] = loc
     # respond to PUT request
-    if request.method == 'PUT':
-        queueObject = updateQueueEntry(request.body)
+    elif request.method == 'PUT' and identifier:
+        try:
+            queueObject = updateQueueEntry(request.body, 
+                    validate_ark=identifier)
+        except ObjectDoesNotExist as e:
+            return HttpResponseNotFound(e.message, content_type="text/plain")
+        except ValidationError as e:
+            return HttpResponse(e.message, content_type="text/plain",
+                    status=409)
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,
@@ -361,13 +376,14 @@ def queue(request, identifier=None):
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
     # respond to GET request
-    if request.method == 'GET' and identifier:
+    elif request.method == 'GET' and identifier:
         # if it's a GET, or if we've just PUT or POST'd
         try:
             queueObject = QueueEntry.objects.get(ark=identifier)
         except QueueEntry.DoesNotExist:
             return HttpResponseNotFound(
-                "There is no Queue Entry for ark '%s'." % identifier
+                "There is no queue entry for ark '%s'.\n" % identifier,
+                content_type="text/plain"
             )
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
@@ -383,6 +399,14 @@ def queue(request, identifier=None):
         resp = HttpResponse(atomText, content_type="application/atom+xml")
     elif request.method == 'GET' and not identifier:
         return queue_list(request)
+    else:
+        if identifier:
+            allow = ('GET', 'PUT', 'DELETE')
+        else:
+            allow = ('GET', 'POST')
+        resp = HttpResponse("Method not allowed.\n", status=405, 
+            content_type="text/plain")
+        resp['Allow'] = ', '.join(allow)
     return resp
 
 
