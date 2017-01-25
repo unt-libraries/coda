@@ -118,7 +118,8 @@ def makeBagAtomFeed(bagObjectList, id, title):
     linkTag.set("href", id)
     for bagObject in bagObjectList:
         entryTag = wrapAtom(
-            objectsToXML(bagObject), bagObject.name, bagObject.name
+            objectsToXML(bagObject), bagObject.name, bagObject.name,
+            alt="/bag/"+bagObject.name
         )
         feedTag.append(entryTag)
     return feedTag

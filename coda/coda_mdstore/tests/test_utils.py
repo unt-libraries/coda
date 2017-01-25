@@ -96,7 +96,7 @@ class TestMakeBagAtomFeed:
     """
 
     @mock.patch('coda_mdstore.presentation.objectsToXML')
-    @mock.patch('coda_mdstore.presentation.wrapAtom', lambda *args: etree.Element('atomEntry'))
+    @mock.patch('coda_mdstore.presentation.wrapAtom', lambda *args,**kwargs: etree.Element('atomEntry'))
     def test_with_bag_objects(self, *args):
         title = 'test title'
         feed_id = 'test-id'
