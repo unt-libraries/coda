@@ -1,6 +1,7 @@
 from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, \
     queueEntryToXML, getValueByName, getNodeByName, makeObjectFeed
 from coda_replication.models import QueueEntry
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 from lxml import etree
 
@@ -92,7 +93,7 @@ def addQueueEntry(rawXML):
     return newEntry
 
 
-def updateQueueEntry(rawXML):
+def updateQueueEntry(rawXML, validate_ark=None):
     """
     Handle updating the Queue.  Based on XML input.
     """
@@ -109,10 +110,12 @@ def updateQueueEntry(rawXML):
     contentElement = getNodeByName(entryRoot, "content")
     queueEntryNode = getNodeByName(contentElement, "queueEntry")
     newEntry = xmlToQueueEntry(queueEntryNode)
+    if validate_ark and newEntry.ark != validate_ark:
+        raise ValidationError("Mismatch between URL identifier and document ID.")
     try:
         oldEntry = QueueEntry.objects.get(ark=newEntry.ark)
     except QueueEntry.DoesNotExist:
-        raise HttpResponseNotFound(
+        raise ObjectDoesNotExist(
             "There is no existing Queue Entry for ark '%s'." % newEntry.ark
         )
     for item in updateList:
