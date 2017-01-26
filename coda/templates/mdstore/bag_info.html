@@ -34,8 +34,8 @@
                     <i class="icon-user"></i> {{ k.field_body }}
                 {% else %}{% if k.field_name == 'Internal-Sender-Identifier' %}
                     <i class="icon-tag"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Source-Organization' and 'University of North Texas' in k.field_body %}
-                    <img src="http://example.com/media/aubrey_public/images/brand-digital-library/favicon.ico"></i> {{ k.field_body }}
+                {% else %}{% if k.field_name == 'Source-Organization' %}
+                    <i class="icon-home"></i> {{ k.field_body }}
                 {% else %}
                     <i class="icon-leaf"></i> {{ k.field_body }}
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
