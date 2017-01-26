@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.core.paginator import Paginator, Page
 from lxml import etree, objectify
+from codalib import bagatom
 import mock
 import pytest
 
@@ -168,12 +169,16 @@ class TestNodeEntry:
 
         xml_obj = convert_etree(tree)
 
+        node_last_checked = node.last_checked.strftime(
+                bagatom.TIME_FORMAT_STRING
+        )
+
         assert xml_obj.content.node.name == node.node_name
         assert xml_obj.content.node.capacity == node.node_capacity
         assert xml_obj.content.node.size == node.node_size
         assert xml_obj.content.node.path == node.node_path
         assert xml_obj.content.node.url == node.node_url
-        assert xml_obj.content.node.last_checked == str(node.last_checked)
+        assert xml_obj.content.node.last_checked == node_last_checked
         assert xml_obj.content.node.countchildren() == 6
 
     def test_xml_id(self):
