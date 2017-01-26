@@ -18,6 +18,7 @@ from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
 from django.shortcuts import render_to_response, get_object_or_404, \
     get_list_or_404
 from django.core.servers.basehttp import FileWrapper
+from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
 from django.utils.feedgenerator import Atom1Feed
@@ -974,8 +975,19 @@ def app_node(request, identifier=None):
         return resp
     # NEW ENTRY
     elif request.method == 'POST' and not identifier:
-        node = createNode(request)
-        node.save()
+        try:
+            node = createNode(request)
+        except etree.LxmlError:
+            return HttpResponse("Invalid XML in request body.\n", status=400,
+                content_type="text/plain"
+            )
+        try:
+            node.save()
+        except IntegrityError as e:
+            return HttpResponse(
+                "Conflict with already-existing resource.\n",
+                status=409, content_type="text/plain"
+            )
         loc = 'http://%s/APP/node/%s/' % (
             request.META['HTTP_HOST'], node.node_name
         )
