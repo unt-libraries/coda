@@ -212,38 +212,30 @@ $ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4d
 
 # here's a simple example of what an event xml looks like
 &lt;?xml version="1.0"?&gt;
-&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
-  &lt;title&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/title&gt;
-  &lt;id&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/id&gt;
-  &lt;updated&gt;2013-06-05T17:04:40Z&lt;/updated&gt;
-  &lt;author&gt;
-    &lt;name&gt;server&lt;/name&gt;
-  &lt;/author&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;premis:event xmlns:premis="info:lc/xmlns/premis-v2"&gt;
-      &lt;premis:eventDetail&gt;THIS IS EDITING THE EVENT DETAIL&lt;/premis:eventDetail&gt;
-      &lt;premis:eventOutcomeInformation&gt;
-        &lt;premis:eventOutcomeDetail&gt;Total time for verification: 0:00:01.839590&lt;/premis:eventOutcomeDetail&gt;
-        &lt;premis:eventOutcome&gt;http://purl.org/net/untl/vocabularies/eventOutcomes/#success&lt;/premis:eventOutcome&gt;
-      &lt;/premis:eventOutcomeInformation&gt;
-      &lt;premis:eventType&gt;http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck&lt;/premis:eventType&gt;
-      &lt;premis:linkingAgentIdentifier&gt;
-        &lt;premis:linkingAgentIdentifierValue&gt;http://{{ request.META.HTTP_HOST }}/agent/codaMigrationVerification&lt;/premis:linkingAgentIdentifierValue&gt;
-        &lt;premis:linkingAgentIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#URL&lt;/premis:linkingAgentIdentifierType&gt;
-      &lt;/premis:linkingAgentIdentifier&gt;
-      &lt;premis:eventIdentifier&gt;
-        &lt;premis:eventIdentifierValue&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/premis:eventIdentifierValue&gt;
+&lt;premis:event xmlns:premis="info:lc/xmlns/premis-v2"&gt;
+    &lt;premis:eventIdentifier&gt;
         &lt;premis:eventIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#UUID&lt;/premis:eventIdentifierType&gt;
-      &lt;/premis:eventIdentifier&gt;
-      &lt;premis:eventDateTime&gt;2013-05-13 14:14:55&lt;/premis:eventDateTime&gt;
-      &lt;premis:linkingObjectIdentifier&gt;
+        &lt;premis:eventIdentifierValue&gt;9e42cbd3cc3b4dfc888522036bbc4491&lt;/premis:eventIdentifierValue&gt;
+    &lt;/premis:eventIdentifier&gt;
+    &lt;premis:eventType&gt;http://purl.org/net/untl/vocabularies/preservationEvents/#fixityCheck&lt;/premis:eventType&gt;
+    &lt;premis:eventDateTime&gt;2013-05-13T14:14:55Z&lt;/premis:eventDateTime&gt;
+    &lt;premis:eventDetail&gt;THIS IS EDITING THE EVENT DETAIL&lt;/premis:eventDetail&gt;
+    &lt;premis:eventOutcomeInformation&gt;
+        &lt;premis:eventOutcome&gt;http://purl.org/net/untl/vocabularies/eventOutcomes/#success&lt;/premis:eventOutcome&gt;
+        &lt;premis:eventOutcomeDetail&gt;
+            &lt;premis:eventOutcomeDetailNote&gt;Total time for verification: 0:00:01.839590&lt;/premis:eventOutcomeDetailNote&gt;
+        &lt;/premis:eventOutcomeDetail&gt;
+    &lt;/premis:eventOutcomeInformation&gt;
+    &lt;premis:linkingAgentIdentifier&gt;
+        &lt;premis:linkingAgentIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#URL&lt;/premis:linkingAgentIdentifierType&gt;
+        &lt;premis:linkingAgentIdentifierValue&gt;http://localhost:8787/agent/codaMigrationVerification&lt;/premis:linkingAgentIdentifierValue&gt;
+    &lt;/premis:linkingAgentIdentifier&gt;
+    &lt;premis:linkingObjectIdentifier&gt;
         &lt;premis:linkingObjectIdentifierType&gt;http://purl.org/net/untl/vocabularies/identifier-qualifiers/#ARK&lt;/premis:linkingObjectIdentifierType&gt;
         &lt;premis:linkingObjectIdentifierValue&gt;ark:/67531/coda10kx&lt;/premis:linkingObjectIdentifierValue&gt;
         &lt;premis:linkingObjectRole/&gt;
-      &lt;/premis:linkingObjectIdentifier&gt;
-    &lt;/premis:event&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;
+    &lt;/premis:linkingObjectIdentifier&gt;
+&lt;/premis:event&gt;
 </pre></div>
 
 <h4>Queue</h4>
@@ -306,12 +298,12 @@ $ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
 # Here's what an agent xml looks like
 &lt;?xml version="1.0"?&gt;
 &lt;premis:agent xmlns:premis="info:lc/xmlns/premis-v2"&gt;
-  &lt;premis:agentIdentifier&gt;
-    &lt;premis:agentIdentifierValue&gt;codaMigration&lt;/premis:agentIdentifierValue&gt;
-    &lt;premis:agentIdentifierType&gt;purl:thing&lt;/premis:agentIdentifierType&gt;
-  &lt;/premis:agentIdentifier&gt;
-  &lt;premis:agentName&gt;Bloda Bligration Blagent&lt;/premis:agentName&gt;
-  &lt;premis:agentType&gt;Software&lt;/premis:agentType&gt;
+    &lt;premis:agentIdentifier&gt;
+        &lt;premis:agentIdentifierType&gt;purl:thing&lt;/premis:agentIdentifierType&gt;
+        &lt;premis:agentIdentifierValue&gt;codaMigration&lt;/premis:agentIdentifierValue&gt;
+    &lt;/premis:agentIdentifier&gt;
+    &lt;premis:agentName&gt;Bloda Bligration Blagent&lt;/premis:agentName&gt;
+    &lt;premis:agentType&gt;Software&lt;/premis:agentType&gt;
 &lt;/premis:agent&gt;
 </pre></div>
 <h4>Node</h4>
