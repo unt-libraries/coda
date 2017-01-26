@@ -6,7 +6,8 @@ import urlparse
 
 from BeautifulSoup import BeautifulSoup as BSoup
 from codalib import APP_AUTHOR
-from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP
+from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP,
+    TIME_FORMAT_STRING
 from datetime import datetime
 from lxml import etree
 from pypairtree import pairtree
@@ -315,7 +316,7 @@ def nodeEntry(node, webRoot=None):
     node_url = etree.SubElement(nodeXML, "url")
     node_url.text = node.node_url
     node_last_checked = etree.SubElement(nodeXML, "last_checked")
-    node_last_checked.text = str(node.last_checked)
+    node_last_checked.text = node.last_checked.strftime(TIME_STRING_FORMAT)
     atomXML = wrapAtom(
         xml=nodeXML,
         id='http://%s/node/%s/' % (webRoot, node.node_name),
