@@ -397,7 +397,7 @@ def queue(request, identifier=None):
             atomXML, pretty_print=True
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
-    elif request.method == 'GET' and not identifier:
+    elif request.method == 'GET':
         return queue_list(request)
     else:
         if identifier:
