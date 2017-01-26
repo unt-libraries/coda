@@ -845,17 +845,22 @@ def app_bag(request, identifier=None):
             page = request.GET.get('page')
         else:
             page = 1
-        atomFeed = bagatom.makeObjectFeed(
-            paginator=bags,
-            objectToXMLFunction=objectsToXML,
-            feedId=request.path[1:],
-            title="Bag Feed",
-            webRoot='http://%s' % request.META['HTTP_HOST'],
-            idAttr="name",
-            request=request,
-            page=page,
-            author=APP_AUTHOR
-        )
+        try:
+            atomFeed = bagatom.makeObjectFeed(
+                paginator=bags,
+                objectToXMLFunction=objectsToXML,
+                feedId=request.path[1:],
+                title="Bag Feed",
+                webRoot='http://%s' % request.META['HTTP_HOST'],
+                idAttr="name",
+                request=request,
+                page=page,
+                author=APP_AUTHOR
+            )
+        except EmptyPage:
+            return HttpResponse("That page doesn't exist.\n", status=400,
+                content_type='text/plain'
+            )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
         resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
@@ -957,18 +962,23 @@ def app_node(request, identifier=None):
             page = request.GET.get('page')
         else:
             page = 1
-        atomFeed = bagatom.makeObjectFeed(
-            paginator=paginator,
-            objectToXMLFunction=bagatom.nodeToXML,
-            feedId=request.path[1:],
-            title="Node Feed",
-            webRoot='http://%s' % request.META['HTTP_HOST'],
-            idAttr="node_name",
-            nameAttr="node_name",
-            request=request,
-            page=page,
-            author=APP_AUTHOR
-        )
+        try:
+            atomFeed = bagatom.makeObjectFeed(
+                paginator=paginator,
+                objectToXMLFunction=bagatom.nodeToXML,
+                feedId=request.path[1:],
+                title="Node Feed",
+                webRoot='http://%s' % request.META['HTTP_HOST'],
+                idAttr="node_name",
+                nameAttr="node_name",
+                request=request,
+                page=page,
+                author=APP_AUTHOR
+            )
+        except EmptyPage:
+            return HttpResponse("That page doesn't exist.\n", status=400,
+                content_type='text/plain'
+            )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
         resp = HttpResponse(feedText, content_type="application/atom+xml")
         resp.status_code = 200
