@@ -344,44 +344,6 @@ $ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
 &lt;/entry&gt;
 </pre>
 </div>
-<h4>Node</h4>
-A node is a physical storage location.
-<!--BEGIN CODE MARKUP-->
-<div id="highlight-python"><pre>
-# To submit a new node via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/
-
-# To update the contents of a node
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
-
-# To delete a particular node
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/node/ark:/67531/coda-001/
-
-# To get the node records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/
-
-# To get the data of a particular node
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
-
-# here's a simple example of what an node xml looks like
-&lt;?xml version="1.0"?&gt;
-&lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
-  &lt;title&gt;coda-001&lt;/title&gt;
-  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/coda-001/&lt;/id&gt;
-  &lt;updated&gt;2013-06-13T19:06:49Z&lt;/updated&gt;
-  &lt;content type="application/xml"&gt;
-    &lt;node&gt;
-      &lt;name&gt;coda-001&lt;/name&gt;
-      &lt;capacity&gt;25286628343808&lt;/capacity&gt;
-      &lt;size&gt;34361344&lt;/size&gt;
-      &lt;path&gt;/data3/coda-001&lt;/path&gt;
-      &lt;url&gt;http://example.com/coda-001/&lt;/url&gt;
-      &lt;last_checked&gt;2013-05-03 14:42:40&lt;/last_checked&gt;
-    &lt;/node&gt;
-  &lt;/content&gt;
-&lt;/entry&gt;
-</pre>
-</div>
 <h2>Validations</h2>
 Validation objects are a 1-1 object relationship with Bags. Validations are run concurrently, nonstop, via a daemon that continually asks for the 'next' validation to perform.
 The 'next' validation is represented as an XML feed of 1 entry.
