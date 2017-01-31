@@ -161,8 +161,8 @@ def stats(request):
     first = datetime.date(day=1, month=today.month, year=today.year)
     last_day = last_day_of_month(first.year, first.month)
     this_month_range = [
-        '%s-%s-01' % (first.year, first.month),
-        '%s-%s-%s' % (first.year, first.month, last_day),
+        '%s-%s-01 00:00:00' % (first.year, first.month),
+        '%s-%s-%s 23:59:59' % (first.year, first.month, last_day),
     ]
     # resolve the range for last 24 hours filter
     now = datetime.datetime.now()
