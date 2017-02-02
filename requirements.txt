@@ -10,7 +10,7 @@ pytest-django==2.9.1
 mock
 factory_boy
 #codalib==1.0.0
-git+https://github.com/unt-libraries/codalib@pre-release
+git+https://github.com/unt-libraries/codalib@xsdate-fix
 sqlparse==0.1.18
 django-debug-toolbar==1.4
 
