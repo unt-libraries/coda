@@ -452,7 +452,10 @@ class TestExternalIdentiferSearch:
         request = rf.get(url, {'ark': 'metadc000001'})
         response2 = views.externalIdentifierSearch(request)
 
-        assert response1.content == response2.content
+        # this won't work because atom updated elements contain
+        # xsdatetime values that differ at least in the milliseconds
+        # field
+        # assert response1.content == response2.content
         assert response1['Content-Type'] == response2['Content-Type']
 
         bagxml1 = objectify.fromstring(response1.content)
