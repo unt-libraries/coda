@@ -30,21 +30,27 @@ class TestIndex:
         assert response.status_code == 200
 
     def test_template_used(self, client):
-        response = client.get(reverse('coda_validate.views.index'), 
-                HTTP_HOST="example.com")
+        response = client.get(
+            reverse('coda_validate.views.index'),
+            HTTP_HOST="example.com"
+        )
         assert response.templates[0].name == 'coda_validate/index.html'
 
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30, priority=1)
-        response = client.get(reverse('coda_validate.views.index'),
-                HTTP_HOST="example.com")
+        response = client.get(
+            reverse('coda_validate.views.index'),
+            HTTP_HOST="example.com"
+        )
         context = response.context[-1]
         assert len(context['recently_prioritized']) == 20
         assert len(context['recently_verified']) == 20
 
     def test_context_without_validate_objects(self, client):
-        response = client.get(reverse('coda_validate.views.index'),
-                HTTP_HOST="example.com")
+        response = client.get(
+            reverse('coda_validate.views.index'),
+            HTTP_HOST="example.com"
+        )
         context = response.context[-1]
         assert len(context['recently_prioritized']) == 0
         assert len(context['recently_verified']) == 0
@@ -67,8 +73,10 @@ class TestStats:
         assert response.status_code == 200
 
     def test_template_used(self, client):
-        response = client.get(reverse('coda_validate.views.stats'),
-                HTTP_HOST="example.com")
+        response = client.get(
+            reverse('coda_validate.views.stats'),
+            HTTP_HOST="example.com"
+        )
         assert response.templates[0].name == 'coda_validate/stats.html'
 
     def test_context(self, client):

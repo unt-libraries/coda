@@ -5,9 +5,10 @@ from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from .models import Bag, Bag_Info, Node
+from .models import Bag
 from codalib.bagatom import TIME_FORMAT_STRING
 from urlparse import urlparse
+import warnings
 
 try:
     MOST_RECENT_BAGGING_DATE = Bag.objects.latest(
@@ -32,8 +33,10 @@ def index(
     """
 
     if mimetype:
-        warnings.warn("The mimetype keyword argument is deprecated, use "
-            "content_type instead", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "The mimetype keyword argument is deprecated, use "
+            "content_type instead", DeprecationWarning, stacklevel=2
+        )
         content_type = mimetype
 
     req_protocol = 'https' if request.is_secure() else 'http'
@@ -73,7 +76,6 @@ def sitemap(request, sitemaps, section=None,
     overloaded method above "index".
     """
 
-    req_protocol = 'https' if request.is_secure() else 'http'
     req_site = get_current_site(request)
 
     # since we no longer give ?p arguments,
@@ -109,7 +111,7 @@ def sitemap(request, sitemaps, section=None,
 
 
 def changelist(request, sitemaps, section=None,
-            template_name='changelist.xml', content_type='application/xml'):
+               template_name='changelist.xml', content_type='application/xml'):
     most_recent_bags = Bag.objects.order_by('-bagging_date').values(
         'name',
         'size',
@@ -142,6 +144,7 @@ def capabilitylist(
         },
         content_type=content_type
     )
+
 
 # overload the stock sitemap pagination stuff with our own methods
 setattr(views, 'index', index)

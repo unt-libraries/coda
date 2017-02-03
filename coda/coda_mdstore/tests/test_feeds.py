@@ -1,8 +1,5 @@
 from lxml import objectify
 import pytest
-
-from django.core.paginator import EmptyPage
-
 from .. import factories
 
 

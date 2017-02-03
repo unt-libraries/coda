@@ -3,6 +3,7 @@ from coda_replication.models import STATUS_CHOICES
 
 STATUS_CHOICES += [('', 'None')]
 
+
 class QueueSearchForm(forms.Form):
     identifier = forms.CharField(
         widget=forms.TextInput(

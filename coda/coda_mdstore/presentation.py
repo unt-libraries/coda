@@ -64,7 +64,6 @@ def getFileHandle(codaId, codaPath):
         codaPathParts[i] = urllib.quote(part)
     escapedCodaPath = "/".join(codaPathParts)
     nodeList = Node.objects.all()
-    urlList = []
     exceptionList = []
     for node in nodeList:
         url_parts = urlparse.urlparse(node.node_url)
@@ -113,7 +112,7 @@ def makeBagAtomFeed(bagObjectList, id, title):
     idTag.text = id
     titleTag = etree.SubElement(feedTag, ATOM + "title")
     titleTag.text = title
-    updatedTag = etree.SubElement(feedTag, ATOM + "updated")
+    etree.SubElement(feedTag, ATOM + "updated")
     linkTag = etree.SubElement(feedTag, ATOM + "link")
     linkTag.set("rel", "self")
     linkTag.set("href", id)
@@ -164,10 +163,10 @@ def createBag(xmlText):
 
     entryRoot = None
     entryRoot = etree.XML(xmlText)
-    if entryRoot == None:
+    if entryRoot is None:
         raise Exception("Unable to parse uploaded XML")
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
-    if contentElement == None:
+    if contentElement is None:
         raise Exception("No content element located")
     codaXML = contentElement.xpath("*[local-name() = 'codaXML']")[0]
     codaName = codaXML.xpath("*[local-name() = 'name']")[0].text.strip()

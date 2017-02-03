@@ -39,8 +39,11 @@ class TestIndexView:
         """
 
         self.mock_bag = mock.Mock()
-        self.mock_bag.objects.all().aggregate.return_value = {'files__sum': 1, 
-                'pk__count': 1, 'size_sum': 1000000}
+        self.mock_bag.objects.all().aggregate.return_value = {
+            'files__sum': 1,
+            'pk__count': 1,
+            'size_sum': 1000000,
+        }
         monkeypatch.setattr('coda_mdstore.views.Bag', self.mock_bag)
 
         self.mock_queue_entry = mock.Mock()
@@ -655,8 +658,9 @@ class TestBagFullTextSearchHTMLView:
 
     def test_with_no_search_query(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'), 
-            HTTP_HOST="example.com")
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            HTTP_HOST="example.com"
+        )
         context = response.context[-1]
 
         assert context['searchString'] == ''
@@ -665,8 +669,9 @@ class TestBagFullTextSearchHTMLView:
 
     def test_renders_correct_template(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'), 
-            HTTP_HOST="example.com")
+            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            HTTP_HOST="example.com"
+        )
         assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
 
@@ -705,8 +710,10 @@ class TestShowNodeStatusView:
     def test_context_with_all_nodes(self, client):
         NodeFactory.create_batch(10)
 
-        response = client.get(reverse('coda_mdstore.views.showNodeStatus'),
-                HTTP_HOST="example.com")
+        response = client.get(
+            reverse('coda_mdstore.views.showNodeStatus'),
+            HTTP_HOST="example.com"
+        )
         context = response.context[-1]
 
         assert len(context.get('status_list')) == 10

@@ -2,7 +2,6 @@ from coda_mdstore.models import Bag, Bag_Info
 from coda_mdstore.views import objectsToXML
 from oaipmh import common, error
 from datetime import datetime
-from django.core.paginator import Paginator
 
 
 class md_storeOAIInterface(object):
@@ -13,21 +12,19 @@ class md_storeOAIInterface(object):
     """
 
     def __init__(self, identifyDict={}, resultSize=10, domain="", debug=False):
-        self.identifyDict = \
-        {
+        self.identifyDict = {
             'repositoryName': 'Base',
-            #'baseURL':'http://texashistory.unt.edu/search/oai/',
+            # 'baseURL':'http://texashistory.unt.edu/search/oai/',
             'baseURL': 'http://not.a.good.base.url.com/fixit/kurt/',
             'protocolVersion': "2.0",
             'adminEmails': ['not.a.real.email@.fixit.kurt.com'],
             'earliestDatestamp': datetime(2004, 05, 19),
             'deletedRecord': 'transient',
             'granularity': 'YYYY-MM-DDThh:mm:ssZ',
-            #'granularity':'YYYY-MM-DD',
+            # 'granularity':'YYYY-MM-DD',
             'compression': ['identity'],
         }
-        self.setAssociations = \
-        [
+        self.setAssociations = [
             ("dc_rights_access", "access_rights"),
             ("untl_institution", "partner"),
             ("untl_collection", "collection"),
@@ -35,12 +32,12 @@ class md_storeOAIInterface(object):
         if identifyDict:
             self.identifyDict.update(identifyDict)
         self.resultSize = resultSize
-        #self.timeFormatString = "%Y-%m-%dT%H:%M:%SZ"
+        # self.timeFormatString = "%Y-%m-%dT%H:%M:%SZ"
         self.timeFormatString = "%Y-%m-%d"
         self.debug = debug
         self.domain = domain
-        #self.collectionTable = collectionTable
-        #self.institutionTable = institutionTable
+        # self.collectionTable = collectionTable
+        # self.institutionTable = institutionTable
 
     def identify(self):
         return common.Identify(**self.identifyDict)
@@ -55,31 +52,9 @@ class md_storeOAIInterface(object):
             bagObject = Bag.objects.get(name=id)
         except Bag.DoesNotExist:
             raise error.IdDoesNotExistError, "Id doesnt exist: %s" % identifier
-        record = makeDataRecord(bagObject, domain=self.domain,
-            metadataPrefix=metadataPrefix)
-        return record
-
-    def _old_solr_getRecord(self, metadataPrefix, identifier):
-        """
-        Get a record, by identifier, from Solr, and return it in the proper
-        format
-        """
-
-        solrObject = solr.SolrConnection(self.solrURL)
-        id = infoToArk(identifier)
-        id = id.replace(":", "\:")
-        solrResult = None
-        try:
-            solrResult = solrObject.query("aubrey_identifier:%s" % id)
-        except:
-            pass
-        if not solrResult or not len(solrResult.results):
-            raise error.IdDoesNotExistError, "Id doesnt exist: %s" % identifier
         record = makeDataRecord(
-            solrResult.results[0],
-            domain=self.domain,
-            metadataPrefix=metadataPrefix,
-            setAssociationList=self.setAssociations,
+            bagObject, domain=self.domain,
+            metadataPrefix=metadataPrefix
         )
         return record
 
@@ -89,21 +64,21 @@ class md_storeOAIInterface(object):
         """
 
         raise error.NoSetHierarchyError
-        #return []
+        # return []
 
     def listMetadataFormats(self, identifier=None):
         if identifier:
             id = infoToArk(identifier)
-            #id = id.replace(":","\:")
-            #solrObject = solr.SolrConnection(self.solrURL)
-            #solrResult = solrObject.query("aubrey_identifier:%s" % id)
+            # id = id.replace(":","\:")
+            # solrObject = solr.SolrConnection(self.solrURL)
+            # solrResult = solrObject.query("aubrey_identifier:%s" % id)
             try:
-                bagObject = Bag.objects.get(name=id)
+                Bag.objects.get(name=id)
             except Bag.DoesNotExist:
                 raise error.IdDoesNotExistError(
                     "Id does not exist: %s, (%s)" % (identifier, id)
                 )
-        #seems like there should be a cleaner, automagic way to do this
+        # seems like there should be a cleaner, automagic way to do this
         return [
                     (
                         "oai_dc",
@@ -116,25 +91,29 @@ class md_storeOAIInterface(object):
     def listIdentifiers(self, metadataPrefix=None, from_=None, until=None,
                         set=None, cursor=0, batch_size=10):
 
-        return self.listStuff(metadataPrefix=metadataPrefix, from_=from_,
-                until=until, set=set, cursor=cursor, batch_size=batch_size,
-                headersOnly=True)
+        return self.listStuff(
+            metadataPrefix=metadataPrefix, from_=from_,
+            until=until, set=set, cursor=cursor, batch_size=batch_size,
+            headersOnly=True
+        )
 
     def listRecords(self, metadataPrefix=None, from_=None, until=None,
                     set=None, cursor=0, batch_size=10):
 
-        return self.listStuff(metadataPrefix=metadataPrefix, from_=from_,
-                until=until, set=set, cursor=cursor, batch_size=batch_size,
-                headersOnly=False)
+        return self.listStuff(
+            metadataPrefix=metadataPrefix, from_=from_,
+            until=until, set=set, cursor=cursor, batch_size=batch_size,
+            headersOnly=False
+        )
 
     def listStuff(self, metadataPrefix=None, from_=None, until=None,
-                    set=None, cursor=0, batch_size=10, headersOnly=True):
+                  set=None, cursor=0, batch_size=10, headersOnly=True):
         """
         Assuming that from_ and until_ are datetime.datetime objects
         """
 
-        #solrObject = solr.SolrConnection(self.solrURL)
-        #valid metadata prefixes only
+        # solrObject = solr.SolrConnection(self.solrURL)
+        # valid metadata prefixes only
         formatString = "%Y-%m-%d"
         validPrefixes = ('oai_dc', 'coda_bag')
         if metadataPrefix:
@@ -142,7 +121,7 @@ class md_storeOAIInterface(object):
                 raise error.CannotDisseminateFormatError(
                     "Metadata Prefix %s is not supported" % (metadataPrefix,)
                 )
-        #let's make some defaults
+        # let's make some defaults
         fromValue = datetime(1900, 1, 1, 0, 0, 0)
         if from_:
             fromValue = from_
@@ -160,8 +139,10 @@ class md_storeOAIInterface(object):
             resultSet = bagObjectList[cursor:cursor + batch_size]
         resultList = []
         for result in resultSet:
-            record = makeDataRecord(result, domain=self.domain,
-                metadataPrefix=metadataPrefix)
+            record = makeDataRecord(
+                result, domain=self.domain,
+                metadataPrefix=metadataPrefix
+            )
             if headersOnly:
                 resultList.append(record[0])
             else:
@@ -179,12 +160,12 @@ def makeDataRecord(
     Given a Bag object, make a record in the format that oaipmh uses
     """
 
-    #to build the header, we need the unique ID, and the datestamp
-    #would the setspec be taken from facets?
+    # to build the header, we need the unique ID, and the datestamp
+    # would the setspec be taken from facets?
     bagInfoObjectList = Bag_Info.objects.filter(bag_name=bagObject)
 
     id = arkToInfo(bagObject.name)
-    #date = bagObject.last_verified_date
+    # date = bagObject.last_verified_date
     date = bagObject.bagging_date
     for bagInfoObject in bagInfoObjectList:
         if bagInfoObject.field_name == 'Bagging-Date':
@@ -215,7 +196,7 @@ def makeDataRecord(
         dcDict["date"] = [bagInfoDict["Bagging-Date"]]
     if not len(dcDict):
         raise Exception("dcDict is empty")
-    #raise Exception(pprint.pformat(dcDict))
+    # raise Exception(pprint.pformat(dcDict))
     setList = []
     header = common.Header(
         id,
@@ -223,24 +204,24 @@ def makeDataRecord(
         setList,
         False,
     )
-    #to build the metadata, we need to build a dublin core structure
-    #title = solrRecord['display_title']
-    title = bagObject.name
-    #dublinStruct = {}
-    #dublinStruct['title'] = [ "Title %s" % title ] #we'll add more stuff later
-    #don't worry Mark, i just need this for testing ;)
-    #dublinStruct['identifier'] = [ "Identifier %s" % id ]
+    # to build the metadata, we need to build a dublin core structure
+    # title = solrRecord['display_title']
+    # title = bagObject.name
+    # dublinStruct = {}
+    # dublinStruct['title'] = [ "Title %s" % title ] #we'll add more stuff later
+    # don't worry Mark, i just need this for testing ;)
+    # dublinStruct['identifier'] = [ "Identifier %s" % id ]
     dublinStruct = dcDict
-    #if metadataPrefix=="untl":
+    # if metadataPrefix=="untl":
     #    metadata = common.Metadata(untlDict)
-    #else:
+    # else:
     #    metadata = common.Metadata(dublinStruct)
     if metadataPrefix == "oai_dc":
         metadata = common.Metadata(dublinStruct)
     elif metadataPrefix == "coda_bag":
         bagMap = {}
         bagMap["bag"] = bagObject
-        #bagMag["baginfos"] = bagInfoObjectList
+        # bagMag["baginfos"] = bagInfoObjectList
         metadata = common.Metadata(bagMap)
     # the third member of the tuple is supposed to be the 'about' field...
     # what to populate that with?

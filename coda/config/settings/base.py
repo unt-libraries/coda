@@ -16,16 +16,28 @@ SITE_ROOT = os.path.dirname(CONFIG_ROOT)
 # Absolute path to the root of the project
 PROJECT_ROOT = os.path.dirname(SITE_ROOT)
 
+
 # Compose a path from the project root
-project_path = lambda path: os.path.join(CONFIG_ROOT, path)
+def _project_path(path):
+    return os.path.join(CONFIG_ROOT, path)
+
+
+project_path = _project_path
+
 
 # Compose path from the site root
-site_path = lambda path: os.path.join(SITE_ROOT, path)
+def _site_path(path):
+    return os.path.join(SITE_ROOT, path)
+
+
+site_path = _site_path
+
 
 # Get our secrets from a file outside of version control.
 # This helps to keep the settings files generic.
 with open(os.path.join(PROJECT_ROOT, "secrets.json")) as f:
     secrets = json.loads(f.read())
+
 
 def get_secret(setting, secrets=secrets):
     try:

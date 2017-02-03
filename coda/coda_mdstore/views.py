@@ -1,6 +1,4 @@
 import codecs
-import urlparse
-import re
 import copy
 import urllib2
 try:
@@ -15,8 +13,7 @@ except ImportError:
     import simplejson as json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
-from django.shortcuts import render_to_response, get_object_or_404, \
-    get_list_or_404
+from django.shortcuts import render_to_response, get_object_or_404
 from django.core.servers.basehttp import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
@@ -26,7 +23,7 @@ from django.contrib.syndication.views import Feed
 from django.template import RequestContext
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from lxml import etree
-from premis_event_service.models import Agent, Event
+from premis_event_service.models import Event
 from coda_replication.models import QueueEntry
 from coda_validate.models import Validate
 from .models import Bag, Bag_Info, Node, External_Identifier
@@ -36,12 +33,17 @@ from presentation import getFileList, getFileHandle, bagSearch, \
     nodeEntry, createNode
 from dateutil import rrule
 from datetime import datetime
-from django.contrib.sites.models import Site
+# for historical reasons that are not entirely clear, the tests for
+# this module do some monkeypatching that expects this import
+# because Site isn't used, the line has to be muted so flake8 doesn't
+# carp about it
+from django.contrib.sites.models import Site  # noqa
 from django.db import connection
 
 from django.core.urlresolvers import reverse
 
 from . import exceptions
+from .presentation import pairtreeCandidateList
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
 utf8_decoder = codecs.getdecoder("utf-8")
@@ -67,7 +69,6 @@ def prepare_graph_date_range():
     month = system_start_date.strftime('%Y-%m')
     daily_edit_counts.append([datetime.strptime(month, '%Y-%m'), 0])
     # start with a zero count and reset this as we cross a month
-    monthly_count = 0
     for dt in rrule.rrule(
         rrule.DAILY,
         dtstart=system_start_date,
@@ -76,7 +77,7 @@ def prepare_graph_date_range():
         # if we change months
         if month != dt.strftime('%Y-%m'):
             month = dt.strftime('%Y-%m')
-            #make the year and drop in if i doenst exist
+            # make the year and drop in if i doenst exist
             daily_edit_counts.append([datetime.strptime(month, '%Y-%m'), 0])
     return daily_edit_counts
 
@@ -96,9 +97,11 @@ def calc_total_by_month(**kwargs):
     # fill in totals
     for u in month_skeleton:
         # replace existing value of zero with sum of nums in certain month
-        current_month_counts = [e for e in daily_counts if \
-            datetime.strftime(e['day'], '%Y-%m') == \
-            datetime.strftime(u[0], '%Y-%m')]
+        current_month_counts = [
+            e for e in daily_counts
+            if datetime.strftime(e['day'], '%Y-%m') ==
+            datetime.strftime(u[0], '%Y-%m')
+        ]
         for n in current_month_counts:
             if metric == 'bags':
                 current_total += n['bagging_date_num']
@@ -434,7 +437,7 @@ def json_stats(request):
     # dump the dict to as an HttpResponse
     response = HttpResponse(content_type='application/json')
     # construct the dictionary with values from aggregates
-    if bags['bagging_date__max'] != None:
+    if bags['bagging_date__max'] is not None:
         jsonDict = {
             'bags': bags['pk__count'],
             'files': bags['files__sum'],
@@ -525,7 +528,7 @@ def bagURLList(request, identifier):
     transList = []
     # attempt to grab a bag,
     try:
-        bagObject = Bag.objects.get(name=identifier)
+        Bag.objects.get(name=identifier)
     except Bag.DoesNotExist:
         return HttpResponseNotFound(
             "There is no bag with id {0}.".format(identifier)
@@ -555,10 +558,10 @@ def bagURLList(request, identifier):
         # path = urllib2.quote(path)
         try:
             unipath = unicode(path)
-        except UnicodeDecodeError, ude:
+        except UnicodeDecodeError:
             try:
                 unipath = utf8_decoder(path)[0]
-            except UnicodeDecodeError, ude:
+            except UnicodeDecodeError:
                 unipath = latin_decoder(path)[0]
         # CODA_PROXY_MODE is a settings variable
         if settings.CODA_PROXY_MODE:
@@ -581,7 +584,7 @@ def bagURLListScrape(request, identifier):
     """
 
     try:
-        bagObject = Bag.objects.get(name=identifier)
+        Bag.objects.get(name=identifier)
     except Bag.DoesNotExist:
         return HttpResponseNotFound(
             "There is no bag with id '%s'." % identifier
@@ -601,7 +604,7 @@ def bagProxy(request, identifier, filePath):
     """
 
     try:
-        bagObject = Bag.objects.get(name=identifier)
+        Bag.objects.get(name=identifier)
     except Bag.DoesNotExist:
         return HttpResponseNotFound(
             "There is no bag with id '%s'." % identifier
@@ -626,7 +629,7 @@ def externalIdentifierSearch(request, identifier=None):
     if identifier or request.REQUEST.get('ark'):
         feed_id = request.path
         if request.REQUEST.get('ark') and 'ark:/67531' not in \
-            request.REQUEST.get('ark'):
+                request.REQUEST.get('ark'):
             identifier = 'ark:/67531/%s' % request.REQUEST.get('ark')
             feed_id = request.path + identifier + '/'
         elif request.REQUEST.get('ark'):
@@ -644,7 +647,7 @@ def externalIdentifierSearch(request, identifier=None):
         bagList = []
         for bagInfoObject in bagInfoObjectList:
             bag = bagInfoObject.belong_to_bag
-            if not bag in bagList:
+            if bag not in bagList:
                 bagList.append(bag)
         feedTag = makeBagAtomFeed(
             bagObjectList=bagList,
@@ -741,7 +744,6 @@ def bagFullTextSearch(searchString, listSize=50):
     """
 
     bagList = bagSearch(searchString)
-    bagListLength = bagList.count()
     return Paginator(bagList, listSize)
 
 
@@ -838,10 +840,8 @@ def app_bag(request, identifier=None):
         entry_text = XML_HEADER % etree.tostring(entries, pretty_print=True)
         return HttpResponse(entry_text, content_type="application/atom+xml")
     elif request.method == 'GET':
-        requestString = request.path
         bags = Paginator(Bag.objects.order_by('-bagging_date'), 20)
         if len(request.GET):
-            requestString = "%s?%s" % (request.path, request.GET.urlencode())
             page = request.GET.get('page')
         else:
             page = 1
@@ -858,8 +858,9 @@ def app_bag(request, identifier=None):
                 author=APP_AUTHOR
             )
         except EmptyPage:
-            return HttpResponse("That page doesn't exist.\n", status=400,
-                content_type='text/plain'
+            return HttpResponse(
+                "That page doesn't exist.\n",
+                status=400, content_type='text/plain'
             )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
         resp = HttpResponse(feedText, content_type="application/atom+xml")
@@ -887,11 +888,15 @@ def app_bag(request, identifier=None):
         try:
             bagObject = updateBag(request)
         except Bag.DoesNotExist as e:
-            return HttpResponseNotFound("%s\n" % (e,), 
-                content_type="text/plain")
+            return HttpResponseNotFound(
+                "%s\n" % (e,),
+                content_type="text/plain"
+            )
         except exceptions.BadBagName as e:
-            return HttpResponseBadRequest("%s\n" % (e,), 
-                content_type="text/plain")
+            return HttpResponseBadRequest(
+                "%s\n" % (e,),
+                content_type="text/plain"
+            )
 
         returnXML = objectsToXML(bagObject)
         returnEntry = bagatom.wrapAtom(
@@ -927,8 +932,10 @@ def app_bag(request, identifier=None):
             allow = ('GET', 'PUT', 'DELETE')
         else:
             allow = ('GET', 'POST')
-        resp = HttpResponse("Invalid method.\n", status=405, 
-            content_type="text/plain")
+        resp = HttpResponse(
+            "Invalid method.\n",
+            status=405, content_type="text/plain"
+        )
         resp['Allow'] = ', '.join(allow)
         return resp
 
@@ -956,9 +963,7 @@ def app_node(request, identifier=None):
     elif request.method == 'GET':
         nodes = Node.objects.all()
         paginator = Paginator(nodes, max(1, len(nodes)))
-        requestString = request.path
         if len(request.GET):
-            requestString = "%s?%s" % (request.path, request.GET.urlencode())
             page = request.GET.get('page')
         else:
             page = 1
@@ -976,8 +981,9 @@ def app_node(request, identifier=None):
                 author=APP_AUTHOR
             )
         except EmptyPage:
-            return HttpResponse("That page doesn't exist.\n", status=400,
-                content_type='text/plain'
+            return HttpResponse(
+                "That page doesn't exist.\n",
+                status=400, content_type='text/plain'
             )
         feedText = XML_HEADER % etree.tostring(atomFeed, pretty_print=True)
         resp = HttpResponse(feedText, content_type="application/atom+xml")
@@ -988,8 +994,9 @@ def app_node(request, identifier=None):
         try:
             node = createNode(request)
         except etree.LxmlError:
-            return HttpResponse("Invalid XML in request body.\n", status=400,
-                content_type="text/plain"
+            return HttpResponse(
+                "Invalid XML in request body.\n",
+                status=400, content_type="text/plain"
             )
         try:
             node.save()

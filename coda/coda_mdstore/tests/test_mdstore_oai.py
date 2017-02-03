@@ -19,10 +19,6 @@ class Testmd_storeOAIInterface:
         identity = md.identify()
         assert isinstance(identity, common.Identify)
 
-    @pytest.mark.xfail(reason='Method is never used.')
-    def test__old_solr_getRecord(self):
-        assert 0
-
     def test_getRecord(self):
         bag = factories.FullBagFactory.create()
         md = oai.md_storeOAIInterface()
