@@ -1,4 +1,5 @@
 from .base import *  # noqa
+from .base import get_secret  # being explicit here
 
 
 SITE_ID = get_secret('SITE_ID')

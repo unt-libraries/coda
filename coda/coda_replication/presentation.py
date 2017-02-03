@@ -1,37 +1,10 @@
-from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, \
-    queueEntryToXML, getValueByName, getNodeByName, makeObjectFeed
+from codalib.bagatom import getValueByName, getNodeByName
 from coda_replication.models import QueueEntry
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from datetime import datetime
 from lxml import etree
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
-
-def queue_object_to_xml(queue_entry, webRoot=None):
-    """
-    Form an atom xml for a given queue object.
-    """
-
-    nodeXML = etree.Element("queue entry")
-    node_name = etree.SubElement(nodeXML, "name")
-    node_name.text = node.node_name
-    node_capacity = etree.SubElement(nodeXML, "capacity")
-    node_capacity.text = str(node.node_capacity)
-    node_size = etree.SubElement(nodeXML, "size")
-    node_size.text = str(node.node_size)
-    node_path = etree.SubElement(nodeXML, "path")
-    node_path.text = node.node_path
-    node_url = etree.SubElement(nodeXML, "url")
-    node_url.text = node.node_url
-    node_last_checked = etree.SubElement(nodeXML, "last_checked")
-    node_last_checked.text = str(node.last_checked)
-    atomXML = wrapAtom(
-        xml=nodeXML,
-        id='http://%s/%s/' % (webRoot, node.node_name),
-        title=node.node_name,
-    )
-    return atomXML
 
 
 def xmlToQueueEntry(queue_xml):
@@ -69,15 +42,6 @@ def addQueueEntry(rawXML):
     """
     Handle adding the Queue.  Based on XML input.
     """
-
-    updateList = [
-        "oxum",
-        "url_list",
-        "status",
-        "harvest_start",
-        "harvest_end",
-        "queue_position",
-    ]
     entryRoot = etree.fromstring(rawXML)
     contentElement = getNodeByName(entryRoot, "content")
     queueEntryNode = getNodeByName(contentElement, "queueEntry")

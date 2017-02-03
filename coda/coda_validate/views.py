@@ -77,8 +77,8 @@ oldest prioritized.'
             # instead, let's do this:
             # http://elpenia.wordpress.com/2010/05/11/getting-random-objects-from-a-queryset-in-django/
             v = validations.filter(
-                last_verified__lte=datetime.datetime.now() - \
-                    settings.VALIDATION_PERIOD
+                last_verified__lte=datetime.datetime.now() -
+                settings.VALIDATION_PERIOD
             )
             if v.exists():
                 random_slice = int(random.random() * v.count())
@@ -114,7 +114,8 @@ class AtomNextFeedNoServer(AtomNextNewsFeed):
 
 def index(request):
     context = {
-        'recently_prioritized': Validate.objects.filter(priority__gt=0).order_by('-priority_change_date')[:20],
+        'recently_prioritized': Validate.objects.filter(
+            priority__gt=0).order_by('-priority_change_date')[:20],
         'recently_verified': Validate.objects.all().order_by('-last_verified')[:20],
         'verified_counts': Validate.objects.last_verified_status_counts()
     }
@@ -151,11 +152,12 @@ def stats(request):
                 'unverified': 0,
                 'passed': 0,
                 'failed': 0,
-                'validation_period': '%s days' % \
-                    str(settings.VALIDATION_PERIOD.days),
+                'validation_period': '%s days' % str(
+                    settings.VALIDATION_PERIOD.days
+                ),
             },
             context_instance=RequestContext(request)
-    )
+        )
     # resolve the range for last month filter
     today = datetime.date.today()
     first = datetime.date(day=1, month=today.month, year=today.year)
@@ -172,7 +174,8 @@ def stats(request):
     # make a set of data that makes sense for the heatmap
     all_v = Validate.objects.all().order_by('last_verified')
     sums_by_date = {}
-    first_day, last_day = all_v[0], all_v.reverse()[0]
+    last_day = all_v[0], all_v.reverse()[0]
+    last_day = last_day[-1]
     for v in all_v.exclude(last_verified_status='Unverified'):
         # if the day is set
         if sums_by_date.get('%s, %s, %s' % (v.last_verified.year,
@@ -187,10 +190,13 @@ def stats(request):
                                              v.last_verified.day)] + 1
         else:
             # otherwise, create it and set it to 1
-            sums_by_date.setdefault('%s, %s, %s' % \
-                (v.last_verified.year,
-                 v.last_verified.month - 1,
-                 v.last_verified.day), 1)
+            sums_by_date.setdefault(
+                '%s, %s, %s' % (
+                    v.last_verified.year,
+                    v.last_verified.month - 1,
+                    v.last_verified.day
+                ), 1
+            )
     return render_to_response(
         'coda_validate/stats.html',
         {
@@ -206,8 +212,7 @@ def stats(request):
                 last_verified_status='Unverified'),
             'passed': Validate.objects.filter(last_verified_status='Passed'),
             'failed': Validate.objects.filter(last_verified_status='Failed'),
-            'validation_period': '%s days' % \
-                str(settings.VALIDATION_PERIOD.days),
+            'validation_period': '%s days' % str(settings.VALIDATION_PERIOD.days),
         },
         context_instance=RequestContext(request)
     )
@@ -386,7 +391,7 @@ def xmlToUpdateValidateObject(validateXML):
     """
 
     entryRoot = etree.XML(validateXML)
-    if entryRoot == None:
+    if entryRoot is None:
         raise Exception("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
@@ -418,8 +423,9 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(validateObject)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % \
-                (request.META['HTTP_HOST'], validateObject.identifier),
+            id='http://%s/APP/validate/%s/' % (
+                request.META['HTTP_HOST'], validateObject.identifier
+            ),
             title=validateObject.identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
@@ -460,8 +466,9 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(returnValidate)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % \
-                (request.META['HTTP_HOST'], identifier),
+            id='http://%s/APP/validate/%s/' % (
+                request.META['HTTP_HOST'], identifier
+            ),
             title=identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
@@ -479,8 +486,9 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(returnValidate)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % \
-                (request.META['HTTP_HOST'], identifier),
+            id='http://%s/APP/validate/%s/' % (
+                request.META['HTTP_HOST'], identifier
+            ),
             title=identifier,
             author=APP_AUTHOR.get('name', None),
             author_uri=APP_AUTHOR.get('uri', None)
@@ -501,8 +509,9 @@ def app_validate(request, identifier=None):
         validate_object.delete()
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % \
-                (request.META['HTTP_HOST'], identifier),
+            id='http://%s/APP/validate/%s/' % (
+                request.META['HTTP_HOST'], identifier
+            ),
             title=identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)

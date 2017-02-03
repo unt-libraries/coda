@@ -1,5 +1,4 @@
 from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
-#from coda_replication.models import QueueEntry
 from django.contrib import admin
 
 

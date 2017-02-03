@@ -1,13 +1,11 @@
-from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
-    HttpResponseNotFound
-from presentation import xmlToQueueEntry, addQueueEntry, updateQueueEntry
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
+from presentation import addQueueEntry, updateQueueEntry
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 from django.shortcuts import render_to_response, get_object_or_404
-from django.db.models import Sum, Count, Max, Min, Avg
 from django.conf import settings
-from django.contrib.sites.models import Site
+from django.contrib.sites.models import Site  # noqa
 from django.template import RequestContext
 try:
     # the json module was included in the stdlib in python 2.6
@@ -22,7 +20,6 @@ except ImportError:
 from datetime import datetime
 from lxml import etree
 import urllib
-import copy
 
 from codalib import APP_AUTHOR
 from codalib.bagatom import makeObjectFeed, queueEntryToXML, wrapAtom
@@ -119,7 +116,7 @@ def queue_search(request):
         identifier = request.GET.get('identifier')
         try:
             queue = queue.filter(ark__icontains=identifier)
-        except Exception, e:
+        except Exception:
             queue = QueueEntry.objects.none()
         initial.setdefault('identifier', identifier)
     # paginate 20 per page
@@ -176,11 +173,8 @@ def queue_search_JSON(request):
         # paginate 20 per page
         paginated_entries = paginate_entries(request, queue, num_per_page=20)
         # prepare a results set and then append each event to it as a dict
-        queue_url_prefix = "%s/queue/search.json" % \
-            request.META.get('HTTP_HOST')
         rel_links = []
         entries = []
-        cur_page = paginated_entries.number
         # we will ALWAYS have a self, first and last relative link
         args['page'] = paginated_entries.number
         current_page_args = args.copy()
@@ -239,9 +233,6 @@ def queue_search_JSON(request):
                 },
             )
         for entry in paginated_entries.object_list:
-            entry_status = [
-                i[1] for i in STATUS_CHOICES if str(i[0]) == entry.status
-            ][0]
             entries.extend(
                 [
                     {
@@ -358,13 +349,16 @@ def queue(request, identifier=None):
     # respond to PUT request
     elif request.method == 'PUT' and identifier:
         try:
-            queueObject = updateQueueEntry(request.body, 
-                    validate_ark=identifier)
+            queueObject = updateQueueEntry(
+                request.body, validate_ark=identifier
+            )
         except ObjectDoesNotExist as e:
             return HttpResponseNotFound(e.message, content_type="text/plain")
         except ValidationError as e:
-            return HttpResponse(e.message, content_type="text/plain",
-                    status=409)
+            return HttpResponse(
+                e.message,
+                content_type="text/plain", status=409
+            )
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,
@@ -404,8 +398,10 @@ def queue(request, identifier=None):
             allow = ('GET', 'PUT', 'DELETE')
         else:
             allow = ('GET', 'POST')
-        resp = HttpResponse("Method not allowed.\n", status=405, 
-            content_type="text/plain")
+        resp = HttpResponse(
+            "Method not allowed.\n",
+            status=405, content_type="text/plain"
+        )
         resp['Allow'] = ', '.join(allow)
     return resp
 
