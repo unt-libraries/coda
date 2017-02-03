@@ -7,6 +7,7 @@ python-dateutil==1.4.1
 requests==2.7.0
 pyoai==2.4.4
 pytest-django==2.9.1
+flake8
 mock
 factory_boy
 #codalib==1.0.0
