@@ -1,7 +1,7 @@
 import pytest
 
-from .. import factories
-from ..models import (
+from coda_validate import factories
+from coda_validate.models import (
         ValidateManager,
         Validate,
         VerifiedCountsResultFormatter)

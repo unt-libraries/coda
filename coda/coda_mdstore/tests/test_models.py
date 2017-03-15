@@ -1,4 +1,4 @@
-from .. import factories
+from coda_mdstore import factories
 
 
 class TestBag:

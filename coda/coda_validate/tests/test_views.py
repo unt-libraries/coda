@@ -6,8 +6,8 @@ import pytest
 from django.core.urlresolvers import reverse
 from django import http
 
-from .. import factories, views
-from ..models import Validate
+from coda_validate import factories, views
+from coda_validate.models import Validate
 
 
 pytestmark = pytest.mark.django_db

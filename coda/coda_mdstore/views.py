@@ -77,7 +77,7 @@ def prepare_graph_date_range():
         # if we change months
         if month != dt.strftime('%Y-%m'):
             month = dt.strftime('%Y-%m')
-            # make the year and drop in if i doenst exist
+            # make the year and drop in if it doesn't exist
             daily_edit_counts.append([datetime.strptime(month, '%Y-%m'), 0])
     return daily_edit_counts
 

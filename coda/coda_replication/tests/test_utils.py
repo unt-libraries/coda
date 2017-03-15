@@ -3,9 +3,9 @@ from lxml import etree, objectify
 
 from django.core.paginator import Page
 
-from .. import presentation, factories, views
-from ..models import QueueEntry
-from . import QUEUE_ENTRY
+from coda_replication import presentation, factories, views
+from coda_replication.models import QueueEntry
+from coda_replication.tests import QUEUE_ENTRY
 
 
 def test_paginate_entries_returns_paginator_object(rf):

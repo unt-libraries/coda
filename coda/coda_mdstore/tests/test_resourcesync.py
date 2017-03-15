@@ -2,8 +2,8 @@ import pytest
 
 from django.contrib.sitemaps import Sitemap
 
-from .. import factories
-from .. import resourcesync
+from coda_mdstore import factories
+from coda_mdstore import resourcesync
 
 pytestmark = pytest.mark.django_db()
 

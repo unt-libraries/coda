@@ -9,9 +9,9 @@ import pytest
 from django.core.urlresolvers import reverse
 from django import http
 
-from .. import views, models, exceptions
-from ..factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
-from . import CODA_XML
+from coda_mdstore import views, models, exceptions
+from coda_mdstore.factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
+from coda_mdstore.tests import CODA_XML
 
 
 pytestmark = pytest.mark.django_db()

@@ -56,3 +56,4 @@ class Validate(models.Model):
     class Meta:
         verbose_name_plural = "Validations"
         ordering = ['added']
+        app_label = 'coda_validate'

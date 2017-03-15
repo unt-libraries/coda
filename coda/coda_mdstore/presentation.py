@@ -6,8 +6,9 @@ import urlparse
 
 from BeautifulSoup import BeautifulSoup as BSoup
 from codalib import APP_AUTHOR
-from codalib.bagatom import wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, \
-        TIME_FORMAT_STRING
+from codalib.bagatom import (
+    wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, TIME_FORMAT_STRING
+)
 from datetime import datetime
 from lxml import etree
 from pypairtree import pairtree
