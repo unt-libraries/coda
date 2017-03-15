@@ -5,6 +5,7 @@ import pytest
 
 from django.core.paginator import Page
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from django import http
 
 from coda_replication import factories
@@ -350,14 +351,14 @@ class TestQueue:
     def queue_xml(self):
         return """<?xml version="1.0"?>
             <entry xmlns="http://www.w3.org/2005/Atom">
-            <title>ark:/67531/coda4fnk</title>
-            <id>http://example.com/ark:/67531/coda4fnk/</id>
+            <title>ark:/{ark_naan}/coda4fnk</title>
+            <id>http://example.com/ark:/{ark_naan}/coda4fnk/</id>
             <updated>2014-04-23T15:39:20Z</updated>
             <content type="application/xml">
                 <queueEntry xmlns="http://digital2.library.unt.edu/coda/queuexml/">
-                <ark>ark:/67531/coda4fnk</ark>
+                <ark>ark:/{ark_naan}/coda4fnk</ark>
                 <oxum>3640551.188</oxum>
-                <urlListLink>http://example.com/ark:/67531/coda4fnk.urls</urlListLink>
+                <urlListLink>http://example.com/ark:/{ark_naan}/coda4fnk.urls</urlListLink>
                 <status>1</status>
                 <start>2013-05-17T01:35:04Z</start>
                 <end>2013-05-17T01:35:13Z</end>
@@ -365,7 +366,7 @@ class TestQueue:
                 </queueEntry>
             </content>
             </entry>
-        """
+        """.format(ark_naan=settings.ARK_NAAN)
 
     def test_get_with_identifier(self, rf):
         entry = factories.QueueEntryFactory.create()
@@ -397,7 +398,10 @@ class TestQueue:
         assert response.status_code == 404
 
     def test_put(self, queue_xml, rf):
-        entry = factories.QueueEntryFactory.create(ark='ark:/67531/coda4fnk', bytes='4')
+        entry = factories.QueueEntryFactory.create(
+            ark='ark:/%d/coda4fnk' % settings.ARK_NAAN,
+            bytes='4'
+        )
 
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.queue(request, entry.ark)
@@ -409,7 +413,10 @@ class TestQueue:
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_put_without_identifier(self, queue_xml, rf):
-        factories.QueueEntryFactory.create(ark='ark:/67531/coda4fnk', bytes='4')
+        factories.QueueEntryFactory.create(
+            ark='ark:/%d/coda4fnk' % settings.ARK_NAAN,
+            bytes='4'
+        )
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
         response = views.queue(request)
 
@@ -418,7 +425,7 @@ class TestQueue:
 
     def test_put_with_xml_for_entry_that_does_not_exist(self, queue_xml, rf):
         request = rf.put('/', queue_xml, 'application/xml', HTTP_HOST='example.com')
-        response = views.queue(request, 'ark:/67531/coda4fnk')
+        response = views.queue(request, 'ark:/%d/coda4fnk' % settings.ARK_NAAN)
         assert response.status_code == 404
 
     def test_post(self, queue_xml, rf):

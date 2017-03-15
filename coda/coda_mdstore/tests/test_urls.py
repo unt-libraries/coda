@@ -1,5 +1,6 @@
 from django.contrib import sitemaps
 from django.core.urlresolvers import resolve
+from django.conf import settings
 
 from coda_mdstore import resourcesync
 from coda_mdstore import views
@@ -18,19 +19,19 @@ def test_app_bag_no_parameters():
 
 
 def test_app_with_parameters():
-    assert resolve('/APP/bag/ark:/67531/coda2/').func == views.app_bag
+    assert resolve('/APP/bag/ark:/%d/coda2/' % settings.ARK_NAAN).func == views.app_bag
 
 
 def test_bagHTML():
-    assert resolve('/bag/ark:/67531/coda2/').func == views.bagHTML
+    assert resolve('/bag/ark:/%d/coda2/' % settings.ARK_NAAN).func == views.bagHTML
 
 
 def test_bagURLList():
-    assert resolve('/bag/ark:/67531/coda2.urls').func == views.bagURLList
+    assert resolve('/bag/ark:/%d/coda2.urls' % settings.ARK_NAAN).func == views.bagURLList
 
 
 def test_bagProxy():
-    assert resolve('/bag/ark:/67531/foo/bar').func == views.bagProxy
+    assert resolve('/bag/ark:/%d/foo/bar' % settings.ARK_NAAN).func == views.bagProxy
 
 
 def test_stats():
