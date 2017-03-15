@@ -385,7 +385,6 @@ class TestQueue:
 
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
-        print entry.ark
         request = rf.delete('/'+entry.ark)
         response = views.queue(request, entry.ark)
 

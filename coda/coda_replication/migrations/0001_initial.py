@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 (
                     'files',
                     models.IntegerField(
-                        help_text=b'The number of files that the queued entry' +
+                        help_text=b'The number of files that the queued entry ' +
                                   'contains'
                     )
                 ),
