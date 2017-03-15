@@ -1,3 +1,6 @@
+from urlparse import urlparse
+import warnings
+
 from django.contrib.sitemaps import Sitemap, views
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import urlresolvers
@@ -5,10 +8,9 @@ from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from .models import Bag
+
 from codalib.bagatom import TIME_FORMAT_STRING
-from urlparse import urlparse
-import warnings
+from coda_mdstore.models import Bag
 
 try:
     MOST_RECENT_BAGGING_DATE = Bag.objects.latest(
