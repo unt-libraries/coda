@@ -1,8 +1,8 @@
 import pytest
 from lxml import etree, objectify
 
-from .. import views, factories
-from ..models import Validate
+from coda_validate import views, factories
+from coda_validate.models import Validate
 
 
 VALIDATE_XML = '{http://digital2.library.unt.edu/coda/validatexml/}validate'

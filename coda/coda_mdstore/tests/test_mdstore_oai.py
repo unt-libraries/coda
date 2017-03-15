@@ -4,8 +4,8 @@ from lxml import etree
 from oaipmh import common, error
 import pytest
 
-from .. import factories
-from .. import mdstore_oai as oai
+from coda_mdstore import factories
+from coda_mdstore import mdstore_oai as oai
 
 OAI_DC = 'oai_dc'
 CODA_BAG = 'coda_bag'

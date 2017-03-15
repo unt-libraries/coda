@@ -7,10 +7,10 @@ from django.core.paginator import Page
 from django.core.urlresolvers import reverse
 from django import http
 
-from .. import factories
-from .. import views
-from ..models import STATUS_CHOICES, QueueEntry
-from . import QUEUE_ENTRY
+from coda_replication import factories
+from coda_replication import views
+from coda_replication.models import STATUS_CHOICES, QueueEntry
+from coda_replication.tests import QUEUE_ENTRY
 
 
 pytestmark = pytest.mark.django_db()

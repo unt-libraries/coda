@@ -1,8 +1,8 @@
 from django.contrib import sitemaps
 from django.core.urlresolvers import resolve
 
-from .. import resourcesync
-from .. import views
+from coda_mdstore import resourcesync
+from coda_mdstore import views
 
 
 def test_index():

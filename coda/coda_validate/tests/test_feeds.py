@@ -4,7 +4,7 @@ import pytest
 
 from django.conf import settings
 
-from .. import views, factories
+from coda_validate import views, factories
 
 
 pytestmark = pytest.mark.django_db()

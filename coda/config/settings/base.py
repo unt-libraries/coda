@@ -130,7 +130,8 @@ LOCAL_APPS = (
     'coda_mdstore',
     'coda_replication',
     'coda_oaipmh',
-    'coda_validate',)
+    'coda_validate',
+)
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

@@ -14,7 +14,7 @@ services:
     app:
         extends:
             service: base
-        command: python manage.py runserver 0.0.0.0:80
+        command: ./appstart.sh
         ports:
             - "8787:80"
         links:

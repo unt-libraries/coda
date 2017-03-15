@@ -1,6 +1,6 @@
 from lxml import objectify
 import pytest
-from .. import factories
+from coda_mdstore import factories
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 from django.core.urlresolvers import resolve
 
-from .. import views
+from coda_validate import views
 
 
 def test_app_validate():

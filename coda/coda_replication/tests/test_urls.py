@@ -1,6 +1,6 @@
 from django.core.urlresolvers import resolve
 
-from .. import views
+from coda_replication import views
 
 
 def test_queue():

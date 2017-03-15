@@ -6,8 +6,8 @@ from codalib import bagatom
 import mock
 import pytest
 
-from .. import factories, models, presentation, views, exceptions
-from . import CODA_XML
+from coda_mdstore import factories, models, presentation, views, exceptions
+from coda_mdstore.tests import CODA_XML
 
 
 def convert_etree(tree):
