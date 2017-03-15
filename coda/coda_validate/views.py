@@ -174,8 +174,7 @@ def stats(request):
     # make a set of data that makes sense for the heatmap
     all_v = Validate.objects.all().order_by('last_verified')
     sums_by_date = {}
-    last_day = all_v[0], all_v.reverse()[0]
-    last_day = last_day[-1]
+    last_day = all_v.reverse()[0]  # reverse indexing not allowed here
     for v in all_v.exclude(last_verified_status='Unverified'):
         # if the day is set
         if sums_by_date.get('%s, %s, %s' % (v.last_verified.year,

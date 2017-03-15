@@ -32,12 +32,9 @@ class md_storeOAIInterface(object):
         if identifyDict:
             self.identifyDict.update(identifyDict)
         self.resultSize = resultSize
-        # self.timeFormatString = "%Y-%m-%dT%H:%M:%SZ"
         self.timeFormatString = "%Y-%m-%d"
         self.debug = debug
         self.domain = domain
-        # self.collectionTable = collectionTable
-        # self.institutionTable = institutionTable
 
     def identify(self):
         return common.Identify(**self.identifyDict)
@@ -69,16 +66,12 @@ class md_storeOAIInterface(object):
     def listMetadataFormats(self, identifier=None):
         if identifier:
             id = infoToArk(identifier)
-            # id = id.replace(":","\:")
-            # solrObject = solr.SolrConnection(self.solrURL)
-            # solrResult = solrObject.query("aubrey_identifier:%s" % id)
             try:
                 Bag.objects.get(name=id)
             except Bag.DoesNotExist:
                 raise error.IdDoesNotExistError(
                     "Id does not exist: %s, (%s)" % (identifier, id)
                 )
-        # seems like there should be a cleaner, automagic way to do this
         return [
                     (
                         "oai_dc",
@@ -112,7 +105,6 @@ class md_storeOAIInterface(object):
         Assuming that from_ and until_ are datetime.datetime objects
         """
 
-        # solrObject = solr.SolrConnection(self.solrURL)
         # valid metadata prefixes only
         formatString = "%Y-%m-%d"
         validPrefixes = ('oai_dc', 'coda_bag')
@@ -165,7 +157,6 @@ def makeDataRecord(
     bagInfoObjectList = Bag_Info.objects.filter(bag_name=bagObject)
 
     id = arkToInfo(bagObject.name)
-    # date = bagObject.last_verified_date
     date = bagObject.bagging_date
     for bagInfoObject in bagInfoObjectList:
         if bagInfoObject.field_name == 'Bagging-Date':
@@ -196,7 +187,6 @@ def makeDataRecord(
         dcDict["date"] = [bagInfoDict["Bagging-Date"]]
     if not len(dcDict):
         raise Exception("dcDict is empty")
-    # raise Exception(pprint.pformat(dcDict))
     setList = []
     header = common.Header(
         id,
@@ -204,27 +194,13 @@ def makeDataRecord(
         setList,
         False,
     )
-    # to build the metadata, we need to build a dublin core structure
-    # title = solrRecord['display_title']
-    # title = bagObject.name
-    # dublinStruct = {}
-    # dublinStruct['title'] = [ "Title %s" % title ] #we'll add more stuff later
-    # don't worry Mark, i just need this for testing ;)
-    # dublinStruct['identifier'] = [ "Identifier %s" % id ]
     dublinStruct = dcDict
-    # if metadataPrefix=="untl":
-    #    metadata = common.Metadata(untlDict)
-    # else:
-    #    metadata = common.Metadata(dublinStruct)
     if metadataPrefix == "oai_dc":
         metadata = common.Metadata(dublinStruct)
     elif metadataPrefix == "coda_bag":
         bagMap = {}
         bagMap["bag"] = bagObject
-        # bagMag["baginfos"] = bagInfoObjectList
         metadata = common.Metadata(bagMap)
-    # the third member of the tuple is supposed to be the 'about' field...
-    # what to populate that with?
     return (header, metadata, None)
 
 
