@@ -42,8 +42,8 @@ from django.db import connection
 
 from django.core.urlresolvers import reverse
 
-from . import exceptions
-from .presentation import pairtreeCandidateList
+from coda_mdstore import exceptions
+from coda_mdstore.presentation import pairtreeCandidateList
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
 utf8_decoder = codecs.getdecoder("utf-8")
@@ -628,9 +628,9 @@ def externalIdentifierSearch(request, identifier=None):
 
     if identifier or request.REQUEST.get('ark'):
         feed_id = request.path
-        if request.REQUEST.get('ark') and 'ark:/67531' not in \
+        if request.REQUEST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
                 request.REQUEST.get('ark'):
-            identifier = 'ark:/67531/%s' % request.REQUEST.get('ark')
+            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.REQUEST.get('ark'))
             feed_id = request.path + identifier + '/'
         elif request.REQUEST.get('ark'):
             identifier = request.REQUEST.get('ark')
@@ -671,8 +671,8 @@ def externalIdentifierSearch(request, identifier=None):
 def externalIdentifierSearchJSON(request):
     """External_Identifier search formatted in JSON."""
     ark = request.GET.get('ark', '')
-    if 'ark:/67531' not in ark:
-        ark = 'ark:/67531/%s' % ark
+    if ('ark:/%d' % settings.ARK_NAAN) not in ark:
+        ark = 'ark:/%d/%s' % (settings.ARK_NAAN, ark)
 
     identifiers = (External_Identifier.objects
                                       .select_related('belong_to_bag')

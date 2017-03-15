@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.paginator import Paginator, Page
+from django.conf import settings
 from lxml import etree, objectify
 from codalib import bagatom
 import mock
@@ -293,7 +294,7 @@ class TestXmlToBagObject:
     def bag_xml(self):
         xml = """
             <bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/">
-            <bag:name>ark:/67531/coda2</bag:name>
+            <bag:name>ark:/{ark_naan}/coda2</bag:name>
             <bag:fileCount>43</bag:fileCount>
             <bag:payloadSize>46259062</bag:payloadSize>
             <bag:bagitVersion>0.96</bag:bagitVersion>
@@ -311,7 +312,7 @@ class TestXmlToBagObject:
                 </bag:item>
             </bag:bagInfo>
             </bag:codaXML>
-        """
+        """.format(ark_naan=settings.ARK_NAAN)
         return objectify.fromstring(xml)
 
     def test_name_not_set(self, bag_xml):
@@ -426,15 +427,15 @@ class TestXmlToBagObject:
 def bag_xml():
     xml = """<?xml version="1.0"?>
         <entry xmlns="http://www.w3.org/2005/Atom">
-        <title>ark:/67531/coda2</title>
-        <id>ark:/67531/coda2</id>
+        <title>ark:/{ark_naan}/coda2</title>
+        <id>ark:/{ark_naan}/coda2</id>
         <updated>2013-06-05T17:05:33Z</updated>
         <author>
             <name>server</name>
         </author>
         <content type="application/xml">
             <bag:codaXML xmlns:bag="http://digital2.library.unt.edu/coda/bagxml/">
-            <bag:name>ark:/67531/coda2</bag:name>
+            <bag:name>ark:/{ark_naan}/coda2</bag:name>
             <bag:fileCount>43</bag:fileCount>
             <bag:payloadSize>46259062</bag:payloadSize>
             <bag:bagitVersion>0.96</bag:bagitVersion>
@@ -452,7 +453,7 @@ def bag_xml():
             </bag:codaXML>
         </content>
         </entry>
-    """
+    """.format(ark_naan=settings.ARK_NAAN)
     return objectify.fromstring(xml)
 
 
@@ -527,7 +528,7 @@ class TestUpdateBag:
     """
 
     def test_returns_bag(self, bag_xml, rf):
-        bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
+        bag = factories.FullBagFactory.create(name='ark:/%d/coda2' % settings.ARK_NAAN)
         xml_str = etree.tostring(bag_xml)
 
         uri = '/APP/bag/{0}/'.format(bag.name)
@@ -537,7 +538,7 @@ class TestUpdateBag:
         assert isinstance(updated_bag, models.Bag)
 
     def test_bag_is_updated(self, bag_xml, rf):
-        bag = factories.FullBagFactory.create(name='ark:/67531/coda2')
+        bag = factories.FullBagFactory.create(name='ark:/%d/coda2' % settings.ARK_NAAN)
         xml_str = etree.tostring(bag_xml)
 
         uri = '/APP/bag/{0}/'.format(bag.name)
@@ -555,7 +556,7 @@ class TestUpdateBag:
         assert updated_bag.external_identifier_set.count() == 0
 
     def test_raises_bad_bag_name_exception(self, bag_xml, rf):
-        factories.FullBagFactory.create(name='ark:/67531/coda2')
+        factories.FullBagFactory.create(name='ark:/%d/coda2' % settings.ARK_NAAN)
         xml_str = etree.tostring(bag_xml)
 
         request = rf.post('/', xml_str, 'application/xml')
@@ -568,7 +569,7 @@ class TestUpdateBag:
         xml_str = etree.tostring(bag_xml)
 
         # FIXME: Duplication between the test and the test fixture
-        uri = '/APP/bag/ark:/67531/coda2/'
+        uri = '/APP/bag/ark:/%d/coda2/' % settings.ARK_NAAN
         request = rf.post(uri, xml_str, 'application/xml')
 
         with pytest.raises(models.Bag.DoesNotExist):

@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from django import http
 
 from coda_mdstore import views, models, exceptions
@@ -439,7 +440,7 @@ class TestExternalIdentiferSearch:
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
-            value='ark:/67531/metadc000001'
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
         )
 
         # URL with the identifier as a URL parameter. We will feed the URL to
@@ -479,7 +480,7 @@ class TestExternalIdentiferSearch:
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
-            value='ark:/67531/metadc000001'
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
         )
 
         # Just like in the previous test, feed the real URL to the request
@@ -491,7 +492,7 @@ class TestExternalIdentiferSearch:
 
         # URL with the ark id as a query parameter.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
-        request = rf.get(url, {'ark': 'ark:/67531/metadc000001'})
+        request = rf.get(url, {'ark': 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)})
         response2 = views.externalIdentifierSearch(request)
 
         assert response1['Content-Type'] == response2['Content-Type']
@@ -532,7 +533,7 @@ class TestExternalIdentiferSearchJSON:
         bag = FullBagFactory.create()
         ext_id = ExternalIdentifierFactory.create(
             belong_to_bag=bag,
-            value='ark:/67531/metadc000001'
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
         )
 
         request = rf.get('/', {'ark': ext_id.value})

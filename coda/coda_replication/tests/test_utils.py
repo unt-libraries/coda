@@ -2,6 +2,7 @@ import pytest
 from lxml import etree, objectify
 
 from django.core.paginator import Page
+from django.conf import settings
 
 from coda_replication import presentation, factories, views
 from coda_replication.models import QueueEntry
@@ -29,15 +30,15 @@ def test_paginate_entries_invalid_page_defaults_to_last_page(rf):
 @pytest.fixture
 def queue_entry_xml():
     return """<queueEntry>
-            <ark>ark:/67531/coda4fnk</ark>
+            <ark>ark:/{ark_naan}/coda4fnk</ark>
             <oxum>3640551.188</oxum>
-            <urlListLink>http://example.com/ark:/67531/coda4fnk.urls</urlListLink>
+            <urlListLink>http://example.com/ark:/{ark_naan}/coda4fnk.urls</urlListLink>
             <status>1</status>
             <start>2013-05-17T01:35:04Z</start>
             <end>2013-05-17T01:35:13Z</end>
             <position>2</position>
         </queueEntry>
-    """
+    """.format(ark_naan=settings.ARK_NAAN)
 
 
 def test_xmlToQueueEntry_returns_QueueEntry(queue_entry_xml):
@@ -91,14 +92,14 @@ def test_xmlToQueueEntry_sets_queue_position_attribute(queue_entry_xml):
 def queue_xml():
     return """<?xml version="1.0"?>
         <entry xmlns="http://www.w3.org/2005/Atom">
-        <title>ark:/67531/coda4fnk</title>
-        <id>http://example.com/ark:/67531/coda4fnk/</id>
+        <title>ark:/{ark_naan}/coda4fnk</title>
+        <id>http://example.com/ark:/{ark_naan}/coda4fnk/</id>
         <updated>2014-04-23T15:39:20Z</updated>
         <content type="application/xml">
             <queueEntry xmlns="http://digital2.library.unt.edu/coda/queuexml/">
-            <ark>ark:/67531/coda4fnk</ark>
+            <ark>ark:/{ark_naan}/coda4fnk</ark>
             <oxum>3640551.188</oxum>
-            <urlListLink>http://example.com/ark:/67531/coda4fnk.urls</urlListLink>
+            <urlListLink>http://example.com/ark:/{ark_naan}/coda4fnk.urls</urlListLink>
             <status>1</status>
             <start>2013-05-17T01:35:04Z</start>
             <end>2013-05-17T01:35:13Z</end>
@@ -106,7 +107,7 @@ def queue_xml():
             </queueEntry>
         </content>
         </entry>
-    """
+    """.format(ark_naan=settings.ARK_NAAN)
 
 
 @pytest.mark.django_db
