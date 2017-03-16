@@ -1,4 +1,6 @@
+import os
 import pytest
+from lxml import etree
 
 from django.contrib.sitemaps import Sitemap
 
@@ -39,7 +41,7 @@ class FakeSitemap(Sitemap):
         return "/bag/%s" % obj.name
 
 
-def test_index_context(rf):
+def test_index_context(rf, siteindex_schema):
     """Test the context data in the response returned from `index`.
 
     `index` is essentially the function defined in
@@ -60,6 +62,11 @@ def test_index_context(rf):
 
     assert resource_list_1 in locations[0]
     assert resource_list_2 in locations[1]
+    if response.is_rendered:
+        raw_xml = response.content
+    else:
+        raw_xml = response.rendered_content
+    siteindex_schema.assert_(etree.fromstring(raw_xml.encode('utf-8')))
 
 
 def test_sitemap_context(rf):
