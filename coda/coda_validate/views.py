@@ -76,9 +76,9 @@ oldest prioritized.'
             # ).order_by('?')
             # instead, let's do this:
             # http://elpenia.wordpress.com/2010/05/11/getting-random-objects-from-a-queryset-in-django/
+            now = datetime.datetime.now()
             v = validations.filter(
-                last_verified__lte=datetime.datetime.now() -
-                settings.VALIDATION_PERIOD
+                last_verified__lte=now - settings.VALIDATION_PERIOD
             )
             if v.exists():
                 random_slice = int(random.random() * v.count())

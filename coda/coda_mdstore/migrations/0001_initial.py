@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                     'last_verified_date',
                     models.DateField(
                         help_text=b'Date of last Bag Verification'
-                        )
+                    )
                 ),
                 (
                     'last_verified_status',
@@ -123,7 +123,8 @@ class Migration(migrations.Migration):
                         verbose_name='ID',
                         serialize=False,
                         auto_created=True,
-                        primary_key=True)
+                        primary_key=True
+                    )
                 ),
                 (
                     'node_name',
