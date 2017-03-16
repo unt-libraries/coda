@@ -59,9 +59,7 @@ class md_storeOAIInterface(object):
         """
         No sets as of yet
         """
-
         raise error.NoSetHierarchyError
-        # return []
 
     def listMetadataFormats(self, identifier=None):
         if identifier:
