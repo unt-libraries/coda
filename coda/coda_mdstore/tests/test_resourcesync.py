@@ -7,6 +7,19 @@ from coda_mdstore import resourcesync
 
 pytestmark = pytest.mark.django_db()
 
+SCHEMA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'schema')
+
+
+@pytest.fixture
+def siteindex_schema():
+    """Provides an lxml schema object for the sitemap schema (including
+    resourcesync 1.1) for validation.
+    """
+    with open(os.path.join(SCHEMA_DIR, "siteindex.xsd")) as schema_file:
+        schema_doc = etree.parse(schema_file)
+        schema = etree.XMLSchema(schema_doc)
+    return schema
+
 
 class FakeSitemap(Sitemap):
     """Fake Sitemap object similar to resourcesync.BaseSitemap.
