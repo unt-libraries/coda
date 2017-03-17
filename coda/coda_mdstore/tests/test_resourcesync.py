@@ -66,7 +66,8 @@ def test_index_context(rf, siteindex_schema):
         raw_xml = response.content
     else:
         raw_xml = response.rendered_content
-    siteindex_schema.assert_(etree.fromstring(raw_xml.encode('utf-8')))
+    siteindex_xml = etree.fromstring(raw_xml.encode('utf-8'))
+    siteindex_schema.assert_(siteindex_xml)
 
 
 def test_sitemap_context(rf):
@@ -86,11 +87,15 @@ def test_sitemap_context(rf):
     urlset = response.context_data['urlset']
 
     # Check that all the dictionaries in `urlset` have the following keys.
-    assert all(True for item in urlset if 'priority' in item.keys())
-    assert all(True for item in urlset if 'lastmod' in item.keys())
-    assert all(True for item in urlset if 'changefreq' in item.keys())
-    assert all(True for item in urlset if 'location' in item.keys())
-    assert all(True for item in urlset if 'oxum' in item.keys())
+    reqd_keys = ('priority', 'lastmod', 'changefreq', 'location', 'oxum')
+    def has_keys(d):
+        for reqd_key in reqd_keys:
+            if reqd_key in d:
+                continue
+            else:
+                return False
+        return True
+    assert all(map(has_keys, urlset))
 
     assert 'MOST_RECENT_BAGGING_DATE' in response.context_data
 

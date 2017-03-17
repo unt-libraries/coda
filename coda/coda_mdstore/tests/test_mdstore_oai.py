@@ -91,7 +91,7 @@ class Testmd_storeOAIInterface:
 
         records = md.listRecords(OAI_DC)
         assert len(records) == 10
-        assert all(True for r in records if len(r) == 3)
+        assert all(map(lambda x: len(x) == 3, records))
 
     def test_listStuff_raises_CannotDisseminateFormatError(self):
         """Test listStuff will raise a CannotDisseminateFormatError
