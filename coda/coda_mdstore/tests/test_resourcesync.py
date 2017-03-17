@@ -1,6 +1,7 @@
 import os
 import pytest
 from lxml import etree
+from functools import partial
 
 from django.contrib.sitemaps import Sitemap
 
@@ -11,6 +12,18 @@ pytestmark = pytest.mark.django_db()
 
 SCHEMA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'schema')
 
+def has_these_keys(dict_, required=None):
+    """Checks `dict_` for presence of all keys passed as strings in iterable
+    `required`. Useful for binding with `partial`.
+    """
+    if not required:
+        return True
+    for reqd_key in required:
+        if reqd_key in dict_:
+            continue
+        else:
+            return False
+    return True
 
 @pytest.fixture
 def siteindex_schema():
@@ -88,13 +101,7 @@ def test_sitemap_context(rf):
 
     # Check that all the dictionaries in `urlset` have the following keys.
     reqd_keys = ('priority', 'lastmod', 'changefreq', 'location', 'oxum')
-    def has_keys(d):
-        for reqd_key in reqd_keys:
-            if reqd_key in d:
-                continue
-            else:
-                return False
-        return True
+    has_keys = partial(has_these_keys, required=reqd_keys)
     assert all(map(has_keys, urlset))
 
     assert 'MOST_RECENT_BAGGING_DATE' in response.context_data
@@ -115,7 +122,7 @@ def test_sitemap_locations(rf):
 
     # Verify that each bag in the batch has a location in the context.
     for bag in bags:
-        assert any(True for u in urlset if bag.name in u['location'])
+        assert any(map(lambda u: bag.name in u['location'], urlset))
 
 
 def test_changelist(rf):
@@ -146,10 +153,9 @@ def test_changelist_context(rf):
     urlset = response.context_data['urlset']
 
     # Check that all the dictionaries in `urlset` have the following keys.
-    assert all(True for item in urlset if 'name' in item.keys())
-    assert all(True for item in urlset if 'size' in item.keys())
-    assert all(True for item in urlset if 'files' in item.keys())
-    assert all(True for item in urlset if 'bagging_date' in item.keys())
+    reqd_keys = ('name', 'size', 'files', 'bagging_date')
+    has_keys = partial(has_these_keys, required=reqd_keys)
+    assert all(map(has_keys, urlset))
 
     assert 'MOST_RECENT_BAGGING_DATE' in response.context_data
 
@@ -178,7 +184,7 @@ class TestBaseSitemap:
         items = sitemap.items()
 
         assert items.count() == 10
-        assert all(True for i in items if 'name' in i.keys())
+        assert all(map(lambda i: 'name' in i.keys(), items))
 
     def test_location(self):
         obj = {'name': 'ark:/00001/coda1k'}
