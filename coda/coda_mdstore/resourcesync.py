@@ -17,7 +17,7 @@ try:
         'bagging_date'
     ).bagging_date.strftime(TIME_FORMAT_STRING)
 except Exception, e:
-    MOST_RECENT_BAGGING_DATE = '12/12/2012'
+    MOST_RECENT_BAGGING_DATE = '2012-12-12T00:00:00Z'
 
 
 def index(

@@ -72,11 +72,15 @@ class md_storeOAIInterface(object):
                 )
         return [
                     (
-                        "oai_dc",
-                        "http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd",
-                        "http://www.openarchives.org/OAI/2.0/oai_dc/"
+                        'oai_dc',
+                        'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd',
+                        'http://www.openarchives.org/OAI/2.0/oai_dc/'
                     ),
-                    ("coda_bag", "", ""),
+                    (
+                        'coda_bag',
+                        'http://digital2.library.unt.edu/bagxml.xsd',
+                        'http://digital2.library.unt.edu/coda/bagxml/'
+                    ),
                 ]
 
     def listIdentifiers(self, metadataPrefix=None, from_=None, until=None,
