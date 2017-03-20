@@ -143,8 +143,7 @@ class OAIInterface(object):
 def makeDataRecord(
     bagObject,
     domain="",
-    metadataPrefix="oai_dc",
-    setAssociationList=[]
+    metadataPrefix="oai_dc"
 ):
     """
     Given a Bag object, make a record in the format that oaipmh uses
