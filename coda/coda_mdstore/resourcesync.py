@@ -114,7 +114,7 @@ def sitemap(request, sitemaps, section=None,
 
 def changelist(request, sitemaps, section=None,
                template_name='changelist.xml', content_type='application/xml'):
-    most_recent_bags = Bag.objects.order_by('-bagging_date').values(
+    most_recent_bags = Bag.objects.order_by('-bagging_date', '-name').values(
         'name',
         'size',
         'files',
@@ -160,7 +160,7 @@ class BaseSitemap(Sitemap):
 
     def items(self):
         # return the list of all the bags sorted by bagging_date
-        return Bag.objects.order_by('bagging_date').values('name')
+        return Bag.objects.order_by('bagging_date', 'name').values('name')
 
     def location(self, obj):
         # if we just return the object it will give a unicode value tuple
