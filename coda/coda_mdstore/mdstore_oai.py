@@ -23,11 +23,6 @@ class OAIInterface(object):
             # 'granularity':'YYYY-MM-DD',
             'compression': ['identity'],
         }
-        self.setAssociations = [
-            ("dc_rights_access", "access_rights"),
-            ("untl_institution", "partner"),
-            ("untl_collection", "collection"),
-        ]
         if identifyDict:
             self.identifyDict.update(identifyDict)
         self.resultSize = resultSize
