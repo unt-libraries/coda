@@ -4,13 +4,12 @@ from oaipmh import common, error
 from datetime import datetime
 
 
-class md_storeOAIInterface(object):
+class OAIInterface(object):
     """
-    Right, so, this is a class that is supposed to implement the requirements
-    laid out by the ResumptionOAIPMH 'interface'.  I'm sort of stabbing in
-    the dark at how this is supposed to work right now
-    """
+    This class implements the IOAI 'interface', laid out here:
 
+     https://github.com/infrae/pyoai/blob/master/src/oaipmh/interfaces.py
+    """
     def __init__(self, identifyDict={}, resultSize=10, domain="", debug=False):
         self.identifyDict = {
             'repositoryName': 'Base',
@@ -86,7 +85,7 @@ class md_storeOAIInterface(object):
     def listIdentifiers(self, metadataPrefix=None, from_=None, until=None,
                         set=None, cursor=0, batch_size=10):
 
-        return self.listStuff(
+        return self.makeList(
             metadataPrefix=metadataPrefix, from_=from_,
             until=until, set=set, cursor=cursor, batch_size=batch_size,
             headersOnly=True
@@ -95,14 +94,14 @@ class md_storeOAIInterface(object):
     def listRecords(self, metadataPrefix=None, from_=None, until=None,
                     set=None, cursor=0, batch_size=10):
 
-        return self.listStuff(
+        return self.makeList(
             metadataPrefix=metadataPrefix, from_=from_,
             until=until, set=set, cursor=cursor, batch_size=batch_size,
             headersOnly=False
         )
 
-    def listStuff(self, metadataPrefix=None, from_=None, until=None,
-                  set=None, cursor=0, batch_size=10, headersOnly=True):
+    def makeList(self, metadataPrefix=None, from_=None, until=None,
+                 set=None, cursor=0, batch_size=10, headersOnly=True):
         """
         Assuming that from_ and until_ are datetime.datetime objects
         """

@@ -12,6 +12,7 @@ pytestmark = pytest.mark.django_db()
 
 SCHEMA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'schema')
 
+
 def has_these_keys(dict_, required=None):
     """Checks `dict_` for presence of all keys passed as strings in iterable
     `required`. Useful for binding with `partial`.
@@ -24,6 +25,7 @@ def has_these_keys(dict_, required=None):
         else:
             return False
     return True
+
 
 @pytest.fixture
 def siteindex_schema():
