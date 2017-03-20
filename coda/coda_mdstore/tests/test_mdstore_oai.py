@@ -12,16 +12,16 @@ CODA_BAG = 'coda_bag'
 
 
 @pytest.mark.django_db
-class Testmd_storeOAIInterface:
+class TestOAIInterface:
 
     def test_identify(self):
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
         identity = md.identify()
         assert isinstance(identity, common.Identify)
 
     def test_getRecord(self):
         bag = factories.FullBagFactory.create()
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
         record = md.getRecord(OAI_DC, bag.name)
 
         header, metadata, about = record
@@ -34,19 +34,19 @@ class Testmd_storeOAIInterface:
         """Test that getRecord raises an exception when an object cannot
         be located with the given identifier.
         """
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         with pytest.raises(error.IdDoesNotExistError):
             md.getRecord(OAI_DC, 'ark:/00001/dne')
 
     def test_listSets_raises_NoSetHierarchyError(self):
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         with pytest.raises(error.NoSetHierarchyError):
             md.listSets()
 
     def test_listMetadataFormats(self):
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         formats = md.listMetadataFormats()
         assert formats[0][0] == OAI_DC
@@ -58,7 +58,7 @@ class Testmd_storeOAIInterface:
         method.
         """
         bag = factories.FullBagFactory.create()
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         formats_without_identifier = md.listMetadataFormats()
         formats_with_identifier = md.listMetadataFormats(bag.name)
@@ -69,7 +69,7 @@ class Testmd_storeOAIInterface:
         """Test listMetadataFormats raises an IdDoesNotExistError when an
         invalid identifier is passed.
         """
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
         invalid_identifier = 'dne'
 
         with pytest.raises(error.IdDoesNotExistError):
@@ -78,7 +78,7 @@ class Testmd_storeOAIInterface:
     def test_listIdentifiers(self):
         """Test listIdentifiers returns a list of Header objects."""
         factories.FullBagFactory.create_batch(30)
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         records = md.listIdentifiers(OAI_DC)
         assert len(records) == 10
@@ -87,50 +87,50 @@ class Testmd_storeOAIInterface:
     def test_listRecords(self):
         """Test listRecords returns a list of 3 element tuples."""
         factories.FullBagFactory.create_batch(30)
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
         records = md.listRecords(OAI_DC)
         assert len(records) == 10
         assert all(map(lambda r: len(r) == 3, records))
 
-    def test_listStuff_raises_CannotDisseminateFormatError(self):
-        """Test listStuff will raise a CannotDisseminateFormatError
+    def test_makeList_raises_CannotDisseminateFormatError(self):
+        """Test makeList will raise a CannotDisseminateFormatError
         when given an invalid prefix.
         """
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
         invalid_prefix = 'dne'
 
         with pytest.raises(error.CannotDisseminateFormatError):
-            md.listStuff(invalid_prefix)
+            md.makeList(invalid_prefix)
 
-    def test_listStuff_returns_records(self):
-        """Test listStuff returns complete records when the `headersOnly`
+    def test_makeList_returns_records(self):
+        """Test makeList returns complete records when the `headersOnly`
         keyword arg is False.
         """
         factories.FullBagFactory.create_batch(30)
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
-        records = md.listStuff(OAI_DC, headersOnly=False)
+        records = md.makeList(OAI_DC, headersOnly=False)
         assert len(records) == 10
         assert all(map(lambda r: len(r) == 3, records))
 
-    def test_listStuff_only_returns_headers(self):
-        """Test listStuff returns Header objects when the `headersOnly`
+    def test_makeList_only_returns_headers(self):
+        """Test makeList returns Header objects when the `headersOnly`
         keyword arg is True.
         """
         factories.FullBagFactory.create_batch(30)
-        md = oai.md_storeOAIInterface()
+        md = oai.OAIInterface()
 
-        records = md.listStuff(OAI_DC, headersOnly=True)
+        records = md.makeList(OAI_DC, headersOnly=True)
         assert len(records) == 10
         assert all(isinstance(r, common.Header) for r in records)
 
     @pytest.mark.xfail(reason='When the default metadataPrefix parameter is used, an '
                               'exception is raised.')
-    def test_listStuff_with_default_metadataPrefix(self):
+    def test_makeList_with_default_metadataPrefix(self):
         factories.FullBagFactory.create_batch(30)
-        md = oai.md_storeOAIInterface()
-        md.listStuff()
+        md = oai.OAIInterface()
+        md.makeList()
 
 
 @pytest.mark.django_db
@@ -264,7 +264,7 @@ def test_infoToArk_returns_info_uri():
 @pytest.mark.django_db
 def test_coda_bag_writer():
     bag = factories.FullBagFactory.create()
-    md = oai.md_storeOAIInterface()
+    md = oai.OAIInterface()
 
     _, metadata, _ = md.getRecord(CODA_BAG, bag.name)
     element = etree.Element('root')
@@ -278,7 +278,7 @@ def test_coda_bag_writer():
                           'can be passed to the function.')
 def test_coda_bag_writer_with_invalid_metadata():
     bag = factories.FullBagFactory.create()
-    md = oai.md_storeOAIInterface()
+    md = oai.OAIInterface()
 
     _, metadata, _ = md.getRecord(OAI_DC, bag.name)
     element = etree.Element('root')
