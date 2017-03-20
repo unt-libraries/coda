@@ -98,7 +98,9 @@ class OAIInterface(object):
     def makeList(self, metadataPrefix=None, from_=None, until=None,
                  set=None, cursor=0, batch_size=10, headersOnly=True):
         """
-        Assuming that from_ and until_ are datetime.datetime objects
+        Method for creating generic lists of bag resources.
+
+        Assumes that from_ and until_ are datetime.datetime objects
         """
 
         # valid metadata prefixes only
