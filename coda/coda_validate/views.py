@@ -186,7 +186,7 @@ def stats(request):
         'coda_validate/stats.html',
         {
             'sums_by_date': dict((('%d, %d, %d ' % s, c)
-                                   for s, c in sums_by_date.items())),
+                                 for s, c in sums_by_date.items())),
             'num_years': num_years,
             'validations': total,
             'this_month': Validate.objects.filter(
