@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from datetime import datetime
 
 
@@ -57,3 +57,36 @@ class Validate(models.Model):
         verbose_name_plural = "Validations"
         ordering = ['added']
         app_label = 'coda_validate'
+
+    @classmethod
+    def sums_by_date(cls,):
+        sql = """select date(last_verified) as dt, count(date(last_verified)) as ct
+        from %s
+        where last_verified_status != 'Unverified'
+        group by date(last_verified)
+        order by last_verified asc""" % (cls._meta.db_table,)
+        sums_by_date = {}
+        with connection.cursor() as cur:
+            cur.execute(sql)
+            row = cur.fetchone()
+            while row:
+                dt, ct = row
+                dt = (dt.year, dt.month, dt.day)
+                sums_by_date[dt] = ct
+                row = cur.fetchone()
+        return sums_by_date
+
+    @classmethod
+    def result_counts(cls,):
+        sql = """select last_verified_status as st, count(*) as ct
+        from %s
+        group by last_verified_status""" % (cls._meta.db_table,)
+        results = {}
+        with connection.cursor() as cur:
+            cur.execute(sql)
+            row = cur.fetchone()
+            while row:
+                st, ct = row
+                results[st] = ct
+                row = cur.fetchone()
+        return results

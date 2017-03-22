@@ -1,6 +1,7 @@
 import json
 import random
 import datetime
+from itertools import groupby
 
 from codalib import APP_AUTHOR
 from codalib.bagatom import wrapAtom, makeObjectFeed
@@ -172,45 +173,31 @@ def stats(request):
     since_validation_period = now - datetime.timedelta(
         days=settings.VALIDATION_PERIOD.days)
     # make a set of data that makes sense for the heatmap
-    all_v = Validate.objects.all().order_by('last_verified')
-    sums_by_date = {}
-    last_day = all_v.reverse()[0]  # reverse indexing not allowed here
-    for v in all_v.exclude(last_verified_status='Unverified'):
-        # if the day is set
-        if sums_by_date.get('%s, %s, %s' % (v.last_verified.year,
-                                            v.last_verified.month - 1,
-                                            v.last_verified.day)):
-            # increment the value by one
-            sums_by_date['%s, %s, %s' % (v.last_verified.year,
-                                         v.last_verified.month - 1,
-                                         v.last_verified.day)] = \
-                sums_by_date['%s, %s, %s' % (v.last_verified.year,
-                                             v.last_verified.month - 1,
-                                             v.last_verified.day)] + 1
-        else:
-            # otherwise, create it and set it to 1
-            sums_by_date.setdefault(
-                '%s, %s, %s' % (
-                    v.last_verified.year,
-                    v.last_verified.month - 1,
-                    v.last_verified.day
-                ), 1
-            )
+    result_counts = Validate.result_counts()
+    total = sum(result_counts.values())
+    sums_by_date = Validate.sums_by_date()
+    years = []
+    for y, g in groupby(sums_by_date.keys(), lambda s: s[0]):
+        if y not in years:
+            years.append(y)
+    years = tuple(sorted(years))
+    num_years = len(years)
     return render_to_response(
         'coda_validate/stats.html',
         {
-            'sums_by_date': sums_by_date,
-            'validations': Validate.objects.all(),
+            'sums_by_date': dict((('%d, %d, %d ' % s, c)
+                                   for s, c in sums_by_date.items())),
+            'num_years': num_years,
+            'validations': total,
             'this_month': Validate.objects.filter(
-                last_verified__range=this_month_range),
+                last_verified__range=this_month_range).count(),
             'last_24h': Validate.objects.filter(
-                last_verified__range=[twenty_four_hours_ago, now]),
+                last_verified__range=[twenty_four_hours_ago, now]).count(),
             'last_vp': Validate.objects.filter(
-                last_verified__range=[since_validation_period, now]),
-            'unverified': Validate.objects.filter(
-                last_verified_status='Unverified'),
-            'passed': Validate.objects.filter(last_verified_status='Passed'),
-            'failed': Validate.objects.filter(last_verified_status='Failed'),
+                last_verified__range=[since_validation_period, now]).count(),
+            'unverified': result_counts['Unverified'],
+            'passed': result_counts['Passed'],
+            'failed': result_counts['Failed'],
             'validation_period': '%s days' % str(settings.VALIDATION_PERIOD.days),
         },
         context_instance=RequestContext(request)
