@@ -10,9 +10,9 @@
         dataTable.addColumn({ type: 'string', id: 'status' });
         dataTable.addColumn({ type: 'number', id: 'num' });
         dataTable.addRows([
-            ['Unverified', {{ unverified.count }}],
-            ['Passed', {{ passed.count }}],
-            ['Failed', {{ failed.count }}],
+            ['Unverified', {{ unverified }}],
+            ['Passed', {{ passed }}],
+            ['Failed', {{ failed }}],
         ]);
         var options = {
             width: 300,
@@ -32,7 +32,7 @@
     function drawChart() {
         var dataTable = new google.visualization.DataTable();
         dataTable.addColumn({ type: 'date', id: 'Date' });
-        dataTable.addColumn({ type: 'number', id: 'Won/Loss' });
+        dataTable.addColumn({ type: 'number', id: 'Validated' });
         dataTable.addRows([
             // add rows like this:
             // [ new Date(2012, 3, 13), 125123 ],
@@ -42,7 +42,7 @@
         ]);
         var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
         var options = {
-            height: 250,
+            height: {{ num_years }} * 180
         };
         chart.draw(dataTable, options);
     }
@@ -59,25 +59,25 @@
             <div class='span4'>
                 <dl class="dl-horizontal">
                     <dt>Total Validations</dt>
-                    <dd><span class="label">{{ validations.count|intcomma }}</span></dd>
+                    <dd><span class="label">{{ validations|intcomma }}</span></dd>
                     <dt>Past {{ validation_period }}</dt>
-                    <dd><span class="label">{{ last_vp.count|intcomma }}</span></dd>
+                    <dd><span class="label">{{ last_vp|intcomma }}</span></dd>
                     <dt>Past 24 hrs</dt>
-                    <dd><span class="label">{{ last_24h.count|intcomma }}</span></dd>
+                    <dd><span class="label">{{ last_24h|intcomma }}</span></dd>
                     <dt>This month</dt>
-                    <dd><span class="label">{{ this_month.count|intcomma }}</span></dd>
+                    <dd><span class="label">{{ this_month|intcomma }}</span></dd>
                     <dt>Unverified in Queue</dt>
-                    <dd><span class="label">{{ unverified.count|intcomma }}</span></dd>
+                    <dd><span class="label">{{ unverified|intcomma }}</span></dd>
                 </dl>
             </div>
             <div class='span8'>
-                <div id="piechart" style="width: 300px; height: 300px;"></div>
+                <div id="piechart" style="width: 300px; height: auto;"></div>
             </div>
         </div>
         <div class='row'>
             <div class='span12 hero-unit'>
                 <h3>Validations By Date</h3>
-                <div id="calendar_basic" style="width: 1000px; height: 200px;"></div>
+                <div id="calendar_basic"></div>
             </div>
         </div>
     {% endif %}
