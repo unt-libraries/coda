@@ -1,7 +1,6 @@
 import json
 import random
 import datetime
-from itertools import groupby
 
 from codalib import APP_AUTHOR
 from codalib.bagatom import wrapAtom, makeObjectFeed
