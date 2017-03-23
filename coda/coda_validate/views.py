@@ -177,16 +177,13 @@ def stats(request):
     total = sum(result_counts.values())
     sums_by_date = Validate.sums_by_date()
     sums_by_date_g = {}
+    years = set()
     for dt, ct in sums_by_date.items():
         y, m, d = dt
         dt = (y, m-1, d)
         sums_by_date_g[dt] = ct
+        years.add(y)
     sums_by_date = sums_by_date_g
-    years = []
-    for y, g in groupby(sums_by_date.keys(), lambda s: s[0]):
-        if y not in years:
-            years.append(y)
-    years = tuple(sorted(years))
     num_years = len(years)
     return render_to_response(
         'coda_validate/stats.html',
