@@ -75,18 +75,3 @@ class Validate(models.Model):
                 sums_by_date[dt] = ct
                 row = cur.fetchone()
         return sums_by_date
-
-    @classmethod
-    def result_counts(cls,):
-        sql = """select last_verified_status as st, count(*) as ct
-        from %s
-        group by last_verified_status""" % (cls._meta.db_table,)
-        results = {}
-        with connection.cursor() as cur:
-            cur.execute(sql)
-            row = cur.fetchone()
-            while row:
-                st, ct = row
-                results[st] = ct
-                row = cur.fetchone()
-        return results

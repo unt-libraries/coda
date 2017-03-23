@@ -172,7 +172,7 @@ def stats(request):
     since_validation_period = now - datetime.timedelta(
         days=settings.VALIDATION_PERIOD.days)
     # make a set of data that makes sense for the heatmap
-    result_counts = Validate.result_counts()
+    result_counts = Validate.objects.last_verified_status_counts()
     total = sum(result_counts.values())
     sums_by_date = Validate.sums_by_date()
     sums_by_date_g = {}
@@ -187,7 +187,7 @@ def stats(request):
     return render_to_response(
         'coda_validate/stats.html',
         {
-            'sums_by_date': dict((('%d, %d, %d ' % s, c)
+            'sums_by_date': dict((('%d, %d, %d' % s, c)
                                  for s, c in sums_by_date.items())),
             'num_years': num_years,
             'validations': total,
@@ -197,9 +197,9 @@ def stats(request):
                 last_verified__range=[twenty_four_hours_ago, now]).count(),
             'last_vp': Validate.objects.filter(
                 last_verified__range=[since_validation_period, now]).count(),
-            'unverified': result_counts['Unverified'],
-            'passed': result_counts['Passed'],
-            'failed': result_counts['Failed'],
+            'unverified': result_counts.get('Unverified'),
+            'passed': result_counts.get('Passed'),
+            'failed': result_counts.get('Failed'),
             'validation_period': '%s days' % str(settings.VALIDATION_PERIOD.days),
         },
         context_instance=RequestContext(request)
