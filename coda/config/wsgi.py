@@ -10,7 +10,6 @@ https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
 import os
 import sys
 import site
-from django.core.wsgi import get_wsgi_application
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -25,4 +24,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
 activate_env = os.path.join(ENV, 'bin/activate_this.py')
 execfile(activate_env, dict(__file__=activate_env))
 
+from django.core.wsgi import get_wsgi_application  # noqa
 application = get_wsgi_application()
