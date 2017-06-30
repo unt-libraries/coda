@@ -46,7 +46,7 @@
 <!-- EVENTS HEADER -->
 {% if json_events|length > 0 %}
 
-<h3><i class="icon-link icon-large"></i>There are <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ json_events.feed.entry|length }} premis events</a> associated with {{ bag }}:</h3>
+<h3><i class="icon-link icon-large"></i>Here are the first <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ json_events.feed.entry|length }} premis events</a> associated with {{ bag }}:</h3>
 
 
 <table class="table table-striped">
@@ -87,6 +87,6 @@
 
 
 {% else %}
-    <h3><i class="icon-remove icon-large"></i> There are no <em>premis events</em> associated with this bag.</h3>
+    <h3><i class="icon-remove icon-large"></i> There are no <em>premis events</em> associated with {{ bag }}.</h3>
 {% endif %}
 {% endblock %}
