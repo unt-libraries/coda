@@ -495,7 +495,7 @@ def bagHTML(request, identifier):
     try:
         # grab the related premis events from the json search for
         # linked object id
-        event_json_url = 'http://%s/event/search.json?link_object_id=%s' % (
+        event_json_url = 'http://%s/event/search.json?linked_object_id=%s' % (
             request.META.get('HTTP_HOST'), bag
         )
         json_response = urllib2.urlopen(event_json_url)
