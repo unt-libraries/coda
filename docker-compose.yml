@@ -16,7 +16,7 @@ services:
             service: base
         command: ./appstart.sh
         ports:
-            - "8787:80"
+            - "8787:8787"
         links:
             - db
 

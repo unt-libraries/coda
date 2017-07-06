@@ -1,6 +1,7 @@
 import codecs
 import copy
-import urllib2
+from urllib2 import urlopen
+from urllib import urlencode
 try:
     # the json module was included in the stdlib in python 2.6
     # http://docs.python.org/library/json.html
@@ -483,29 +484,62 @@ def bagHTML(request, identifier):
     bag = get_object_or_404(Bag, name__exact=identifier)
     bag_info = Bag_Info.objects.filter(bag_name__exact=bag)
     # determine some values that will be databased better in the future
-    payload_oxum_file_count = (
-        item for item in bag_info if item.field_name == "Payload-Oxum"
-    ).next().field_body.split(".")[1]
-    payload_oxum_size = (
-        item for item in bag_info if item.field_name == "Payload-Oxum"
-    ).next().field_body.split(".")[0]
-    bag_date = datetime.strptime((
-        item for item in bag_info if item.field_name == "Bagging-Date"
-    ).next().field_body, '%Y-%m-%d')
     try:
-        # grab the related premis events from the json search for
-        # linked object id
-        event_json_url = 'http://%s/event/search.json?linked_object_id=%s' % (
-            request.META.get('HTTP_HOST'), bag
-        )
-        json_response = urllib2.urlopen(event_json_url)
-        json_events = json.load(json_response)
+        payload_oxum_file_count = (
+            item for item in bag_info if item.field_name == "Payload-Oxum"
+        ).next().field_body.split(".")[1]
     except:
-        json_events = json.loads('{}')
+        payload_oxum_file_count = -1
+    try:
+        payload_oxum_size = (
+            item for item in bag_info if item.field_name == "Payload-Oxum"
+        ).next().field_body.split(".")[0]
+    except:
+        payload_oxum_size = -1
+    try:
+        bag_date = datetime.strptime((
+            item for item in bag_info if item.field_name == "Bagging-Date"
+        ).next().field_body, '%Y-%m-%d')
+    except:
+        bag_date = None
+    # grab the related premis events from the json search for
+    # linked object id
+    linked_events = []
+    total_events = None
+    try:
+        filters = {'linked_object_id': str(bag)}
+        event_json_url = 'http://%s/event/search.json?%s' % (
+                # TODO: Maybe this should be configurable?
+                request.META.get('HTTP_HOST'),
+                urlencode(filters)
+        )
+        json_response = urlopen(event_json_url)
+        json_events = json.load(json_response)
+        if json_events:
+            total_events = json_events.get('feed', {})
+            total_events = total_events.get('opensearch:totalResults', 0)
+        while json_events:
+            this_page = json_events.get('feed', {})
+            this_page = this_page.get('entry', [])
+            linked_events += this_page
+            next_url = json_events.get('feed', {})
+            next_url = next_url.get('link', [])
+            next_url = {l.get('rel'): l.get('href') for l in next_url}
+            next_url = next_url.get('next')
+            if next_url:
+                try:
+                    json_response = urlopen(next_url)
+                    json_events = json.load(json_response)
+                except:
+                    json_events = None
+            else:
+                json_events = None
+    except:
+        json_events = None
     return render_to_response(
         'mdstore/bag_info.html',
         {
-            'json_events': json_events,
+            'linked_events': linked_events, 'total_events': total_events,
             'payload_oxum_file_count': payload_oxum_file_count,
             'payload_oxum_size': payload_oxum_size,
             'bag_date': bag_date,

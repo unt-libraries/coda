@@ -44,9 +44,9 @@
     {% endfor %}
 </table>
 <!-- EVENTS HEADER -->
-{% if json_events|length > 0 %}
+{% if linked_events|length > 0 %}
 
-<h3><i class="icon-link icon-large"></i>There are <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ json_events.feed.entry|length }} premis events</a> associated with {{ bag }}:</h3>
+<h3><i class="icon-link icon-large"></i>There are <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ total_events }} premis events</a> associated with {{ bag }}:</h3>
 
 
 <table class="table table-striped">
@@ -61,7 +61,7 @@
   </thead>
   <tbody>
 
-{% for event in json_events.feed.entry %}
+{% for event in linked_events %}
 
     <tr>
 
