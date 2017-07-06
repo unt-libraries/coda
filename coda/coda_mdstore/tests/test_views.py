@@ -287,7 +287,7 @@ class TestBagHTMLView:
         response = views.bagHTML(rf.get('/', HTTP_HOST="example.com"), bag.name)
         assert response.status_code in (200, 404)
 
-    @mock.patch('coda_mdstore.views.urllib2.urlopen')
+    @mock.patch('coda_mdstore.views.urlopen')
     def test_catches_urlerror(self, mock_urlopen, client):
         bag = FullBagFactory.create()
         mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
@@ -296,7 +296,7 @@ class TestBagHTMLView:
             reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
 
         assert mock_urlopen.call_count == 1
-        assert response.context[-1]['json_events'] == {}
+        assert response.context[-1]['linked_events'] == []
 
     def test_renders_correct_template(self, client):
         bag = FullBagFactory.create()
@@ -306,7 +306,8 @@ class TestBagHTMLView:
         assert response.templates[0].name == 'mdstore/bag_info.html'
 
     @pytest.mark.parametrize('key', [
-        'json_events',
+        'total_events',
+        'linked_events',
         'payload_oxum_file_count',
         'payload_oxum_size',
         'bag_date',
