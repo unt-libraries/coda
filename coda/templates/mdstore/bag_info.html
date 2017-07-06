@@ -10,35 +10,35 @@
 <!-- BAG INFO HEADER -->
 <h3 class="main"><i class="icon-white icon-briefcase"></i> Bag Info Details:</h3>
 <table class="table table-striped info">
-    {% for k in bag_info %}
-        <tr>
-            <th style="width: 20%; border-right:5px solid {% cycle #00B230,#E8B85A,#4C23E8,#885499,#FF2F35,#58807D %}">{{ k.field_name }}:</th>
+    {% for k, v in bag_info.items %}
+    <tr>
+            <th style="width: 20%; border-right:5px solid {% cycle #00B230,#E8B85A,#4C23E8,#885499,#FF2F35,#58807D %}">{{ k }}:</th>
             <td>
-                {% if k.field_name == 'Contact-Email' %}
-                    <i class="icon-envelope"></i> <a href="mailto:{{ k.field_body }}">{{ k.field_body }}</a>
-                {% else %}{% if k.field_name == 'External-Identifier' %}
-                    <i class="icon-globe"></i> <a href="http://texashistory.unt.edu/{{ k.field_body }}">{{ k.field_body }}</a>
-                {% else %}{% if k.field_name == 'Payload-Oxum' %}
+                {% if k == 'Contact-Email' %}
+                    <i class="icon-envelope"></i> <a href="mailto:{{ v }}">{{ v }}</a>
+                {% elif k == 'External-Identifier' %}
+                    <i class="icon-globe"></i> <a href="http://texashistory.unt.edu/{{ v }}">{{ v }}</a>
+                {% elif k == 'Payload-Oxum' %}
                     <i class="icon-hdd"></i> {{ payload_oxum_size|filesizeformat }}, <i class="icon-file-alt"></i> {{ payload_oxum_file_count }} files
-                {% else %}{% if k.field_name == 'Bagging-Date' %}
+                {% elif k == 'Bagging-Date' %}
                     <i class="icon-calendar"></i> {{ bag_date|timesince }} ago
-                {% else %}{% if k.field_name == 'Organization-Address' %}
-                    <i class="icon-building"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Contact-Phone' %}
-                    <i class="icon-phone"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'BagIt-Version' %}
-                    <i class="icon-info-sign"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Bag-Size' %}
-                    <i class="icon-hdd"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Contact-Name' %}
-                    <i class="icon-user"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Internal-Sender-Identifier' %}
-                    <i class="icon-tag"></i> {{ k.field_body }}
-                {% else %}{% if k.field_name == 'Source-Organization' %}
-                    <i class="icon-home"></i> {{ k.field_body }}
+                {% elif k == 'Organization-Address' %}
+                    <i class="icon-building"></i> {{ v }}
+                {% elif k == 'Contact-Phone' %}
+                    <i class="icon-phone"></i> {{ v }}
+                {% elif k == 'BagIt-Version' %}
+                    <i class="icon-info-sign"></i> {{ v }}
+                {% elif k == 'Bag-Size' %}
+                    <i class="icon-hdd"></i> {{ v }}
+                {% elif k == 'Contact-Name' %}
+                    <i class="icon-user"></i> {{ v }}
+                {% elif k == 'Internal-Sender-Identifier' %}
+                    <i class="icon-tag"></i> {{ v }}
+                {% elif k == 'Source-Organization' %}
+                    <i class="icon-home"></i> {{ v }}
                 {% else %}
-                    <i class="icon-leaf"></i> {{ k.field_body }}
-                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+                    <i class="icon-leaf"></i> {{ v }}
+                {% endif %}
             </td>
         </tr>
     {% endfor %}
