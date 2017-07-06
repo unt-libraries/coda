@@ -483,23 +483,16 @@ def bagHTML(request, identifier):
     # try and get the bag
     bag = get_object_or_404(Bag, name__exact=identifier)
     bag_info = Bag_Info.objects.filter(bag_name__exact=bag)
-    # determine some values that will be databased better in the future
+    # Put the bag info in a dict
+    bag_info_d = dict((info.field_name, info.field_body) for info in bag_info)
+    oxum_count = oxum_size = -1
     try:
-        payload_oxum_file_count = (
-            item for item in bag_info if item.field_name == "Payload-Oxum"
-        ).next().field_body.split(".")[1]
+        oxum = bag_info_d.get('Payload-Oxum', '')
+        oxum_count, oxum_size = map(int, oxum.split('.', 1))
     except:
-        payload_oxum_file_count = -1
+        pass
     try:
-        payload_oxum_size = (
-            item for item in bag_info if item.field_name == "Payload-Oxum"
-        ).next().field_body.split(".")[0]
-    except:
-        payload_oxum_size = -1
-    try:
-        bag_date = datetime.strptime((
-            item for item in bag_info if item.field_name == "Bagging-Date"
-        ).next().field_body, '%Y-%m-%d')
+        bag_date = datetime.strptime(bag_info_d.get('Bagging-Date'), '%Y-%m-%d')
     except:
         bag_date = None
     # grab the related premis events from the json search for
@@ -518,6 +511,7 @@ def bagHTML(request, identifier):
         if json_events:
             total_events = json_events.get('feed', {})
             total_events = total_events.get('opensearch:totalResults', 0)
+        # Follow next url in results until we hit the last page
         while json_events:
             this_page = json_events.get('feed', {})
             this_page = this_page.get('entry', [])
@@ -535,16 +529,17 @@ def bagHTML(request, identifier):
             else:
                 json_events = None
     except:
-        json_events = None
+        pass
     return render_to_response(
         'mdstore/bag_info.html',
         {
-            'linked_events': linked_events, 'total_events': total_events,
-            'payload_oxum_file_count': payload_oxum_file_count,
-            'payload_oxum_size': payload_oxum_size,
+            'linked_events': linked_events,
+            'total_events': total_events,
+            'payload_oxum_file_count': oxum_count,
+            'payload_oxum_size': oxum_size,
             'bag_date': bag_date,
             'bag': bag,
-            'bag_info': bag_info,
+            'bag_info': bag_info_d,
             'maintenance_message': MAINTENANCE_MSG,
         },
         context_instance=RequestContext(request)
