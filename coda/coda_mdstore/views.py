@@ -485,10 +485,10 @@ def bagHTML(request, identifier):
     bag_info = Bag_Info.objects.filter(bag_name__exact=bag)
     # Put the bag info in a dict
     bag_info_d = dict((info.field_name, info.field_body) for info in bag_info)
-    oxum_count = oxum_size = -1
+    oxum_bytes = oxum_file_count = -1
     try:
         oxum = bag_info_d.get('Payload-Oxum', '')
-        oxum_count, oxum_size = map(int, oxum.split('.', 1))
+        oxum_bytes, oxum_file_count = map(int, oxum.split('.', 1))
     except:
         pass
     try:
@@ -535,8 +535,8 @@ def bagHTML(request, identifier):
         {
             'linked_events': linked_events,
             'total_events': total_events,
-            'payload_oxum_file_count': oxum_count,
-            'payload_oxum_size': oxum_size,
+            'payload_oxum_file_count': oxum_file_count,
+            'payload_oxum_size': oxum_bytes,
             'bag_date': bag_date,
             'bag': bag,
             'bag_info': bag_info_d,
