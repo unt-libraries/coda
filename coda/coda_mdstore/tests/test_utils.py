@@ -174,7 +174,7 @@ class TestNodeEntry:
         xml_obj = convert_etree(tree)
 
         node_last_checked = node.last_checked.strftime(
-                bagatom.TIME_FORMAT_STRING
+            bagatom.TIME_FORMAT_STRING
         )
 
         assert xml_obj.content.node.name == node.node_name

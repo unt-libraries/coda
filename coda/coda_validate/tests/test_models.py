@@ -2,9 +2,9 @@ import pytest
 
 from coda_validate import factories
 from coda_validate.models import (
-        ValidateManager,
-        Validate,
-        VerifiedCountsResultFormatter)
+    ValidateManager,
+    Validate,
+    VerifiedCountsResultFormatter)
 
 
 class TestValidate:

@@ -385,7 +385,7 @@ class TestQueue:
 
     def test_delete(self, rf):
         entry = factories.QueueEntryFactory.create()
-        request = rf.delete('/'+entry.ark)
+        request = rf.delete('/' + entry.ark)
         response = views.queue(request, entry.ark)
 
         assert response.status_code == 200
