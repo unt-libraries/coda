@@ -19,7 +19,7 @@
                 {% elif k == 'External-Identifier' %}
                     <i class="icon-globe"></i> <a href="http://texashistory.unt.edu/{{ v }}">{{ v }}</a>
                 {% elif k == 'Payload-Oxum' %}
-                    <i class="icon-hdd"></i> {{ payload_oxum_size|filesizeformat }}, <i class="icon-file-alt"></i> {{ payload_oxum_file_count }} files
+                    <i class="icon-hdd"></i> {{ payload_oxum_size }} bytes, <i class="icon-file-alt"></i> {{ payload_oxum_file_count }} files
                 {% elif k == 'Bagging-Date' %}
                     <i class="icon-calendar"></i> {{ bag_date|timesince }} ago
                 {% elif k == 'Organization-Address' %}

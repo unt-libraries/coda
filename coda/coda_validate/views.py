@@ -179,7 +179,7 @@ def stats(request):
     years = set()
     for dt, ct in sums_by_date.items():
         y, m, d = dt
-        dt = (y, m-1, d)
+        dt = (y, m - 1, d)
         sums_by_date_g[dt] = ct
         years.add(y)
     sums_by_date = sums_by_date_g
@@ -345,7 +345,7 @@ def xmlToValidateObject(validateXML):
         "*[local-name() = 'identifier']")[0].text.strip()
 
     last_verified = validateXML.xpath(
-            "*[local-name() = 'last_verified']")[0].text.strip()
+        "*[local-name() = 'last_verified']")[0].text.strip()
     last_verified = parser.parse(last_verified)
 
     last_verified_status = validateXML.xpath(

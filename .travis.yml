@@ -8,7 +8,7 @@ env:
         - DB_HOST=localhost
         - DB_MYSQL_USER=travis
         - DB_PASSWORD=''
-        - PYTHONPATH=`pwd`/coda
+        - PYTHONPATH=$PWD/coda
 before_script:
     - mysql -e 'create database coda_local;'
     - cp secrets.json.template secrets.json

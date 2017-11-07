@@ -346,12 +346,11 @@ def stats(request):
         # multiple graphs.
         month_skeleton = prepare_graph_date_range()
         daily_counts = Bag.objects.extra(
-                    select={'day': 'date(bagging_date)'}
-                ).values('day').annotate(
-                    bagging_date_num=Count('bagging_date'),
-                    files_total=Sum('files'),
-                    sizes_total=Sum('size'),
-                )
+            select={'day': 'date(bagging_date)'}).values('day').annotate(
+                bagging_date_num=Count('bagging_date'),
+                files_total=Sum('files'),
+                sizes_total=Sum('size'),
+        )
         # make sure we send in !!!COPIES!!! of the month_skeleton so we dont
         # end up rewriting over the initial data, need that for the other
         # datasets.
@@ -485,10 +484,10 @@ def bagHTML(request, identifier):
     bag_info = Bag_Info.objects.filter(bag_name__exact=bag)
     # Put the bag info in a dict
     bag_info_d = dict((info.field_name, info.field_body) for info in bag_info)
-    oxum_count = oxum_size = -1
+    oxum_bytes = oxum_file_count = -1
     try:
         oxum = bag_info_d.get('Payload-Oxum', '')
-        oxum_count, oxum_size = map(int, oxum.split('.', 1))
+        oxum_bytes, oxum_file_count = map(int, oxum.split('.', 1))
     except:
         pass
     try:
@@ -502,9 +501,9 @@ def bagHTML(request, identifier):
     try:
         filters = {'linked_object_id': str(bag)}
         event_json_url = 'http://%s/event/search.json?%s' % (
-                # TODO: Maybe this should be configurable?
-                request.META.get('HTTP_HOST'),
-                urlencode(filters)
+            # TODO: Maybe this should be configurable?
+            request.META.get('HTTP_HOST'),
+            urlencode(filters)
         )
         json_response = urlopen(event_json_url)
         json_events = json.load(json_response)
@@ -535,8 +534,8 @@ def bagHTML(request, identifier):
         {
             'linked_events': linked_events,
             'total_events': total_events,
-            'payload_oxum_file_count': oxum_count,
-            'payload_oxum_size': oxum_size,
+            'payload_oxum_file_count': oxum_file_count,
+            'payload_oxum_size': oxum_bytes,
             'bag_date': bag_date,
             'bag': bag,
             'bag_info': bag_info_d,

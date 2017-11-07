@@ -65,17 +65,17 @@ class OAIInterface(object):
                     "Id does not exist: %s, (%s)" % (identifier, id)
                 )
         return [
-                    (
-                        'oai_dc',
-                        'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd',
-                        'http://www.openarchives.org/OAI/2.0/oai_dc/'
-                    ),
-                    (
-                        'coda_bag',
-                        'http://digital2.library.unt.edu/bagxml.xsd',
-                        'http://digital2.library.unt.edu/coda/bagxml/'
-                    ),
-                ]
+            (
+                'oai_dc',
+                'http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd',
+                'http://www.openarchives.org/OAI/2.0/oai_dc/'
+            ),
+            (
+                'coda_bag',
+                'http://digital2.library.unt.edu/bagxml.xsd',
+                'http://digital2.library.unt.edu/coda/bagxml/'
+            ),
+        ]
 
     def listIdentifiers(self, metadataPrefix=None, from_=None, until=None,
                         set=None, cursor=0, batch_size=10):

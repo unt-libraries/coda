@@ -120,7 +120,7 @@ def makeBagAtomFeed(bagObjectList, id, title):
     for bagObject in bagObjectList:
         entryTag = wrapAtom(
             objectsToXML(bagObject), bagObject.name, bagObject.name,
-            alt="/bag/"+bagObject.name
+            alt="/bag/" + bagObject.name
         )
         feedTag.append(entryTag)
     return feedTag
