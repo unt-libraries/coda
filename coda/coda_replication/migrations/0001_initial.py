@@ -41,8 +41,7 @@ class Migration(migrations.Migration):
                 (
                     'files',
                     models.IntegerField(
-                        help_text=b'The number of files that the queued entry ' +
-                                  'contains'
+                        help_text=b'The number of files that the queued entry contains'
                     )
                 ),
                 (
@@ -55,8 +54,7 @@ class Migration(migrations.Migration):
                     'status',
                     models.CharField(
                         blank=True,
-                        help_text=b'A message indicating the current status ' +
-                                  'of the harvest',
+                        help_text=b'A message indicating the current status of the harvest',
                         max_length=10,
                         choices=[
                             (b'1', b'Ready to Harvest'),

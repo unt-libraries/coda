@@ -100,8 +100,7 @@ def calc_total_by_month(**kwargs):
         # replace existing value of zero with sum of nums in certain month
         current_month_counts = [
             e for e in daily_counts
-            if datetime.strftime(e['day'], '%Y-%m') ==
-            datetime.strftime(u[0], '%Y-%m')
+            if datetime.strftime(e['day'], '%Y-%m') == datetime.strftime(u[0], '%Y-%m')
         ]
         for n in current_month_counts:
             if metric == 'bags':
