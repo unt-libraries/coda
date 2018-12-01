@@ -335,6 +335,7 @@ class TestBagProxyView:
         # The mocked value that getFileHandle will return.
         file_handle = mock.Mock()
         file_handle.info().getheader.side_effect = ['text/plain', '255']
+        file_handle.geturl.return_value = 'http://example.com/direct-file.txt'
 
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
@@ -353,6 +354,16 @@ class TestBagProxyView:
 
         assert response['Content-Length'] == '255'
         assert response['Content-Type'] == 'text/plain'
+
+    @mock.patch.object(settings, 'REPROXY', True)
+    def test_response_has_correct_headers_reproxy(self, rf):
+        request = rf.get('/', HTTP_HOST="example.com")
+        response = views.bagProxy(request, self.bag.name, '/foo/bar')
+
+        assert response['Content-Length'] == '255'
+        assert response['Content-Type'] == 'text/plain'
+        assert response['X-REPROXY-URL'] == 'http://example.com/direct-file.txt'
+        assert response['ETag']
 
     def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')

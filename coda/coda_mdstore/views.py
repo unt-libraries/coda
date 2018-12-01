@@ -1,5 +1,7 @@
 import codecs
 import copy
+import uuid
+
 from urllib2 import urlopen
 from urllib import urlencode
 try:
@@ -639,10 +641,17 @@ def bagProxy(request, identifier, filePath):
     handle = getFileHandle(identifier, filePath)
     if handle:
         resp = HttpResponse(
-            FileWrapper(handle),
             content_type=handle.info().getheader('Content-Type')
         )
         resp['Content-Length'] = handle.info().getheader('Content-Length')
+        if getattr(settings, 'REPROXY', False):
+            # Have a proxy server point the client to where to download
+            # the file directly in order to bypass serving through Django.
+            resp['X-REPROXY-URL'] = handle.geturl()
+            resp['ETag'] = '"%s"' % uuid.uuid4().get_hex()
+        else:
+            # Serve the data file through Django.
+            resp.content = FileWrapper(handle)
     else:
         raise Http404
     return resp

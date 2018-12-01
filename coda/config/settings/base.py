@@ -138,3 +138,10 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 VALIDATION_PERIOD = timedelta(days=365)
 
 ARK_NAAN = 67531
+
+# Optional setting to indicate if we are using a proxy server that we want to
+# use to reproxy requests for a bag's static data files (via bagProxy view).
+try:
+    REPROXY = get_secret('REPROXY')
+except ImproperlyConfigured:
+    REPROXY = False
