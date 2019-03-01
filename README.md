@@ -39,6 +39,8 @@ $ docker-compose up -d app
 $ docker-compose run --rm manage createsuperuser
 ```
 
+The app should now be viewable at the default location of localhost:8787.
+
 The code is in a volume that is shared between your workstation and the coda container, which means any edits you make on your workstation will also be reflected in the Docker container. No need to rebuild the container to pick up changes in the code.
 
 However, if the requirements files change, it is important that you rebuild the images for those packages to be installed. This is something that could happen when switching between feature branches, or when pulling updates from the remote.
@@ -60,7 +62,9 @@ $ docker-compose up -d app
 ## Running the tests
 
 ```sh
-# On the initial run or if the schema changes
+# On the initial run or if the schema changes.
+# The db container must already be running, or the tests will probably
+# fail on the first run since the database needs time to warm up.
 $ docker-compose run --rm test --create-db
 
 # Subsequent runs
