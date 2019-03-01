@@ -23,7 +23,7 @@ services:
     test:
         extends:
             service: base
-        entrypoint: py.test
+        entrypoint: pytest --flake8
         links:
             - db
 

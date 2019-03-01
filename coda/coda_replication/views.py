@@ -169,7 +169,7 @@ def queue_search_JSON(request):
         # get corresponding index of human readable status from the choice list
         args['identifier'] = request.GET['identifier']
         queue = queue.filter(ark=args['identifier'])
-    if queue.count() is not 0:
+    if queue.count() != 0:
         # paginate 20 per page
         paginated_entries = paginate_entries(request, queue, num_per_page=20)
         # prepare a results set and then append each event to it as a dict
