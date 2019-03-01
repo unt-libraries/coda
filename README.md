@@ -61,10 +61,11 @@ $ docker-compose up -d app
 
 ## Running the tests
 
+The db container must already be running, or the tests will probably
+fail on the first run since the database needs time to warm up.
+
 ```sh
-# On the initial run or if the schema changes.
-# The db container must already be running, or the tests will probably
-# fail on the first run since the database needs time to warm up.
+# On the initial run or if the schema changes
 $ docker-compose run --rm test --create-db
 
 # Subsequent runs
