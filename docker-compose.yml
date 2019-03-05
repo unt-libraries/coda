@@ -10,6 +10,7 @@ services:
         build: .
         volumes:
             - .:/app/
+            - ./docker_secrets.json:/app/secrets.json
 
     app:
         extends:
@@ -23,7 +24,7 @@ services:
     test:
         extends:
             service: base
-        entrypoint: py.test
+        entrypoint: pytest --flake8
         links:
             - db
 
