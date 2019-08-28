@@ -17,7 +17,7 @@ except ImportError:
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
