@@ -14,7 +14,6 @@ try:
 except NameError:
     INSTALLED_APPS = []
 INSTALLED_APPS += ['debug_toolbar']
-MIDDLEWARE_CLASSES += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 
 # Database settings for the Dockerized dev environment.
