@@ -662,14 +662,14 @@ def externalIdentifierSearch(request, identifier=None):
     Return a collection based on an identifier
     """
 
-    if identifier or request.REQUEST.get('ark'):
+    if identifier or request.POST.get('ark'):
         feed_id = request.path
-        if request.REQUEST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
-                request.REQUEST.get('ark'):
-            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.REQUEST.get('ark'))
+        if request.POST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
+                request.POST.get('ark'):
+            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.POST.get('ark'))
             feed_id = request.path + identifier + '/'
-        elif request.REQUEST.get('ark'):
-            identifier = request.REQUEST.get('ark')
+        elif request.POST.get('ark'):
+            identifier = request.POST.get('ark')
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
         if 'metadc' in identifier or 'metapth' in identifier:
@@ -734,7 +734,7 @@ def bagFullTextSearchHTML(request):
 
     searchString = ""
     paginated_entries = None
-    if request.REQUEST.get('search'):
+    if request.POST.get('search'):
         searchString = request.REQUEST["search"]
         paginated_entries = paginate_entries(
             request, bagSearch(searchString), 20
