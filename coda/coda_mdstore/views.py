@@ -734,8 +734,8 @@ def bagFullTextSearchHTML(request):
 
     searchString = ""
     paginated_entries = None
-    if request.POST.get('search'):
-        searchString = request.REQUEST["search"]
+    if request.GET.get('search'):
+        searchString = request.GET["search"]
         paginated_entries = paginate_entries(
             request, bagSearch(searchString), 20
         )
