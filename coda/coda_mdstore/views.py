@@ -662,14 +662,14 @@ def externalIdentifierSearch(request, identifier=None):
     Return a collection based on an identifier
     """
 
-    if identifier or request.POST.get('ark'):
+    if identifier or request.GET.get('ark'):
         feed_id = request.path
-        if request.POST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
-                request.POST.get('ark'):
-            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.POST.get('ark'))
+        if request.GET.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
+                request.GET.get('ark'):
+            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.GET.get('ark'))
             feed_id = request.path + identifier + '/'
-        elif request.POST.get('ark'):
-            identifier = request.POST.get('ark')
+        elif request.GET.get('ark'):
+            identifier = request.GET.get('ark')
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
         if 'metadc' in identifier or 'metapth' in identifier:

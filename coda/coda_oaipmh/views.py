@@ -29,5 +29,5 @@ def index(request):
         resumption_batch_size=500
     )
 
-    response = oaiServer.handleRequest(request.POST)
+    response = oaiServer.handleRequest(request.GET)
     return HttpResponse(response, content_type="text/xml")

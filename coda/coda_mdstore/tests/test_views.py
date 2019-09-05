@@ -466,7 +466,7 @@ class TestExternalIdentiferSearch:
         # URL with the ark id as a query parameter.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
         request = rf.get(url, {'ark': 'metadc000001'})
-        response2 = views.externalIdentifierSearch(request, ext_id.value)
+        response2 = views.externalIdentifierSearch(request)
 
         # this won't work because atom updated elements contain
         # xsdatetime values that differ at least in the milliseconds
@@ -505,7 +505,7 @@ class TestExternalIdentiferSearch:
         # URL with the ark id as a query parameter.
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
         request = rf.get(url, {'ark': 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)})
-        response2 = views.externalIdentifierSearch(request, ext_id.value)
+        response2 = views.externalIdentifierSearch(request)
         assert response1['Content-Type'] == response2['Content-Type']
 
         bagxml1 = objectify.fromstring(response1.content)
