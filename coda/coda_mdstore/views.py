@@ -752,28 +752,6 @@ def bagFullTextSearchHTML(request):
     )
 
 
-def bagFullTextSearchATOM(request):
-    """
-    Return bag search results as ATOM
-    """
-
-    searchString = request.REQUEST["search"]
-    offset = 0
-    listSize = 50
-    if "offset" in request.REQUEST:
-        offset = int(request.REQUEST["offset"]) - 1
-    bagList, resultCount = bagFullTextSearch(searchString, offset, listSize)
-    feedTag = makeBagAtomFeed(
-        bagList,
-        request.path,
-        "Bags found by search string '%s'" % searchString
-    )
-    feedText = XML_HEADER % etree.tostring(feedTag, pretty_print=True)
-    resp = HttpResponse(feedText, content_type="application/atom+xml")
-    resp.status_code = 200
-    return resp
-
-
 def bagFullTextSearch(searchString, listSize=50):
     """
     Generic interface to take a search string and return a feed of bags

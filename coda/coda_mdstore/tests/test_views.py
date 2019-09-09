@@ -647,16 +647,6 @@ class TestBagURLListScrapeView:
         assert 0
 
 
-class TestBagFullTextSearchATOMView:
-    """
-    Tests for coda_mdstore.views.bagFullTextSearchAtom.
-    """
-
-    @pytest.mark.xfail(reason='bagFullTextSearchATOM is never called.')
-    def test_smoke(self):
-        assert 0
-
-
 class TestBagFullTextSearchHTMLView:
     """
     Tests for coda_mdstore.views.bagFullTextSearchHTML.
