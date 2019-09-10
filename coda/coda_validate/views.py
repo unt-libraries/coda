@@ -10,7 +10,7 @@ from django.contrib.sites.models import Site
 from django.contrib.syndication.views import Feed
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import  get_object_or_404, render
+from django.shortcuts import get_object_or_404, render
 from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
 

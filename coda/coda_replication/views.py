@@ -6,7 +6,6 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.contrib.sites.models import Site  # noqa
-from django.template import RequestContext
 try:
     # the json module was included in the stdlib in python 2.6
     # http://docs.python.org/library/json.html
