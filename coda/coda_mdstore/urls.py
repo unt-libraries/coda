@@ -1,6 +1,7 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 from . import views
-from .resourcesync import sitemaps
+from django.contrib.sitemaps import views as sitemap_views
+from .resourcesync import changelist, capabilitylist
 
 urlpatterns = [
     url(r'^bag/$', views.all_bags, name='bag-list'),
@@ -31,42 +32,9 @@ urlpatterns = [
     url(r'^about/$', views.about, name='about'),
     url(r'^robots.txt$', views.shooRobot, name='robots'),
     url(r'^feed/$', views.AtomSiteNewsFeed(), name='feed'),
+    url(r'^resourceindex\.xml$', sitemap_views.index),
+    url(r'^resourcelist-(?P<section>.+)\.xml$', sitemap_views.sitemap, name='sitemaps_views'),
+    url(r'changelist\.xml$', changelist),
+    url(r'^capabilitylist\.xml$', capabilitylist),
     url(r'^$', views.index, name='index'),
 ]
-
-
-urlpatterns += patterns(
-    'django.contrib.sitemaps.views',
-    (
-        r'^resourceindex\.xml$',
-        'index',
-        {
-            'sitemaps': sitemaps,
-            'template_name': 'mdstore/resourceindex.xml'
-        },
-    ),
-    (
-        r'^resourcelist-(?P<section>.+)\.xml$',
-        'sitemap',
-        {
-            'sitemaps': sitemaps,
-            'template_name': 'mdstore/sitemap.xml'
-        },
-    ),
-)
-urlpatterns += patterns(
-    'coda_mdstore.resourcesync',
-    (
-        r'^changelist\.xml$',
-        'changelist',
-        {
-            'sitemaps': sitemaps,
-            'section': 'changelist',
-            'template_name': 'mdstore/changelist.xml'
-        },
-    ),
-    (
-        r'^capabilitylist\.xml$',
-        'capabilitylist',
-    ),
-)
