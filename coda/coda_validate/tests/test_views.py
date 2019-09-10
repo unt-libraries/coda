@@ -31,7 +31,7 @@ class TestIndex:
 
     def test_template_used(self, client):
         response = client.get(
-            reverse('coda_validate.views.index'),
+            reverse('index'),
             HTTP_HOST="example.com"
         )
         assert response.templates[0].name == 'coda_validate/index.html'
@@ -39,7 +39,7 @@ class TestIndex:
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30, priority=1)
         response = client.get(
-            reverse('coda_validate.views.index'),
+            reverse('index'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
@@ -48,7 +48,7 @@ class TestIndex:
 
     def test_context_without_validate_objects(self, client):
         response = client.get(
-            reverse('coda_validate.views.index'),
+            reverse('index'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
@@ -74,14 +74,14 @@ class TestStats:
 
     def test_template_used(self, client):
         response = client.get(
-            reverse('coda_validate.views.stats'),
+            reverse('stats'),
             HTTP_HOST="example.com"
         )
         assert response.templates[0].name == 'coda_validate/stats.html'
 
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30)
-        response = client.get(reverse('coda_validate.views.stats'))
+        response = client.get(reverse('stats'))
         context = response.context[-1]
 
         # Test the context variables for truthiness.
@@ -97,7 +97,7 @@ class TestStats:
         assert context['failed']
 
     def test_context_without_validate_objects(self, client):
-        response = client.get(reverse('coda_validate.views.stats'))
+        response = client.get(reverse('stats'))
         context = response.context[-1]
 
         assert not context['sums_by_date']
@@ -142,13 +142,13 @@ class TestPrioritize:
         assert updated_validate.priority == 1
 
     def test_template_used(self, client):
-        response = client.get(reverse('coda_validate.views.prioritize'))
+        response = client.get(reverse('prioritize'))
         assert response.templates[0].name == 'coda_validate/prioritize.html'
 
     def test_context_with_identifier(self, client):
         validate = factories.ValidateFactory.create()
         response = client.get(
-            reverse('coda_validate.views.prioritize'),
+            reverse('prioritize'),
             {'identifier': validate.identifier})
 
         context = response.context[-1]
@@ -156,7 +156,7 @@ class TestPrioritize:
         assert context['identifier'] == validate.identifier
 
     def test_context_without_identifier(self, client):
-        response = client.get(reverse('coda_validate.views.prioritize'))
+        response = client.get(reverse('prioritize'))
         context = response.context[-1]
         assert context['prioritized'] is False
         assert context['identifier'] is None
@@ -182,7 +182,7 @@ class TestValidate:
     def test_context(self, client):
         validate = factories.ValidateFactory.create()
         response = client.get(
-            reverse('coda_validate.views.validate', args=[validate.identifier]))
+            reverse('detail', args=[validate.identifier]))
 
         context = response.context[-1]
         assert context.get('validate').identifier == validate.identifier
@@ -190,7 +190,7 @@ class TestValidate:
     def test_priority_was_updated(self, client):
         validate = factories.ValidateFactory.create(priority=3)
         client.get(
-            reverse('coda_validate.views.validate', args=[validate.identifier]),
+            reverse('detail', args=[validate.identifier]),
             {'priority': 1})
 
         updated_validate = Validate.objects.get(identifier=validate.identifier)
@@ -199,7 +199,7 @@ class TestValidate:
     def test_priority_was_not_updated(self, client):
         validate = factories.ValidateFactory.create(priority=3)
         client.get(
-            reverse('coda_validate.views.validate', args=[validate.identifier]),
+            reverse('detail', args=[validate.identifier]),
             {'priority': 2})
 
         updated_validate = Validate.objects.get(identifier=validate.identifier)

@@ -74,11 +74,11 @@ class TestIndexView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
-        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
+        response = client.get(reverse('index'), HTTP_HOST="example.com")
         assert key in response.context[-1]
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
+        response = client.get(reverse('index'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/index.html'
 
     def test_totals_files__sum_key_is_none(self, client):
@@ -94,7 +94,7 @@ class TestIndexView:
             'size__sum': 0,
         }
 
-        response = client.get(reverse('coda_mdstore.views.index'), HTTP_HOST="example.com")
+        response = client.get(reverse('index'), HTTP_HOST="example.com")
         assert response.context[-1]['totals']['files__sum'] == 0
 
 
@@ -104,7 +104,7 @@ class TestAboutView:
     """
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.about'), HTTP_HOST="example.com")
+        response = client.get(reverse('about'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/about.html'
 
 
@@ -117,7 +117,7 @@ class TestStatsView:
         """
         Test the context values when no bags are in the database.
         """
-        response = client.get(reverse('coda_mdstore.views.stats'), HTTP_HOST="example.com")
+        response = client.get(reverse('stats'), HTTP_HOST="example.com")
 
         assert response.status_code == 200
         assert response.context[-1]['totals'] == 0
@@ -132,7 +132,7 @@ class TestStatsView:
         """
         FullBagFactory.create_batch(20)
 
-        response = client.get(reverse('coda_mdstore.views.stats'), HTTP_HOST="example.com")
+        response = client.get(reverse('stats'), HTTP_HOST="example.com")
         context = response.context[-1]
 
         assert response.status_code == 200
@@ -163,7 +163,7 @@ class TestJSONStatsView:
             'files__sum': 0
         }
 
-        response = client.get(reverse('coda_mdstore.views.json_stats'), HTTP_HOST="example.com")
+        response = client.get(reverse('stats-json'), HTTP_HOST="example.com")
         payload = json.loads(response.content)
 
         assert len(payload) == 5
@@ -189,7 +189,7 @@ class TestJSONStatsView:
             'files__sum': 1000,
         }
 
-        response = client.get(reverse('coda_mdstore.views.json_stats'), HTTP_HOST="example.com")
+        response = client.get(reverse('stats-json'), HTTP_HOST="example.com")
         payload = json.loads(response.content)
 
         assert len(payload) == 5
@@ -213,7 +213,7 @@ class TestAllBagsView:
             'coda_mdstore.views.paginate_entries', self.mock_paginate_entries)
 
     def test_renders_correct_template(self, client):
-        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
+        response = client.get(reverse('bag-list'), HTTP_HOST="example.com")
         assert response.templates[0].name == 'mdstore/bag_search_results.html'
 
     @pytest.mark.ignore_template_errors
@@ -222,7 +222,7 @@ class TestAllBagsView:
         Verify that the view calls paginate_entries.
         """
         self.mock_paginate_entries.return_value = 'fake data'
-        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
+        response = client.get(reverse('bag-list'), HTTP_HOST="example.com")
 
         assert self.mock_paginate_entries.call_count == 1
         assert response.context[-1]['entries'] == 'fake data'
@@ -232,7 +232,7 @@ class TestAllBagsView:
         'maintenance_message'
     ])
     def test_context_has_key(self, key, client):
-        response = client.get(reverse('coda_mdstore.views.all_bags'), HTTP_HOST="example.com")
+        response = client.get(reverse('bag-list'), HTTP_HOST="example.com")
         assert key in response.context[-1]
 
 
@@ -293,7 +293,7 @@ class TestBagHTMLView:
         mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
 
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
+            reverse('bag-detail', args=[bag.name]), HTTP_HOST="example.com")
 
         assert mock_urlopen.call_count == 1
         assert response.context[-1]['linked_events'] == []
@@ -301,7 +301,7 @@ class TestBagHTMLView:
     def test_renders_correct_template(self, client):
         bag = FullBagFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
+            reverse('bag-detail', args=[bag.name]), HTTP_HOST="example.com")
 
         assert response.templates[0].name == 'mdstore/bag_info.html'
 
@@ -318,7 +318,7 @@ class TestBagHTMLView:
     def test_context_has_key(self, key, client):
         bag = FullBagFactory.create()
         response = client.get(
-            reverse('coda_mdstore.views.bagHTML', args=[bag.name]), HTTP_HOST="example.com")
+            reverse('bag-detail', args=[bag.name]), HTTP_HOST="example.com")
 
         assert key in response.context[-1]
 
@@ -459,12 +459,12 @@ class TestExternalIdentiferSearch:
         # the request factory because the view will use the path to determine
         # the id field.
         url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+            'identifier-search', args=[ext_id.value])
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
         # URL with the ark id as a query parameter.
-        url = reverse('coda_mdstore.views.externalIdentifierSearch')
+        url = reverse('identifier-search')
         request = rf.get(url, {'ark': 'metadc000001'})
         response2 = views.externalIdentifierSearch(request)
 
@@ -498,12 +498,12 @@ class TestExternalIdentiferSearch:
         # Just like in the previous test, feed the real URL to the request
         # factory because the request path is used in the response content.
         url = reverse(
-            'coda_mdstore.views.externalIdentifierSearch', args=[ext_id.value])
+            'identifier-search', args=[ext_id.value])
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
         # URL with the ark id as a query parameter.
-        url = reverse('coda_mdstore.views.externalIdentifierSearch')
+        url = reverse('identifier-search')
         request = rf.get(url, {'ark': 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)})
         response2 = views.externalIdentifierSearch(request)
         assert response1['Content-Type'] == response2['Content-Type']
@@ -654,13 +654,13 @@ class TestBagFullTextSearchHTMLView:
 
     def test_response_with_search_query(self, client):
         client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            reverse('search'),
             {'search': 'metadc000001'}, HTTP_HOST="example.com"
         )
 
     def test_with_no_search_query(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            reverse('search'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
@@ -671,7 +671,7 @@ class TestBagFullTextSearchHTMLView:
 
     def test_renders_correct_template(self, client):
         response = client.get(
-            reverse('coda_mdstore.views.bagFullTextSearchHTML'),
+            reverse('search'),
             HTTP_HOST="example.com"
         )
         assert response.templates[0].name == 'mdstore/bag_search_results.html'
@@ -713,7 +713,7 @@ class TestShowNodeStatusView:
         NodeFactory.create_batch(10)
 
         response = client.get(
-            reverse('coda_mdstore.views.showNodeStatus'),
+            reverse('node-list'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
