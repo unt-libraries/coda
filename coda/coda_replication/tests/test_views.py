@@ -38,7 +38,7 @@ class TestQueueStats:
     def test_totals_context_variable(self, client):
         entries = factories.QueueEntryFactory.create_batch(30)
 
-        response = client.get(reverse('stats'))
+        response = client.get(reverse('replication_stats'))
         totals = response.context[-1].get('totals')
 
         assert len(entries) == totals
@@ -47,7 +47,7 @@ class TestQueueStats:
         entries = factories.QueueEntryFactory.create_batch(30)
 
         response = client.get(
-            reverse('stats'))
+            reverse('replication_stats'))
 
         status_counts = response.context[-1].get('status_counts')
         assert len(status_counts) == 10
@@ -58,7 +58,7 @@ class TestQueueStats:
             assert status_counts.get(status) == sum(e.status == status_id for e in entries)
 
     def test_template_used(self, client):
-        response = client.get(reverse('stats'))
+        response = client.get(reverse('replication_stats'))
         assert response.templates[0].name == 'coda_replication/stats.html'
 
 
@@ -79,14 +79,14 @@ class TestQueueSearch:
         assert response.status_code == 200
 
     def test_template_used(self, client):
-        response = client.get(reverse('search'))
+        response = client.get(reverse('replication_search'))
         assert response.templates[0].name == 'coda_replication/search.html'
 
     def test_entries_context_variable_is_page_object(self, client):
         factories.QueueEntryFactory.create_batch(20)
 
         response = client.get(
-            reverse('search'))
+            reverse('replication_search'))
 
         page = response.context[-1]['entries']
         assert isinstance(page, Page)
@@ -95,7 +95,7 @@ class TestQueueSearch:
         entries = factories.QueueEntryFactory.create_batch(20)
 
         response = client.get(
-            reverse('search'))
+            reverse('replication_search'))
 
         results = response.context[-1]['entries']
         assert len(entries) == len(results.object_list)
@@ -109,7 +109,7 @@ class TestQueueSearch:
         entries += entries_with_status
 
         response = client.get(
-            reverse('search'),
+            reverse('replication_search'),
             {'status': status})
 
         results = response.context[-1]['entries']
@@ -122,7 +122,7 @@ class TestQueueSearch:
         """
         entries = factories.QueueEntryFactory.create_batch(20)
         response = client.get(
-            reverse('search'),
+            reverse('replication_search'),
             {'sort': 'size'})
 
         results = response.context[-1]['entries']
@@ -136,9 +136,9 @@ class TestQueueSearch:
         date_string = entry.harvest_end.strftime('%m/%d/%Y')
 
         response = client.get(
-            reverse('search'),
+            reverse('replication_search'),
             {'end_date': date_string})
-
+        print(response.context)
         end_date = response.context[-1]['end_date']
 
         assert end_date.year == entry.harvest_end.year
@@ -150,7 +150,7 @@ class TestQueueSearch:
         date_string = entry.harvest_start.strftime('%m/%d/%Y')
 
         response = client.get(
-            reverse('search'),
+            reverse('replication_search'),
             {'start_date': date_string})
 
         start_date = response.context[-1]['start_date']
@@ -166,7 +166,7 @@ class TestQueueSearch:
         entry = factories.QueueEntryFactory.create()
 
         response = client.get(
-            reverse('search'),
+            reverse('replication_search'),
             {'identifier': entry.ark})
 
         # Verify the results contain only 1 QueueEntry.
@@ -294,12 +294,12 @@ class TestQueueHtml:
 
     def test_template_used(self, client):
         entry = factories.QueueEntryFactory.create()
-        response = client.get(reverse('detail', args=[entry.ark]))
+        response = client.get(reverse('replication_detail', args=[entry.ark]))
         assert response.templates[0].name == 'coda_replication/queue_entry.html'
 
     def test_context_has_entry(self, client):
         entry = factories.QueueEntryFactory.create()
-        response = client.get(reverse('detail', args=[entry.ark]))
+        response = client.get(reverse('replication_detail', args=[entry.ark]))
         context = response.context[-1]
 
         assert context.get('record').ark == entry.ark
@@ -329,7 +329,7 @@ class TestQueueRecent:
     def test_number_entries_returned(self, client):
         factories.QueueEntryFactory.create_batch(30)
         response = client.get(
-            reverse('index'))
+            reverse('replication_index'))
 
         entries = response.context[-1]['entries']
         assert len(entries) == 10
@@ -337,7 +337,7 @@ class TestQueueRecent:
     def test_template_used(self, client):
         factories.QueueEntryFactory.create_batch(30)
         response = client.get(
-            reverse('index'))
+            reverse('replication_index'))
 
         assert response.templates[0].name == 'coda_replication/queue.html'
 

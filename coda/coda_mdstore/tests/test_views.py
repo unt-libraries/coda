@@ -459,7 +459,7 @@ class TestExternalIdentiferSearch:
         # the request factory because the view will use the path to determine
         # the id field.
         url = reverse(
-            'identifier-search', args=[ext_id.value])
+            'identifier-detail', args=[ext_id.value])
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
@@ -498,7 +498,7 @@ class TestExternalIdentiferSearch:
         # Just like in the previous test, feed the real URL to the request
         # factory because the request path is used in the response content.
         url = reverse(
-            'identifier-search', args=[ext_id.value])
+            'identifier-detail', args=[ext_id.value])
         request = rf.get(url)
         response1 = views.externalIdentifierSearch(request, ext_id.value)
 
