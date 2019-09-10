@@ -17,7 +17,7 @@ except ImportError:
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
 from django.shortcuts import render_to_response, get_object_or_404
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
@@ -662,14 +662,14 @@ def externalIdentifierSearch(request, identifier=None):
     Return a collection based on an identifier
     """
 
-    if identifier or request.REQUEST.get('ark'):
+    if identifier or request.GET.get('ark'):
         feed_id = request.path
-        if request.REQUEST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
-                request.REQUEST.get('ark'):
-            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.REQUEST.get('ark'))
+        if request.GET.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
+                request.GET.get('ark'):
+            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.GET.get('ark'))
             feed_id = request.path + identifier + '/'
-        elif request.REQUEST.get('ark'):
-            identifier = request.REQUEST.get('ark')
+        elif request.GET.get('ark'):
+            identifier = request.GET.get('ark')
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
         if 'metadc' in identifier or 'metapth' in identifier:
@@ -734,8 +734,8 @@ def bagFullTextSearchHTML(request):
 
     searchString = ""
     paginated_entries = None
-    if request.REQUEST.get('search'):
-        searchString = request.REQUEST["search"]
+    if request.GET.get('search'):
+        searchString = request.GET["search"]
         paginated_entries = paginate_entries(
             request, bagSearch(searchString), 20
         )
@@ -750,28 +750,6 @@ def bagFullTextSearchHTML(request):
         },
         context_instance=RequestContext(request)
     )
-
-
-def bagFullTextSearchATOM(request):
-    """
-    Return bag search results as ATOM
-    """
-
-    searchString = request.REQUEST["search"]
-    offset = 0
-    listSize = 50
-    if "offset" in request.REQUEST:
-        offset = int(request.REQUEST["offset"]) - 1
-    bagList, resultCount = bagFullTextSearch(searchString, offset, listSize)
-    feedTag = makeBagAtomFeed(
-        bagList,
-        request.path,
-        "Bags found by search string '%s'" % searchString
-    )
-    feedText = XML_HEADER % etree.tostring(feedTag, pretty_print=True)
-    resp = HttpResponse(feedText, content_type="application/atom+xml")
-    resp.status_code = 200
-    return resp
 
 
 def bagFullTextSearch(searchString, listSize=50):

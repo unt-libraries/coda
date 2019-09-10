@@ -506,7 +506,6 @@ class TestExternalIdentiferSearch:
         url = reverse('coda_mdstore.views.externalIdentifierSearch')
         request = rf.get(url, {'ark': 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)})
         response2 = views.externalIdentifierSearch(request)
-
         assert response1['Content-Type'] == response2['Content-Type']
 
         bagxml1 = objectify.fromstring(response1.content)
@@ -645,16 +644,6 @@ class TestBagURLListScrapeView:
     @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
                               'in scope.')
     def test_response_content(self):
-        assert 0
-
-
-class TestBagFullTextSearchATOMView:
-    """
-    Tests for coda_mdstore.views.bagFullTextSearchAtom.
-    """
-
-    @pytest.mark.xfail(reason='bagFullTextSearchATOM is never called.')
-    def test_smoke(self):
         assert 0
 
 
