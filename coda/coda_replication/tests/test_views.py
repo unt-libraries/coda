@@ -138,7 +138,6 @@ class TestQueueSearch:
         response = client.get(
             reverse('replication_search'),
             {'end_date': date_string})
-        print(response.context)
         end_date = response.context[-1]['end_date']
 
         assert end_date.year == entry.harvest_end.year
