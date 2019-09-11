@@ -25,7 +25,7 @@ def index(
     sitemaps,
     template_name='sitemap_index.xml',
     content_type='application/xml',
-    sitemap_url_name='sitemaps_views',
+    sitemap_url_name='resourcelist',
     mimetype=None
 ):
     """

@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from . import views
 from django.contrib.sitemaps import views as sitemap_views
-from .resourcesync import changelist, capabilitylist
+from .resourcesync import changelist, capabilitylist, sitemaps
 
 urlpatterns = [
     url(r'^bag/$', views.all_bags, name='bag-list'),
@@ -32,9 +32,29 @@ urlpatterns = [
     url(r'^about/$', views.about, name='about'),
     url(r'^robots.txt$', views.shooRobot, name='robots'),
     url(r'^feed/$', views.AtomSiteNewsFeed(), name='feed'),
-    url(r'^resourceindex\.xml$', sitemap_views.index),
-    url(r'^resourcelist-(?P<section>.+)\.xml$', sitemap_views.sitemap, name='sitemaps_views'),
-    url(r'changelist\.xml$', changelist),
+    url(r'^resourceindex\.xml$',
+        sitemap_views.index,
+        {
+            'sitemaps': sitemaps,
+            'template_name': 'mdstore/resourceindex.xml'
+        },
+        ),
+    url(r'^resourcelist-(?P<section>.+)\.xml$',
+        sitemap_views.sitemap,
+        {
+            'sitemaps': sitemaps,
+            'template_name': 'mdstore/sitemap.xml'
+        },
+        name='resourcelist',
+        ),
+    url(r'changelist\.xml$',
+        changelist,
+        {
+            'sitemaps': sitemaps,
+            'section': 'changelist',
+            'template_name': 'mdstore/changelist.xml'
+        },
+        ),
     url(r'^capabilitylist\.xml$', capabilitylist),
     url(r'^$', views.index, name='index'),
 ]

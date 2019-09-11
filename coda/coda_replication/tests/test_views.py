@@ -79,14 +79,14 @@ class TestQueueSearch:
         assert response.status_code == 200
 
     def test_template_used(self, client):
-        response = client.get(reverse('replication_search'))
+        response = client.get(reverse('replication-search'))
         assert response.templates[0].name == 'coda_replication/search.html'
 
     def test_entries_context_variable_is_page_object(self, client):
         factories.QueueEntryFactory.create_batch(20)
 
         response = client.get(
-            reverse('replication_search'))
+            reverse('replication-search'))
 
         page = response.context[-1]['entries']
         assert isinstance(page, Page)
@@ -95,7 +95,7 @@ class TestQueueSearch:
         entries = factories.QueueEntryFactory.create_batch(20)
 
         response = client.get(
-            reverse('replication_search'))
+            reverse('replication-search'))
 
         results = response.context[-1]['entries']
         assert len(entries) == len(results.object_list)
@@ -109,7 +109,7 @@ class TestQueueSearch:
         entries += entries_with_status
 
         response = client.get(
-            reverse('replication_search'),
+            reverse('replication-search'),
             {'status': status})
 
         results = response.context[-1]['entries']
@@ -122,7 +122,7 @@ class TestQueueSearch:
         """
         entries = factories.QueueEntryFactory.create_batch(20)
         response = client.get(
-            reverse('replication_search'),
+            reverse('replication-search'),
             {'sort': 'size'})
 
         results = response.context[-1]['entries']
@@ -136,7 +136,7 @@ class TestQueueSearch:
         date_string = entry.harvest_end.strftime('%m/%d/%Y')
 
         response = client.get(
-            reverse('replication_search'),
+            reverse('replication-search'),
             {'end_date': date_string})
         end_date = response.context[-1]['end_date']
 
@@ -149,7 +149,7 @@ class TestQueueSearch:
         date_string = entry.harvest_start.strftime('%m/%d/%Y')
 
         response = client.get(
-            reverse('replication_search'),
+            reverse('replication-search'),
             {'start_date': date_string})
 
         start_date = response.context[-1]['start_date']
@@ -165,7 +165,7 @@ class TestQueueSearch:
         entry = factories.QueueEntryFactory.create()
 
         response = client.get(
-            reverse('replication_search'),
+            reverse('replication-search'),
             {'identifier': entry.ark})
 
         # Verify the results contain only 1 QueueEntry.
@@ -293,12 +293,12 @@ class TestQueueHtml:
 
     def test_template_used(self, client):
         entry = factories.QueueEntryFactory.create()
-        response = client.get(reverse('replication_detail', args=[entry.ark]))
+        response = client.get(reverse('replication-detail', args=[entry.ark]))
         assert response.templates[0].name == 'coda_replication/queue_entry.html'
 
     def test_context_has_entry(self, client):
         entry = factories.QueueEntryFactory.create()
-        response = client.get(reverse('replication_detail', args=[entry.ark]))
+        response = client.get(reverse('replication-detail', args=[entry.ark]))
         context = response.context[-1]
 
         assert context.get('record').ark == entry.ark
@@ -328,7 +328,7 @@ class TestQueueRecent:
     def test_number_entries_returned(self, client):
         factories.QueueEntryFactory.create_batch(30)
         response = client.get(
-            reverse('replication_index'))
+            reverse('replication-index'))
 
         entries = response.context[-1]['entries']
         assert len(entries) == 10
@@ -336,7 +336,7 @@ class TestQueueRecent:
     def test_template_used(self, client):
         factories.QueueEntryFactory.create_batch(30)
         response = client.get(
-            reverse('replication_index'))
+            reverse('replication-index'))
 
         assert response.templates[0].name == 'coda_replication/queue.html'
 
