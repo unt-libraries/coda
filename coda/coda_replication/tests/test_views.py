@@ -38,7 +38,7 @@ class TestQueueStats:
     def test_totals_context_variable(self, client):
         entries = factories.QueueEntryFactory.create_batch(30)
 
-        response = client.get(reverse('replication_stats'))
+        response = client.get(reverse('replication-stats'))
         totals = response.context[-1].get('totals')
 
         assert len(entries) == totals
@@ -47,7 +47,7 @@ class TestQueueStats:
         entries = factories.QueueEntryFactory.create_batch(30)
 
         response = client.get(
-            reverse('replication_stats'))
+            reverse('replication-stats'))
 
         status_counts = response.context[-1].get('status_counts')
         assert len(status_counts) == 10
@@ -58,7 +58,7 @@ class TestQueueStats:
             assert status_counts.get(status) == sum(e.status == status_id for e in entries)
 
     def test_template_used(self, client):
-        response = client.get(reverse('replication_stats'))
+        response = client.get(reverse('replication-stats'))
         assert response.templates[0].name == 'coda_replication/stats.html'
 
 

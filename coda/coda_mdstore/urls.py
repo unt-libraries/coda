@@ -32,29 +32,32 @@ urlpatterns = [
     url(r'^about/$', views.about, name='about'),
     url(r'^robots.txt$', views.shooRobot, name='robots'),
     url(r'^feed/$', views.AtomSiteNewsFeed(), name='feed'),
-    url(r'^resourceindex\.xml$',
+    url(
+        r'^resourceindex\.xml$',
         sitemap_views.index,
         {
             'sitemaps': sitemaps,
             'template_name': 'mdstore/resourceindex.xml'
         },
-        ),
-    url(r'^resourcelist-(?P<section>.+)\.xml$',
+    ),
+    url(
+        r'^resourcelist-(?P<section>.+)\.xml$',
         sitemap_views.sitemap,
         {
             'sitemaps': sitemaps,
             'template_name': 'mdstore/sitemap.xml'
         },
         name='resourcelist',
-        ),
-    url(r'changelist\.xml$',
+    ),
+    url(
+        r'changelist\.xml$',
         changelist,
         {
             'sitemaps': sitemaps,
             'section': 'changelist',
             'template_name': 'mdstore/changelist.xml'
         },
-        ),
+    ),
     url(r'^capabilitylist\.xml$', capabilitylist),
     url(r'^$', views.index, name='index'),
 ]

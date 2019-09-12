@@ -10,9 +10,9 @@
 </div>
 
 <ul class="well pull-right inline">
-    <li><a href="{% url 'validate_list' %}?status=Passed">Passed <span class="badge badge-success">{{ verified_counts.Passed }}</span></a></li>
-    <li><a href="{% url 'validate_list' %}?status=Failed">Failed <span class="badge badge-important">{{ verified_counts.Failed }}</span></a></li>
-    <li><a href="{% url 'validate_list' %}?status=Unverified">Unverified <span class="badge badge-warning">{{ verified_counts.Unverified }}</span></a></li>
+    <li><a href="{% url 'validate-list' %}?status=Passed">Passed <span class="badge badge-success">{{ verified_counts.Passed }}</span></a></li>
+    <li><a href="{% url 'validate-list' %}?status=Failed">Failed <span class="badge badge-important">{{ verified_counts.Failed }}</span></a></li>
+    <li><a href="{% url 'validate-list' %}?status=Unverified">Unverified <span class="badge badge-warning">{{ verified_counts.Unverified }}</span></a></li>
 </ul>
 
 {% if recently_prioritized.count > 0 %}

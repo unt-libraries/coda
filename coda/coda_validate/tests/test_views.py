@@ -31,7 +31,7 @@ class TestIndex:
 
     def test_template_used(self, client):
         response = client.get(
-            reverse('validate_index'),
+            reverse('validate-index'),
             HTTP_HOST="example.com"
         )
         assert response.templates[0].name == 'coda_validate/index.html'
@@ -39,7 +39,7 @@ class TestIndex:
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30, priority=1)
         response = client.get(
-            reverse('validate_index'),
+            reverse('validate-index'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
@@ -48,7 +48,7 @@ class TestIndex:
 
     def test_context_without_validate_objects(self, client):
         response = client.get(
-            reverse('validate_index'),
+            reverse('validate-index'),
             HTTP_HOST="example.com"
         )
         context = response.context[-1]
@@ -74,14 +74,14 @@ class TestStats:
 
     def test_template_used(self, client):
         response = client.get(
-            reverse('validate_stats'),
+            reverse('validate-stats'),
             HTTP_HOST="example.com"
         )
         assert response.templates[0].name == 'coda_validate/stats.html'
 
     def test_context(self, client):
         factories.ValidateFactory.create_batch(30)
-        response = client.get(reverse('validate_stats'))
+        response = client.get(reverse('validate-stats'))
         context = response.context[-1]
 
         # Test the context variables for truthiness.
@@ -97,7 +97,7 @@ class TestStats:
         assert context['failed']
 
     def test_context_without_validate_objects(self, client):
-        response = client.get(reverse('validate_stats'))
+        response = client.get(reverse('validate-stats'))
         context = response.context[-1]
 
         assert not context['sums_by_date']
