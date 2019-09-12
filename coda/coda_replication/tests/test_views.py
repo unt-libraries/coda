@@ -88,7 +88,7 @@ class TestQueueSearch:
         response = client.get(
             reverse('replication-search'))
 
-        page = response.context[-1]['entries']
+        page = response.context['entries']
         assert isinstance(page, Page)
 
     def test_blank_search_returns_all_queues(self, client):
@@ -97,7 +97,7 @@ class TestQueueSearch:
         response = client.get(
             reverse('replication-search'))
 
-        results = response.context[-1]['entries']
+        results = response.context['entries']
         assert len(entries) == len(results.object_list)
 
     def test_filtering_by_status(self, client):
@@ -112,7 +112,7 @@ class TestQueueSearch:
             reverse('replication-search'),
             {'status': status})
 
-        results = response.context[-1]['entries']
+        results = response.context['entries']
         assert sum(q.status == status for q in entries) == len(results.object_list)
 
     def test_sorting_by_size(self, client):
@@ -125,7 +125,7 @@ class TestQueueSearch:
             reverse('replication-search'),
             {'sort': 'size'})
 
-        results = response.context[-1]['entries']
+        results = response.context['entries']
         entries.sort(key=lambda x: x.bytes)
 
         for entry, result in zip(entries, results.object_list):
@@ -138,7 +138,7 @@ class TestQueueSearch:
         response = client.get(
             reverse('replication-search'),
             {'end_date': date_string})
-        end_date = response.context[-1]['end_date']
+        end_date = response.context['end_date']
 
         assert end_date.year == entry.harvest_end.year
         assert end_date.month == entry.harvest_end.month
@@ -152,7 +152,7 @@ class TestQueueSearch:
             reverse('replication-search'),
             {'start_date': date_string})
 
-        start_date = response.context[-1]['start_date']
+        start_date = response.context['start_date']
 
         assert start_date.year == entry.harvest_start.year
         assert start_date.month == entry.harvest_start.month
@@ -169,7 +169,7 @@ class TestQueueSearch:
             {'identifier': entry.ark})
 
         # Verify the results contain only 1 QueueEntry.
-        results = response.context[-1]['entries']
+        results = response.context['entries']
         assert len(results.object_list) == 1
 
         # Verify that the single object has the same identifier.
