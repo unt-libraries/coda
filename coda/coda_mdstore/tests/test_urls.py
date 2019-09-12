@@ -2,6 +2,8 @@ from django.contrib import sitemaps
 from django.core.urlresolvers import resolve
 from django.conf import settings
 
+import pytest
+
 from coda_mdstore import resourcesync
 from coda_mdstore import views
 
@@ -92,16 +94,25 @@ def test_feed():
     assert resolve('/feed/').func.__class__ == views.AtomSiteNewsFeed
 
 
-def test_resourceindex():
+@pytest.mark.django_db
+def test_resourceindex(client):
     assert resolve('/resourceindex.xml').func == sitemaps.views.index
+    # Verify correct arguments are being passed in urls.py.
+    assert client.get('/resourceindex.xml').status_code == 200
 
 
-def test_resourcelist_section():
+@pytest.mark.django_db
+def test_resourcelist_section(client):
     assert resolve('/resourcelist-001.xml').func == sitemaps.views.sitemap
+    # Verify correct arguments are being passed in urls.py.
+    assert client.get('/resourcelist-001.xml').status_code == 200
 
 
-def test_changelist():
+@pytest.mark.django_db
+def test_changelist(client):
     assert resolve('/changelist.xml').func == resourcesync.changelist
+    # Verify correct arguments are being passed in urls.py.
+    assert client.get('/changelist.xml').status_code == 200
 
 
 def test_capabilitylist():
