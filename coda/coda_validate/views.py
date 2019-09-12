@@ -10,8 +10,7 @@ from django.contrib.sites.models import Site
 from django.contrib.syndication.views import Feed
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import render_to_response, get_object_or_404, render
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, render
 from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
 
@@ -141,7 +140,8 @@ def stats(request):
     stats page
     """
     if not Validate.objects.exists():
-        return render_to_response(
+        return render(
+            request,
             'coda_validate/stats.html',
             {
                 'sums_by_date': {},
@@ -155,8 +155,7 @@ def stats(request):
                 'validation_period': '%s days' % str(
                     settings.VALIDATION_PERIOD.days
                 ),
-            },
-            context_instance=RequestContext(request)
+            }
         )
     # resolve the range for last month filter
     today = datetime.date.today()
@@ -184,7 +183,8 @@ def stats(request):
         years.add(y)
     sums_by_date = sums_by_date_g
     num_years = len(years)
-    return render_to_response(
+    return render(
+        request,
         'coda_validate/stats.html',
         {
             'sums_by_date': dict((('%d, %d, %d' % s, c)
@@ -201,8 +201,7 @@ def stats(request):
             'passed': result_counts.get('Passed'),
             'failed': result_counts.get('Failed'),
             'validation_period': '%s days' % str(settings.VALIDATION_PERIOD.days),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -219,13 +218,13 @@ def prioritize(request):
         v.priority_change_date = datetime.datetime.now()
         v.save()
         prioritized = True
-    return render_to_response(
+    return render(
+        request,
         'coda_validate/prioritize.html',
         {
             'identifier': identifier,
             'prioritized': prioritized,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -242,12 +241,12 @@ def validate(request, identifier):
         v.priority = 1
         v.priority_change_date = datetime.datetime.now()
         v.save()
-    return render_to_response(
+    return render(
+        request,
         'coda_validate/validate.html',
         {
             'validate': v,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

@@ -3,10 +3,9 @@ from presentation import addQueueEntry, updateQueueEntry
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.contrib.sites.models import Site  # noqa
-from django.template import RequestContext
 try:
     # the json module was included in the stdlib in python 2.6
     # http://docs.python.org/library/json.html
@@ -47,14 +46,14 @@ def queue_stats(request):
             QueueEntry.objects.filter(status=status[0]).count()
         )
     # pass info to template
-    return render_to_response(
+    return render(
+        request,
         'coda_replication/stats.html',
         {
             'totals': totals,
             'status_counts': status_counts,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -125,7 +124,8 @@ def queue_search(request):
     else:
         paginated_entries = None
     # render to the template
-    return render_to_response(
+    return render(
+        request,
         'coda_replication/search.html',
         {
             'queue_search_form': QueueSearchForm(initial=initial),
@@ -136,8 +136,7 @@ def queue_search(request):
             'end_date': end_date,
             'entries': paginated_entries,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request),
+        }
     )
 
 
@@ -272,14 +271,14 @@ def queue_html(request, identifier=None):
     """
 
     queue_object = get_object_or_404(QueueEntry, ark=identifier)
-    return render_to_response(
+    return render(
+        request,
         'coda_replication/queue_entry.html',
         {
             'status_list': STATUS_CHOICES,
             'record': queue_object,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -290,15 +289,15 @@ def queue_recent(request):
 
     queue_entries = QueueEntry.objects.all().order_by('-pk')[:10]
     # pass info to template
-    return render_to_response(
+    return render(
+        request,
         'coda_replication/queue.html',
         {
             'entries': queue_entries,
             'status_list': STATUS_CHOICES,
             'num_events': QueueEntry.objects.count(),
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
