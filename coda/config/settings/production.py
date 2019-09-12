@@ -6,10 +6,10 @@ SITE_ID = get_secret('SITE_ID')
 
 SECRET_KEY = get_secret('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
-
+ALLOWED_HOSTS += ['example.com']
 ADMINS = get_secret('ADMINS')
 
 DATABASES = {
