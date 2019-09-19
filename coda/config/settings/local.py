@@ -15,6 +15,11 @@ except NameError:
     INSTALLED_APPS = []
 INSTALLED_APPS += ['debug_toolbar']
 
+try:
+    MIDDLEWARE  # noqa
+except NameError:
+    MIDDLEWARE = []
+MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
 
 # Database settings for the Dockerized dev environment.
 # See docker-compose.yml
