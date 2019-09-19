@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 from django.contrib import admin
-from coda.coda_oaipmh import views as oai_views
+from coda_oaipmh import views as oai_views
 
 admin.autodiscover()
 
