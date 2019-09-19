@@ -12,8 +12,8 @@ DEBUG_TOOLBAR_CONFIG = {
 try:
     INSTALLED_APPS  # noqa
 except NameError:
-    INSTALLED_APPS = ()
-INSTALLED_APPS += ('debug_toolbar',)
+    INSTALLED_APPS = []
+INSTALLED_APPS += ['debug_toolbar']
 
 
 # Database settings for the Dockerized dev environment.

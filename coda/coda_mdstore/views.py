@@ -16,14 +16,13 @@ except ImportError:
     import simplejson as json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
-from django.shortcuts import render_to_response, get_object_or_404
-from django.core.servers.basehttp import FileWrapper
+from django.shortcuts import get_object_or_404, render
+from wsgiref.util import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
 from django.utils.feedgenerator import Atom1Feed
 from django.contrib.syndication.views import Feed
-from django.template import RequestContext
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from lxml import etree
 from premis_event_service.models import Event
@@ -154,7 +153,8 @@ def index(request):
     if not totals['files__sum']:
         totals['files__sum'] = 0
     # render back with a dict of details
-    return render_to_response(
+    return render(
+        request,
         'mdstore/index.html',
         {
             'totals': totals,
@@ -162,8 +162,7 @@ def index(request):
             'validation_total': validation_total,
             'event_total': event_total,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -173,12 +172,12 @@ def about(request):
     """
 
     # render back with a dict of details
-    return render_to_response(
+    return render(
+        request,
         'mdstore/about.html',
         {
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -194,13 +193,13 @@ def all_bags(request):
         all_bags.order_by('-bagging_date')
     )
     # render back with a dict of details
-    return render_to_response(
+    return render(
+        request,
         'mdstore/bag_search_results.html',
         {
             'entries': paginated_entries,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -392,7 +391,8 @@ def stats(request):
             running=True,
         )
         # pass info to template
-        return render_to_response(
+        return render(
+            request,
             'mdstore/stats.html',
             {
                 'totals': totals,
@@ -403,12 +403,12 @@ def stats(request):
                 'monthly_size': monthly_size,
                 'monthly_running_size': monthly_running_size,
                 'maintenance_message': MAINTENANCE_MSG,
-            },
-            context_instance=RequestContext(request)
+            }
         )
     else:
         # pass info to template
-        return render_to_response(
+        return render(
+            request,
             'mdstore/stats.html',
             {
                 'totals': 0,
@@ -417,8 +417,7 @@ def stats(request):
                 'monthly_running_bag_total': [],
                 'monthly_running_file_total': [],
                 'maintenance_message': MAINTENANCE_MSG,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -530,7 +529,8 @@ def bagHTML(request, identifier):
                 json_events = None
     except:
         pass
-    return render_to_response(
+    return render(
+        request,
         'mdstore/bag_info.html',
         {
             'linked_events': linked_events,
@@ -541,8 +541,7 @@ def bagHTML(request, identifier):
             'bag': bag,
             'bag_info': bag_info_d,
             'maintenance_message': MAINTENANCE_MSG,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -662,14 +661,14 @@ def externalIdentifierSearch(request, identifier=None):
     Return a collection based on an identifier
     """
 
-    if identifier or request.REQUEST.get('ark'):
+    if identifier or request.GET.get('ark'):
         feed_id = request.path
-        if request.REQUEST.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
-                request.REQUEST.get('ark'):
-            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.REQUEST.get('ark'))
+        if request.GET.get('ark') and ('ark:/%d' % settings.ARK_NAAN) not in \
+                request.GET.get('ark'):
+            identifier = 'ark:/%d/%s' % (settings.ARK_NAAN, request.GET.get('ark'))
             feed_id = request.path + identifier + '/'
-        elif request.REQUEST.get('ark'):
-            identifier = request.REQUEST.get('ark')
+        elif request.GET.get('ark'):
+            identifier = request.GET.get('ark')
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
         if 'metadc' in identifier or 'metapth' in identifier:
@@ -695,12 +694,12 @@ def externalIdentifierSearch(request, identifier=None):
         resp.status_code = 200
         return resp
     else:
-        return render_to_response(
+        return render(
+            request,
             'mdstore/external_identifier.html',
             {
                 'maintenance_message': MAINTENANCE_MSG,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -734,12 +733,13 @@ def bagFullTextSearchHTML(request):
 
     searchString = ""
     paginated_entries = None
-    if request.REQUEST.get('search'):
-        searchString = request.REQUEST["search"]
+    if request.GET.get('search'):
+        searchString = request.GET["search"]
         paginated_entries = paginate_entries(
             request, bagSearch(searchString), 20
         )
-    return render_to_response(
+    return render(
+        request,
         'mdstore/bag_search_results.html',
         {
             'searchString': searchString,
@@ -747,31 +747,8 @@ def bagFullTextSearchHTML(request):
             'maintenance_message': MAINTENANCE_MSG,
             'query': connection.queries,
 
-        },
-        context_instance=RequestContext(request)
+        }
     )
-
-
-def bagFullTextSearchATOM(request):
-    """
-    Return bag search results as ATOM
-    """
-
-    searchString = request.REQUEST["search"]
-    offset = 0
-    listSize = 50
-    if "offset" in request.REQUEST:
-        offset = int(request.REQUEST["offset"]) - 1
-    bagList, resultCount = bagFullTextSearch(searchString, offset, listSize)
-    feedTag = makeBagAtomFeed(
-        bagList,
-        request.path,
-        "Bags found by search string '%s'" % searchString
-    )
-    feedText = XML_HEADER % etree.tostring(feedTag, pretty_print=True)
-    resp = HttpResponse(feedText, content_type="application/atom+xml")
-    resp.status_code = 200
-    return resp
 
 
 def bagFullTextSearch(searchString, listSize=50):
@@ -802,15 +779,15 @@ def showNodeStatus(request, identifier=None):
 
     if identifier:
         node = Node.objects.get(node_name=identifier)
-        return render_to_response(
+        return render(
+            request,
             'mdstore/node.html',
             {
                 'node': node,
                 'filled': percent(node.node_size, node.node_capacity),
                 'available': node.node_capacity - node.node_size,
                 'maintenance_message': MAINTENANCE_MSG,
-            },
-            context_instance=RequestContext(request)
+            }
         )
     else:
         nodes = Node.objects.all()
@@ -835,7 +812,8 @@ def showNodeStatus(request, identifier=None):
             status_list.append(node_status)
         if total_capacity:
             total_filled = percent(total_size, total_capacity)
-        return render_to_response(
+        return render(
+            request,
             'mdstore/node_status.html',
             {
                 'status_list': status_list,
@@ -844,8 +822,7 @@ def showNodeStatus(request, identifier=None):
                 'total_available': total_available,
                 'total_filled': total_filled,
                 'maintenance_message': MAINTENANCE_MSG,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 

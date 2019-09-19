@@ -36,7 +36,7 @@ class Bag(models.Model):
 
 
 class Bag_Info(models.Model):
-    bag_name = models.ForeignKey(Bag)
+    bag_name = models.ForeignKey(Bag, on_delete=models.CASCADE)
     field_name = models.CharField(
         max_length=255,
         help_text="Field Name",
@@ -78,7 +78,7 @@ class Node(models.Model):
 
 class External_Identifier(models.Model):
     value = models.CharField(max_length=250, db_index=True)
-    belong_to_bag = models.ForeignKey(Bag)
+    belong_to_bag = models.ForeignKey(Bag, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['value']

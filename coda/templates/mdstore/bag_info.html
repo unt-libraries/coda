@@ -12,7 +12,7 @@
 <table class="table table-striped info">
     {% for k, v in bag_info.items %}
     <tr>
-            <th style="width: 20%; border-right:5px solid {% cycle #00B230,#E8B85A,#4C23E8,#885499,#FF2F35,#58807D %}">{{ k }}:</th>
+            <th style="width: 20%; border-right:5px solid {% cycle '#00B230' '#E8B85A' '#4C23E8' '#885499' '#FF2F35' '#58807D' %}">{{ k }}:</th>
             <td>
                 {% if k == 'Contact-Email' %}
                     <i class="icon-envelope"></i> <a href="mailto:{{ v }}">{{ v }}</a>
