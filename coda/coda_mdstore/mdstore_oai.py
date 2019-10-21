@@ -17,7 +17,7 @@ class OAIInterface(object):
             'baseURL': 'http://not.a.good.base.url.com/fixit/kurt/',
             'protocolVersion': "2.0",
             'adminEmails': ['not.a.real.email@.fixit.kurt.com'],
-            'earliestDatestamp': datetime(2004, 05, 19),
+            'earliestDatestamp': datetime(2004, 5, 19),
             'deletedRecord': 'transient',
             'granularity': 'YYYY-MM-DDThh:mm:ssZ',
             # 'granularity':'YYYY-MM-DD',
@@ -42,7 +42,7 @@ class OAIInterface(object):
         try:
             bagObject = Bag.objects.get(name=id)
         except Bag.DoesNotExist:
-            raise error.IdDoesNotExistError, "Id doesnt exist: %s" % identifier
+            raise error.IdDoesNotExistError("Id doesnt exist: %s" % identifier)
         record = makeDataRecord(
             bagObject, domain=self.domain,
             metadataPrefix=metadataPrefix
@@ -186,6 +186,7 @@ def makeDataRecord(
         raise Exception("dcDict is empty")
     setList = []
     header = common.Header(
+        bagObject,
         id,
         date,
         setList,
@@ -193,11 +194,11 @@ def makeDataRecord(
     )
     dublinStruct = dcDict
     if metadataPrefix == "oai_dc":
-        metadata = common.Metadata(dublinStruct)
+        metadata = common.Metadata(bagObject, dublinStruct)
     elif metadataPrefix == "coda_bag":
         bagMap = {}
         bagMap["bag"] = bagObject
-        metadata = common.Metadata(bagMap)
+        metadata = common.Metadata(bagObject, bagMap)
     return (header, metadata, None)
 
 
