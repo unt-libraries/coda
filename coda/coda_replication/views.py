@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
-from presentation import addQueueEntry, updateQueueEntry
+from .presentation import addQueueEntry, updateQueueEntry
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
@@ -18,7 +18,7 @@ except ImportError:
     import simplejson as json
 from datetime import datetime
 from lxml import etree
-import urllib
+import urllib.parse
 
 from codalib import APP_AUTHOR
 from codalib.bagatom import makeObjectFeed, queueEntryToXML, wrapAtom
@@ -188,21 +188,21 @@ def queue_search_JSON(request):
                     'rel': 'self',
                     'href': "http://%s%s?%s" % (
                         request.META.get('HTTP_HOST'),
-                        request.path, urllib.urlencode(current_page_args)
+                        request.path, urllib.parse.urlencode(current_page_args)
                     )
                 },
                 {
                     'rel': 'first',
                     'href': "http://%s%s?%s" % (
                         request.META.get('HTTP_HOST'),
-                        request.path, urllib.urlencode(first_page_args)
+                        request.path, urllib.parse.urlencode(first_page_args)
                     )
                 },
                 {
                     'rel': 'last',
                     'href': "http://%s%s?%s" % (
                         request.META.get('HTTP_HOST'),
-                        request.path, urllib.urlencode(last_page_args)
+                        request.path, urllib.parse.urlencode(last_page_args)
                     )
                 },
             ]
@@ -215,7 +215,7 @@ def queue_search_JSON(request):
                     'rel': 'previous',
                     'href': "http://%s%s?%s" % (
                         request.META.get('HTTP_HOST'),
-                        request.path, urllib.urlencode(args)
+                        request.path, urllib.parse.urlencode(args)
                     )
                 },
             )
@@ -227,7 +227,7 @@ def queue_search_JSON(request):
                     'rel': 'next',
                     'href': "http://%s%s?%s" % (
                         request.META.get('HTTP_HOST'),
-                        request.path, urllib.urlencode(args)
+                        request.path, urllib.parse.urlencode(args)
                     )
                 },
             )
@@ -323,7 +323,7 @@ def queue(request, identifier=None):
     elif request.method == 'POST' and not identifier:
         try:
             queueObject = addQueueEntry(request.body)
-        except IntegrityError as e:
+        except IntegrityError:
             return HttpResponse(
                 "Conflict with already-existing resource.\n",
                 status=409
@@ -336,7 +336,7 @@ def queue(request, identifier=None):
             id=loc,
             title=queueObject.ark,
         )
-        atomText = '<?xml version="1.0"?>\n%s' % etree.tostring(
+        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(
@@ -352,7 +352,7 @@ def queue(request, identifier=None):
                 request.body, validate_ark=identifier
             )
         except ObjectDoesNotExist as e:
-            return HttpResponseNotFound(e.message, content_type="text/plain")
+            return HttpResponseNotFound(e, content_type="text/plain")
         except ValidationError as e:
             return HttpResponse(
                 e.message,
@@ -364,7 +364,7 @@ def queue(request, identifier=None):
             id='http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark),
             title=queueObject.ark,
         )
-        atomText = '<?xml version="1.0"?>\n%s' % etree.tostring(
+        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
@@ -386,7 +386,8 @@ def queue(request, identifier=None):
             author=APP_AUTHOR.get('name', None),
             author_uri=APP_AUTHOR.get('uri', None)
         )
-        atomText = '<?xml version="1.0"?>\n%s' % etree.tostring(
+
+        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
@@ -434,6 +435,6 @@ def queue_list(request):
         return HttpResponseBadRequest('Page does not exist.')
 
     feedText = etree.tostring(atomFeed, pretty_print=True)
-    feedText = '<?xml version="1.0"?>\n{0}'.format(feedText)
+    feedText = '<?xml version="1.0"?>\n{0}'.format(feedText.decode())
 
     return HttpResponse(feedText, content_type='application/atom+xml')
