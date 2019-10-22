@@ -15,8 +15,8 @@ class QueueEntryFactory(factory.django.DjangoModelFactory):
     files = fuzzy.FuzzyInteger(50, 500)
     url_list = fuzzy.FuzzyText(length=500)
     status = fuzzy.FuzzyChoice(str(i) for i in range(1, 10))
-    harvest_start = fuzzy.FuzzyNaiveDateTime(datetime(2015, 01, 01))
-    harvest_end = fuzzy.FuzzyNaiveDateTime(datetime(2015, 06, 01))
+    harvest_start = fuzzy.FuzzyNaiveDateTime(datetime(2015, 1, 1))
+    harvest_end = fuzzy.FuzzyNaiveDateTime(datetime(2015, 6, 1))
     queue_position = fuzzy.FuzzyInteger(1, 100)
 
     class Meta:
