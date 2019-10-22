@@ -75,7 +75,7 @@ class QueueEntry(models.Model):
 
     # and we can still have our cake like we want it.
     def oxum(self):
-        return u'%s.%s' % (self.bytes, self.files)
+        return '%s.%s' % (self.bytes, self.files)
     oxum = property(oxum)
 
     class Meta:
