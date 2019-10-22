@@ -14,7 +14,7 @@ import site
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 ENV = os.path.join(BASE_DIR, 'env')
-SITE_PACKAGES = os.path.join(ENV, '/lib/python2.7/site-packages')
+SITE_PACKAGES = os.path.join(ENV, '/lib/python3.7/site-packages')
 
 site.addsitedir(SITE_PACKAGES)
 sys.path.append(os.path.join(BASE_DIR, 'coda/'))
