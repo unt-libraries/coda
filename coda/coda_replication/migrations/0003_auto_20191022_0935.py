@@ -15,27 +15,32 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='queueentry',
             name='ark',
-            field=models.CharField(db_index=True, help_text="The object's ARK identifier", max_length=255, unique=True),
+            field=models.CharField(db_index=True, help_text="The object's ARK identifier",
+                                   max_length=255, unique=True),
         ),
         migrations.AlterField(
             model_name='queueentry',
             name='bytes',
-            field=models.BigIntegerField(db_index=True, help_text='The total size of the queued entry'),
+            field=models.BigIntegerField(db_index=True,
+                                         help_text='The total size of the queued entry'),
         ),
         migrations.AlterField(
             model_name='queueentry',
             name='files',
-            field=models.IntegerField(help_text='The number of files that the queued entry contains'),
+            field=models.IntegerField(help_text='The number of files that the queued '
+                                                'entry contains'),
         ),
         migrations.AlterField(
             model_name='queueentry',
             name='harvest_end',
-            field=models.DateTimeField(blank=True, help_text='When did the harvest finish?', null=True),
+            field=models.DateTimeField(blank=True, help_text='When did the harvest finish?',
+                                       null=True),
         ),
         migrations.AlterField(
             model_name='queueentry',
             name='harvest_start',
-            field=models.DateTimeField(blank=True, help_text='When did the harvest start?', null=True),
+            field=models.DateTimeField(blank=True, help_text='When did the harvest start?',
+                                       null=True),
         ),
         migrations.AlterField(
             model_name='queueentry',
@@ -45,7 +50,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='queueentry',
             name='status',
-            field=models.CharField(blank=True, choices=[('1', 'Ready to Harvest'), ('2', 'Currently Harvesting'), ('3', 'Completed'), ('4', 'Error: Digital Object Too Large'), ('5', 'Error: Bag Verification Failed'), ('6', 'Error: Transfer Error'), ('7', 'Error: Duplicate Entry'), ('8', 'Error: Unknown Error'), ('9', 'Held'), ('', 'None')], help_text='A message indicating the current status of the harvest', max_length=10),
+            field=models.CharField(blank=True, choices=[('1', 'Ready to Harvest'),
+                                                        ('2', 'Currently Harvesting'),
+                                                        ('3', 'Completed'),
+                                                        ('4', 'Error: Digital Object Too Large'),
+                                                        ('5', 'Error: Bag Verification Failed'),
+                                                        ('6', 'Error: Transfer Error'),
+                                                        ('7', 'Error: Duplicate Entry'),
+                                                        ('8', 'Error: Unknown Error'),
+                                                        ('9', 'Held'),
+                                                        ('', 'None')],
+                                   help_text='A message indicating the current status '
+                                             'of the harvest',
+                                   max_length=10),
         ),
         migrations.AlterField(
             model_name='queueentry',
