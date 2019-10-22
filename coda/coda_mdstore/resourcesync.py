@@ -1,4 +1,4 @@
-from urlparse import urlparse
+from urllib.parse import urlparse
 import warnings
 
 from django.contrib.sitemaps import Sitemap, views
@@ -11,12 +11,13 @@ from django.template.response import TemplateResponse
 
 from codalib.bagatom import TIME_FORMAT_STRING
 from coda_mdstore.models import Bag
+import collections
 
 try:
     MOST_RECENT_BAGGING_DATE = Bag.objects.latest(
         'bagging_date'
     ).bagging_date.strftime(TIME_FORMAT_STRING)
-except Exception, e:
+except Exception:
     MOST_RECENT_BAGGING_DATE = '2012-12-12T00:00:00Z'
 
 
@@ -45,8 +46,8 @@ def index(
     req_site = get_current_site(request)
 
     sites = []
-    for section, site in sitemaps.iteritems():
-        if callable(site):
+    for section, site in sitemaps.items():
+        if isinstance(site, collections.Callable):
             site = site()
         protocol = req_protocol if site.protocol is None else site.protocol
         sitemap_url = urlresolvers.reverse(
@@ -89,7 +90,7 @@ def sitemap(request, sitemaps, section=None,
     urls = []
     for site in maps:
         try:
-            if callable(site):
+            if isinstance(site, collections.Callable):
                 site = site()
             u = site.get_urls(page=page, site=req_site)
             urls.extend(u)
