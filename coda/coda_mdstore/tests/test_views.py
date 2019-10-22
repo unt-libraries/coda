@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-import urllib2
+import urllib.error
 
 from lxml import objectify
 import mock
@@ -183,7 +183,7 @@ class TestJSONStatsView:
             'node_capacity__sum': 1000000
         }
         mock_bag.objects.aggregate.return_value = {
-            'bagging_date__max': datetime(2015, 01, 01),
+            'bagging_date__max': datetime(2015, 1, 1),
             'pk__count': 50,
             'size__sum': 100000,
             'files__sum': 1000,
@@ -244,12 +244,12 @@ class TestRobotsView:
     def test_user_agent_is_all(self, rf):
         request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
-        assert 'User-agent: *' in response.content
+        assert b'User-agent: *' in response.content
 
     def test_disallow(self, rf):
         request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
-        assert 'Disallow: /' in response.content
+        assert b'Disallow: /' in response.content
 
 
 class TestBagHTMLView:
@@ -290,7 +290,7 @@ class TestBagHTMLView:
     @mock.patch('coda_mdstore.views.urlopen')
     def test_catches_urlerror(self, mock_urlopen, client):
         bag = FullBagFactory.create()
-        mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
+        mock_urlopen.side_effect = urllib.error.URLError('Fake Exception')
 
         response = client.get(
             reverse('bag-detail', args=[bag.name]), HTTP_HOST="example.com")
@@ -370,7 +370,7 @@ class TestBagProxyView:
         response = views.bagProxy(request, 'ark:/00002/id', '/foo/bar')
 
         assert response.status_code == 404
-        assert response.content == "There is no bag with id 'ark:/00002/id'."
+        assert response.content == b"There is no bag with id 'ark:/00002/id'."
 
     def test_raises_http404_when_file_handle_is_false(self, rf):
         self.getFileHandle.return_value = False
@@ -531,13 +531,13 @@ class TestExternalIdentiferSearchJSON:
     def test_without_ark_parameter(self, rf):
         request = rf.get('/')
         response = views.externalIdentifierSearchJSON(request)
-        assert response.content == '[]'
+        assert response.content == b'[]'
 
     def test_with_invalid_ark_id(self, rf):
         request = rf.get('/', {'ark': 'ark:/67351/metadc000001'})
         response = views.externalIdentifierSearchJSON(request)
 
-        assert response.content == '[]'
+        assert response.content == b'[]'
         assert response['Content-Type'] == 'application/json'
 
     def test_with_valid_ark_id(self, rf):
@@ -629,7 +629,7 @@ class TestBagURLListScrapeView:
 
         assert response.status_code == 404
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00001/id'."
+        assert response.content == b"There is no bag with id 'ark:/00001/id'."
 
     @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
                               'in scope.')

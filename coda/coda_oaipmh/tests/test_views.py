@@ -16,7 +16,7 @@ def test_index_returns_ok(rf):
 def test_index_with_verb_returns_ok(rf):
     request = rf.get('/?verb=Identify')
     response = views.index(request)
-    assert """<Identify>
+    assert b"""<Identify>
         <repositoryName>example.com</repositoryName>
         <baseURL>http://example.com/oai/</baseURL>
         <protocolVersion>2.0</protocolVersion>
@@ -26,8 +26,8 @@ def test_index_with_verb_returns_ok(rf):
         <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
         <description>
           <toolkit xmlns="http://oai.dlib.vt.edu/OAI/metadata/toolkit" """
-    """xsi:schemaLocation="http://oai.dlib.vt.edu/OAI/metadata/toolkit """
-    """http://oai.dlib.vt.edu/OAI/metadata/toolkit.xsd">
+    b"""xsi:schemaLocation="http://oai.dlib.vt.edu/OAI/metadata/toolkit """
+    b"""http://oai.dlib.vt.edu/OAI/metadata/toolkit.xsd">
             <title>pyoai</title>
             <version>2.4.4</version>
             <URL>http://infrae.com/products/oaipack</URL>
