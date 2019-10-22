@@ -40,7 +40,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bag',
             name='name',
-            field=models.CharField(help_text='Name of Bag', max_length=255, primary_key=True, serialize=False),
+            field=models.CharField(help_text='Name of Bag', max_length=255, primary_key=True,
+                                   serialize=False),
         ),
         migrations.AlterField(
             model_name='bag',
@@ -65,22 +66,26 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='node_capacity',
-            field=models.BigIntegerField(blank=True, help_text='The total amount of storage (in bytes)'),
+            field=models.BigIntegerField(blank=True,
+                                         help_text='The total amount of storage (in bytes)'),
         ),
         migrations.AlterField(
             model_name='node',
             name='node_name',
-            field=models.CharField(db_index=True, help_text='The name of the node', max_length=255, unique=True),
+            field=models.CharField(db_index=True, help_text='The name of the node',
+                                   max_length=255, unique=True),
         ),
         migrations.AlterField(
             model_name='node',
             name='node_path',
-            field=models.CharField(help_text="The path on disk to the node's root", max_length=255),
+            field=models.CharField(help_text="The path on disk to the node's root",
+                                   max_length=255),
         ),
         migrations.AlterField(
             model_name='node',
             name='node_size',
-            field=models.BigIntegerField(blank=True, help_text='The current size of files on disk (in bytes)'),
+            field=models.BigIntegerField(blank=True,
+                                         help_text='The current size of files on disk (in bytes)'),
         ),
         migrations.AlterField(
             model_name='node',

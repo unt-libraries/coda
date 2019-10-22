@@ -15,6 +15,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='validate',
             name='last_verified_status',
-            field=models.CharField(choices=[('Unverified', 'Unverified'), ('Passed', 'Passed'), ('Failed', 'Failed')], default='Unverified', max_length=25),
+            field=models.CharField(choices=[('Unverified', 'Unverified'),
+                                            ('Passed', 'Passed'),
+                                            ('Failed', 'Failed')],
+                                   default='Unverified',
+                                   max_length=25),
         ),
     ]
