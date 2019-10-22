@@ -50,7 +50,7 @@ class Validate(models.Model):
 
     objects = ValidateManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % self.identifier
 
     class Meta:

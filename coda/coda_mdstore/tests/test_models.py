@@ -8,6 +8,6 @@ class TestBag:
         expected = '{0}.{1}'.format(bag.size, bag.files)
         assert bag.oxum == expected
 
-    def test_unicode(self):
+    def test_str(self):
         bag = factories.BagFactory.build()
-        assert unicode(bag) == bag.name
+        assert str(bag) == bag.name
