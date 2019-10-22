@@ -19,7 +19,7 @@ from django.views.generic import ListView
 from .models import Validate
 
 
-XML_HEADER = "<?xml version=\"1.0\"?>\n%s"
+XML_HEADER = b"<?xml version=\"1.0\"?>\n%s"
 
 
 class CorrectMimeTypeFeed(Atom1Feed):
