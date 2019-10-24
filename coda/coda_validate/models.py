@@ -60,11 +60,11 @@ class Validate(models.Model):
 
     @classmethod
     def sums_by_date(cls,):
-        sql = """select date(last_verified) as dt, count(date(last_verified)) as ct
-        from %s
-        where last_verified_status != 'Unverified'
-        group by date(last_verified)
-        order by last_verified asc""" % (cls._meta.db_table,)
+        sql = """select dt, ct
+        from (select date(last_verified) as dt, count(date(last_verified)) as ct
+            from %s where last_verified_status != 'Unverified') as m
+        group by dt
+        order by dt asc""" % (cls._meta.db_table,)
         sums_by_date = {}
         with connection.cursor() as cur:
             cur.execute(sql)
