@@ -435,6 +435,6 @@ def queue_list(request):
         return HttpResponseBadRequest('Page does not exist.')
 
     feedText = etree.tostring(atomFeed, pretty_print=True)
-    feedText = '<?xml version="1.0"?>\n{0}'.format(feedText.decode())
+    feedText = b'<?xml version="1.0"?>\n %s' % feedText
 
     return HttpResponse(feedText, content_type='application/atom+xml')
