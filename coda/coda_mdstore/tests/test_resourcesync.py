@@ -185,7 +185,7 @@ class TestBaseSitemap:
         sitemap = resourcesync.BaseSitemap()
         items = sitemap.items()
 
-        assert len(items) == 10
+        assert items.count() == 10
         assert all(map(lambda i: 'name' in i.keys(), items))
 
     def test_location(self):
