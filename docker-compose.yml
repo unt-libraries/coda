@@ -2,6 +2,7 @@ version: '2'
 services:
     db:
         image: mysql:5.5
+        command: --sql_mode="only_full_group_by"
         environment:
             - MYSQL_ROOT_PASSWORD=root
             - MYSQL_DATABASE=coda_local
