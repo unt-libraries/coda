@@ -591,9 +591,23 @@ class TestBagURLListView:
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_output_text(self):
-        assert 0
+    # @pytest.mark.xfail(reason='Refactor is required.')
+    @mock.patch('coda_mdstore.views.len', return_value=5)
+    def test_output_text(self, rf):
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        self.getFileHandle.return_value.readline.return_value = 'This is sample testing text'
+        bag = FullBagFactory.create()
+        request = rf.get('/')
+        text = """<html>
+                    <body>
+                    <tr> <td>test</td> <td>data</td> </tr>
+                    <tr> <td>of </td> </tr>
+                    <tr> <td> <a href='test.com'>url</a> <a href='testurl.com'>here</a> </td> </tr>
+                    </body>
+                </html>"""
+        with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
+            response = views.bagURLList(request, bag.name)
+        assert response.status_code == 200
 
     @pytest.mark.xfail(reason='Refactor is required.')
     def test_top_files_block(self):
