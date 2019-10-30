@@ -591,7 +591,6 @@ class TestBagURLListView:
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    @mock.patch('coda_mdstore.views.len', return_value=5)
     def test_output_text(self, rf):
         self.getFileHandle.return_value.url = 'https://coda/testurl'
         self.getFileHandle.return_value.readline.side_effect = ['This is sample testing text', '']
