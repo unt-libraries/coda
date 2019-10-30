@@ -28,11 +28,11 @@ def getFileList(url):
     fileList = []
     handle = urllib.request.urlopen(url)
     soup = BSoup(handle)
-    trList = soup.findAll('tr')
+    trList = soup.find_all('tr')
     for tr in trList:
-        tds = tr.findAll('td')
+        tds = tr.find_all('td')
         for td in tds:
-            anchors = td.findAll('a')
+            anchors = td.find_all('a')
             for anchor in anchors:
                 try:
                     # if anchor.contents and "Parent Directory" in contents:
