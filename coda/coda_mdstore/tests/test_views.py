@@ -591,31 +591,38 @@ class TestBagURLListView:
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    # @pytest.mark.xfail(reason='Refactor is required.')
     @mock.patch('coda_mdstore.views.len', return_value=5)
     def test_output_text(self, rf):
         self.getFileHandle.return_value.url = 'https://coda/testurl'
-        self.getFileHandle.return_value.readline.return_value = 'This is sample testing text'
+        self.getFileHandle.return_value.readline.side_effect = ['This is sample testing text', '']
+        bag = FullBagFactory.create()
+        request = rf.get('/')
+        response = views.bagURLList(request, bag.name)
+        assert b'https://coda/is sample testing text' in response.content
+        assert response.status_code == 200
+
+    def test_top_files_block(self, rf):
+        self.getFileHandle.return_value.url = 'https://testurl'
+        self.getFileHandle.return_value.readline.side_effect = ['Sample text', '']
         bag = FullBagFactory.create()
         request = rf.get('/')
         text = """<html>
-                    <body>
-                    <tr> <td>test</td> <td>data</td> </tr>
-                    <tr> <td>of </td> </tr>
-                    <tr> <td> <a href='test.com'>url</a> <a href='testurl.com'>here</a> </td> </tr>
-                    </body>
-                </html>"""
+                     <body>
+                     <tr> <td>test</td> <td>data</td> </tr>
+                     <tr> <td>of </td> </tr>
+                     <tr> <td>
+                        <a href='test.com'>url</a>
+                        <a href='testurl.com'>here</a>
+                     </td> </tr>
+                     </body>
+                  </html>"""
         with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
             response = views.bagURLList(request, bag.name)
+        assert b'https://testurl.com\nhttps://test.com\nhttps://text' in response.content
         assert response.status_code == 200
 
     @pytest.mark.xfail(reason='Refactor is required.')
-    def test_top_files_block(self):
-        # TODO: rename once implemented.
-        assert 0
-
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_path_is_not_unicode_safe(self):
+    def test_path_is_not_unicode_safe(self, rf):
         assert 0
 
     @pytest.mark.xfail(reason='Refactor is required.')
@@ -655,10 +662,26 @@ class TestBagURLListScrapeView:
         with pytest.raises(http.Http404):
             views.bagURLListScrape(request, 'ark:/00001/id')
 
-    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
-                              'in scope.')
-    def test_response_content(self):
-        assert 0
+    def test_response_content(self, rf):
+        bag = FullBagFactory.create()
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        request = rf.get('/')
+        text = """<html>
+                    <body>
+                    <tr> <td>test</td> <td>data</td> </tr>
+                    <tr> <td>of </td> </tr>
+                    <tr> <td>
+                        <a href='test.com'>url</a>
+                        <a href='testurl.com'>here</a>
+                    </td> </tr>
+                    </body>
+                  </html>"""
+
+        with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
+            response = views.bagURLListScrape(request, bag.name)
+
+        assert b'test.com\ntesturl.com' == response.content
+        assert response.status_code == 200
 
 
 class TestBagFullTextSearchHTMLView:
