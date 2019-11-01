@@ -1,6 +1,7 @@
 import pytest
 from lxml import etree, objectify
 import mock
+from django.core.exceptions import ValidationError
 
 from coda_validate import views, factories
 from coda_validate.models import Validate
@@ -67,7 +68,7 @@ def test_xmlToValidateObject(validate_feed):
 
 @mock.patch('coda_validate.views.etree.XML', return_value=None)
 def test_xmlToValidateObject_raises_exception(mock_xml):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(ValidationError) as e:
         views.xmlToValidateObject(mock_xml)
     assert 'Unable to parse uploaded XML' in str(e)
 
@@ -138,7 +139,7 @@ def test_xmlToUpdateValidateObject_sets_priority_to_zero(validate_feed):
 
 @mock.patch('coda_validate.views.etree.XML', return_value=None)
 def test_xmlToUpdateValidateObject_raises_exception(mock_xml):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(ValidationError) as e:
         views.xmlToUpdateValidateObject(mock_xml)
     assert 'Unable to parse uploaded XML' in str(e)
 
