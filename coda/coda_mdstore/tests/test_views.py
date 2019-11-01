@@ -626,14 +626,6 @@ class TestBagURLListView:
                response.content
         assert response.status_code == 200
 
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_path_is_not_unicode_safe(self):
-        assert 0
-
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_returns_status_code_200(self):
-        assert 0
-
 
 class TestBagURLListScrapeView:
     """
