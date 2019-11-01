@@ -573,7 +573,7 @@ def bagURLList(request, identifier):
         if len(parts) > 1:
             pathList.append(parts[1])
         line = handle.readline()
-    # iterate top tiles and append to pathlist
+    # iterate top files and append to pathlist
     try:
         topFileHandle = getFileHandle(identifier, "")
         topFiles = getFileList(topFileHandle.url)
@@ -583,21 +583,13 @@ def bagURLList(request, identifier):
         pass
     # iterate pathlist and resolve a unicode path dependent on proxy mode
     for path in pathList:
-        # path = urllib2.quote(path)
-        try:
-            unipath = path
-        except UnicodeDecodeError:
-            try:
-                unipath = utf8_decoder(path)[0]
-            except UnicodeDecodeError:
-                unipath = latin_decoder(path)[0]
         # CODA_PROXY_MODE is a settings variable
         if settings.CODA_PROXY_MODE:
             uni = '%sbag/%s/%s' % (
-                proxyRoot, identifier, unipath
+                proxyRoot, identifier, path
             )
         else:
-            uni = bag_root + "/" + unipath
+            uni = bag_root + "/" + path
         # throw the final path into a list
         transList.append(uni)
     outputText = "\n".join(reversed(transList))
