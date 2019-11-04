@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.core.paginator import Paginator, Page
+from django.core.paginator import Page
 from django.conf import settings
 from lxml import etree, objectify
 from codalib import bagatom
