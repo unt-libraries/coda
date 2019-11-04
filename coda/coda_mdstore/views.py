@@ -45,7 +45,6 @@ from django.db import connection
 from django.core.urlresolvers import reverse
 
 from coda_mdstore import exceptions
-from coda_mdstore.presentation import pairtreeCandidateList
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
 utf8_decoder = codecs.getdecoder("utf-8")
@@ -606,26 +605,6 @@ def bagURLList(request, identifier):
     return resp
 
 
-def bagURLListScrape(request, identifier):
-    """
-    Scrape the index to get a list of files
-    """
-
-    try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id '%s'." % identifier
-        )
-    handle = getFileHandle(identifier, "", pairtreeCandidateList)
-    if not handle:
-        raise Http404("Unable to browse bag contents.")
-    fileList = getFileList(handle.url)
-    fileListString = "\n".join(fileList)
-    resp = HttpResponse(fileListString)
-    return resp
-
-
 def bagProxy(request, identifier, filePath):
     """
     Attempt to proxy a file from within the given bag
@@ -749,15 +728,6 @@ def bagFullTextSearchHTML(request):
 
         }
     )
-
-
-def bagFullTextSearch(searchString, listSize=50):
-    """
-    Generic interface to take a search string and return a feed of bags
-    """
-
-    bagList = bagSearch(searchString)
-    return Paginator(bagList, listSize)
 
 
 def percent(numerator, denominator):

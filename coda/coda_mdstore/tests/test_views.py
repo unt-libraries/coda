@@ -609,44 +609,6 @@ class TestBagURLListView:
         assert 0
 
 
-class TestBagURLListScrapeView:
-    """
-    Tests for coda_mdstore.views.bagURLListScrape.
-    """
-
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        file_handle = mock.Mock()
-        file_handle.info().getheader.side_effect = ['text/plain', '255']
-
-        self.getFileHandle = mock.Mock(return_value=file_handle)
-        monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', self.getFileHandle)
-
-    def test_raises_not_found_when_object_not_found(self, rf):
-        request = rf.get('/')
-        response = views.bagURLListScrape(request, 'ark:/00001/id')
-
-        assert response.status_code == 404
-        assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00001/id'."
-
-    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
-                              'in scope.')
-    def test_raises_http404_file_handle_is_falsy(self, rf):
-        FullBagFactory.create()
-        self.getFileHandle.return_value = False
-        request = rf.get('/')
-
-        with pytest.raises(http.Http404):
-            views.bagURLListScrape(request, 'ark:/00001/id')
-
-    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
-                              'in scope.')
-    def test_response_content(self):
-        assert 0
-
-
 class TestBagFullTextSearchHTMLView:
     """
     Tests for coda_mdstore.views.bagFullTextSearchHTML.
