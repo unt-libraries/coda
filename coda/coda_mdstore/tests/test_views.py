@@ -594,6 +594,7 @@ class TestBagURLListView:
     def test_output_text(self, rf):
         """Test the outputText obtained from mocked getFileHandle object"""
         self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
         self.getFileHandle.return_value.readline.side_effect = [
             '<html, class=coda lang=en dir=ltr>', '']
         bag = FullBagFactory.create()
@@ -605,6 +606,7 @@ class TestBagURLListView:
     def test_top_files_block(self, rf):
         """Test getFileHandle and getFileList methods are called without any failures"""
         self.getFileHandle.return_value.url = 'https://testurl'
+        # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
         self.getFileHandle.return_value.readline.side_effect = [
             '<html, class=coda lang=en dir=ltr>', '']
         bag = FullBagFactory.create()
@@ -619,7 +621,7 @@ class TestBagURLListView:
                      </td> </tr>
                      </body>
                   </html>"""
-        # Mock return value of getFileHandle method
+        # Mock urlopen() in getFileHandle()
         with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
             response = views.bagURLList(request, bag.name)
         assert b'https://testurl.com\nhttps://test.com\nhttps://class=coda lang=en dir=ltr>' in \
