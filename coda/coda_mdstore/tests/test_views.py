@@ -594,38 +594,31 @@ class TestBagURLListView:
     def test_response_content(self, rf):
         """Test the output contains domain and parsed tag attributes from getFileHandle."""
         self.getFileHandle.return_value.url = 'https://coda/testurl'
-        # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
+        # Mock what gets read from the manifest file.
         self.getFileHandle.return_value.readline.side_effect = [
-            '<html, class=coda lang=en dir=ltr>', '']
+            '<html coda/bag/123/manifest-md5.txt', '<html coda/bag/123/bagit.txt', '']
         bag = FullBagFactory.create()
         request = rf.get('/')
         response = views.bagURLList(request, bag.name)
-        assert b'https://coda/class=coda lang=en dir=ltr>' in response.content
+
+        assert b'https://coda/coda/bag/123/bagit.txt\nhttps://coda/coda/bag/123/manifest-md5.txt'\
+               in response.content
         assert response.status_code == 200
 
-    def test_response_content_with_href(self, rf):
-        """Test that href attributes are parsed and the linked domain is
-        returned in the response."""
-        self.getFileHandle.return_value.url = 'https://testurl'
-        # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
+    def test_response_content_has_topFiles(self, rf):
+        """Test topFiles are returned in the response."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
         self.getFileHandle.return_value.readline.side_effect = [
-            '<html, class=coda lang=en dir=ltr>', '']
+            '<html coda/bag/123/manifest-md5.txt', '<html coda/bag/123/bagit.txt', '']
         bag = FullBagFactory.create()
         request = rf.get('/')
-        text = """<html>
-                     <body>
-                     <tr> <td>test</td> <td>data</td> </tr>
-                     <tr> <td>of </td> </tr>
-                     <tr> <td>
-                        <a href='test.com'>url</a>
-                        <a href='testurl.com'>here</a>
-                     </td> </tr>
-                     </body>
-                  </html>"""
-        with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
+        with mock.patch('coda_mdstore.views.getFileList',
+                        return_value=['bagit.txt', 'bag-info.txt']):
             response = views.bagURLList(request, bag.name)
-        assert b'https://testurl.com\nhttps://test.com\nhttps://class=coda lang=en dir=ltr>' in \
-               response.content
+
+        assert b'https://coda/bag-info.txt\nhttps://coda/bagit.txt\nhttps://coda/coda/' \
+               b'bag/123/bagit.txt\nhttps://coda/coda/bag/123/manifest-md5.txt' in response.content
         assert response.status_code == 200
 
 
