@@ -68,7 +68,7 @@ def test_xmlToValidateObject(validate_feed):
 
 @mock.patch('coda_validate.views.etree.XML', return_value=None)
 def test_xmlToValidateObject_raises_exception(mock_xml):
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValueError) as e:
         views.xmlToValidateObject(mock_xml)
     assert 'Unable to parse uploaded XML' in str(e)
 
