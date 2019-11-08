@@ -16,11 +16,6 @@ from pypairtree import pairtree
 from . import exceptions
 from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
 
-
-pairtreeCandidateList = [
-    "http://example.com/data3/coda-001/store/pairtree_root/",
-    "http://example.com/data4/coda-002/store/pairtree_root/",
-]
 XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml/"
 XHTML = "{%s}" % XHTML_NAMESPACE
 XHTML_NSMAP = {None: XHTML_NAMESPACE}

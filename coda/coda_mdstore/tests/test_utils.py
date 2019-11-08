@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.core.paginator import Paginator, Page
+from django.core.paginator import Page
 from django.conf import settings
 from lxml import etree, objectify
 from codalib import bagatom
@@ -51,18 +51,6 @@ class TestPercent:
     def test_return_value(self):
         result = views.percent(1, 2)
         assert result == 50.0
-
-
-class TestBagFullTextSearch:
-    """
-    Tests for coda_mdstore.views.bagFullTextSearch.
-    """
-
-    @pytest.mark.django_db
-    def test_returns_paginator_object(self):
-        factories.FullBagFactory.create_batch(15)
-        paginator = views.bagFullTextSearch('test search')
-        assert isinstance(paginator, Paginator)
 
 
 @pytest.mark.django_db
