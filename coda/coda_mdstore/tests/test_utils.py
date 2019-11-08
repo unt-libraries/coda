@@ -603,3 +603,22 @@ class TestUpdateBag:
         update_bag_infos = updated_bag.bag_info_set.all()
         assert old_bag_info1.field_name not in [b.field_name for b in update_bag_infos]
         assert old_bag_info2.field_name not in [b.field_name for b in update_bag_infos]
+
+
+@mock.patch('coda_mdstore.presentation.urllib.request.urlopen')
+def test_getFileList(mock_urlopen):
+    """ Test all href tags are extracted as files."""
+    text = """<html>
+                 <body>
+                 <tr> <td>test</td> <td>data</td> </tr>
+                 <tr> <td>of </td> </tr>
+                 <tr> <td>
+                    <a href='bag-info.txt'>url</a>
+                    <a href='manifest-md5.txt'>here</a>
+                    <a href='bagit.txt'>here</a>
+                 </td> </tr>
+                 </body>
+              </html>"""
+    mock_urlopen.return_value = text
+    filelist = presentation.getFileList('https://coda/testurl')
+    assert ['bag-info.txt', 'manifest-md5.txt', 'bagit.txt'] == filelist
