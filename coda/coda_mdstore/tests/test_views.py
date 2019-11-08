@@ -591,8 +591,8 @@ class TestBagURLListView:
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    def test_output_text(self, rf):
-        """Test the outputText obtained from mocked getFileHandle object"""
+    def test_response_content(self, rf):
+        """Test the output contains domain and parsed tag attributes from getFileHandle."""
         self.getFileHandle.return_value.url = 'https://coda/testurl'
         # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
         self.getFileHandle.return_value.readline.side_effect = [
@@ -603,8 +603,9 @@ class TestBagURLListView:
         assert b'https://coda/class=coda lang=en dir=ltr>' in response.content
         assert response.status_code == 200
 
-    def test_top_files_block(self, rf):
-        """Test getFileHandle and getFileList methods are called without any failures"""
+    def test_response_content_with_href(self, rf):
+        """Test that href attributes are parsed and the linked domain is
+        returned in the response."""
         self.getFileHandle.return_value.url = 'https://testurl'
         # Mock the return value of urllib.request.urlopen(url) in getFileHandle()
         self.getFileHandle.return_value.readline.side_effect = [
@@ -621,7 +622,6 @@ class TestBagURLListView:
                      </td> </tr>
                      </body>
                   </html>"""
-        # Mock urlopen() in getFileHandle()
         with mock.patch('coda_mdstore.presentation.urllib.request.urlopen', return_value=text):
             response = views.bagURLList(request, bag.name)
         assert b'https://testurl.com\nhttps://test.com\nhttps://class=coda lang=en dir=ltr>' in \
