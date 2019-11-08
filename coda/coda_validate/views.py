@@ -337,7 +337,7 @@ def xmlToValidateObject(validateXML):
 
     entryRoot = etree.XML(validateXML)
     if entryRoot is None:
-        raise ValidationError("Unable to parse uploaded XML")
+        raise ValueError("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     validateXML = contentElement.xpath("*[local-name() = 'validate']")[0]
