@@ -583,6 +583,12 @@ def bagURLList(request, identifier):
     # iterate pathlist and resolve a unicode path dependent on proxy mode
     for path in pathList:
         # CODA_PROXY_MODE is a settings variable
+        if isinstance(path, bytes):
+            try:
+                path = path.decode()
+            except:
+                path = path.decode('latin-1')
+
         if settings.CODA_PROXY_MODE:
             uni = '%sbag/%s/%s' % (
                 proxyRoot, identifier, path
