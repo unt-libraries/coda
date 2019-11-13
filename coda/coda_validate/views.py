@@ -13,7 +13,6 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 from django.utils.feedgenerator import Atom1Feed
 from lxml import etree
-from django.core.exceptions import ValidationError
 
 from django.views.generic import ListView
 
@@ -380,7 +379,7 @@ def xmlToUpdateValidateObject(validateXML):
 
     entryRoot = etree.XML(validateXML)
     if entryRoot is None:
-        raise ValidationError("Unable to parse uploaded XML")
+        raise ValueError("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     validateXML = contentElement.xpath("*[local-name() = 'validate']")[0]
