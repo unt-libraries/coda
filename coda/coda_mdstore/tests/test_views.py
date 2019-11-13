@@ -592,11 +592,13 @@ class TestBagURLListView:
             views.bagURLList(request, bag.name)
 
     def test_response_content(self, rf):
-        """Test the output contains domain and parsed tag attributes from getFileHandle."""
+        """Test the response contains the url and parsed paths from the mocked file handle."""
         self.getFileHandle.return_value.url = 'https://coda/testurl'
         # Mock what gets read from the manifest file.
         self.getFileHandle.return_value.readline.side_effect = [
-            '<html coda/bag/123/manifest-md5.txt', '<html coda/bag/123/bagit.txt', '']
+            b'<html coda/bag/123/manifest-md5.txt',
+            b'<html coda/bag/123/bagit.txt',
+            b'']
         bag = FullBagFactory.create()
         request = rf.get('/')
         response = views.bagURLList(request, bag.name)
@@ -610,15 +612,20 @@ class TestBagURLListView:
         self.getFileHandle.return_value.url = 'https://coda/testurl'
         # Mock what gets read from the manifest file.
         self.getFileHandle.return_value.readline.side_effect = [
-            '<html coda/bag/123/manifest-md5.txt', '<html coda/bag/123/bagit.txt', '']
+            b'<html coda/bag/123/manifest-md5.txt',
+            b'<html coda/bag/123/bagit.txt',
+            b'']
         bag = FullBagFactory.create()
         request = rf.get('/')
+        # Mock file names found at the bag's root level.
         with mock.patch('coda_mdstore.views.getFileList',
                         return_value=['bagit.txt', 'bag-info.txt']):
             response = views.bagURLList(request, bag.name)
 
-        assert b'https://coda/bag-info.txt\nhttps://coda/bagit.txt\nhttps://coda/coda/' \
-               b'bag/123/bagit.txt\nhttps://coda/coda/bag/123/manifest-md5.txt' in response.content
+        assert (b'https://coda/bag-info.txt\n'
+                b'https://coda/bagit.txt\n'
+                b'https://coda/coda/bag/123/bagit.txt\n'
+                b'https://coda/coda/bag/123/manifest-md5.txt') in response.content
         assert response.status_code == 200
 
 

@@ -595,8 +595,8 @@ class TestUpdateBag:
 
 @mock.patch('coda_mdstore.presentation.urllib.request.urlopen')
 def test_getFileList(mock_urlopen):
-    """ Test all href tags are extracted as files."""
-    text = """<html>
+    """Test all attribute values are extracted as files."""
+    text = b"""<html>
                  <body>
                  <tr> <td>test</td> <td>data</td> </tr>
                  <tr> <td>of </td> </tr>
