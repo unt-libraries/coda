@@ -59,7 +59,7 @@ def test_xmlToValidateObject(validate_feed):
 
     assert validate_xml.identifier == validate.identifier
     assert validate_xml.last_verified == validate.last_verified.isoformat()
-    assert validate_xml.last_verified_status == str(validate.last_verified_status)
+    assert validate_xml.last_verified_status == validate.last_verified_status
     assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority.text == validate.priority
     assert validate_xml.server == validate.server
@@ -153,7 +153,7 @@ def test_validateToXML():
 
     assert validate_xml.identifier == validate.identifier
     assert validate_xml.last_verified == validate.last_verified.isoformat()
-    assert validate_xml.last_verified_status == str(validate.last_verified_status)
+    assert validate_xml.last_verified_status == validate.last_verified_status
     assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority == validate.priority
     assert validate_xml.server == validate.server
