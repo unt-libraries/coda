@@ -1,4 +1,3 @@
-import codecs
 import copy
 import uuid
 
@@ -48,8 +47,6 @@ from coda_mdstore import exceptions
 from coda_mdstore.presentation import pairtreeCandidateList
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
-utf8_decoder = codecs.getdecoder("utf-8")
-latin_decoder = codecs.getdecoder("latin_1")
 XML_HEADER = b"<?xml version=\"1.0\"?>\n%s"
 
 
@@ -587,7 +584,7 @@ def bagURLList(request, identifier):
         if isinstance(path, bytes):
             try:
                 path = path.decode()
-            except:
+            except UnicodeDecodeError:
                 path = path.decode('latin-1')
 
         if settings.CODA_PROXY_MODE:
