@@ -5,6 +5,7 @@ RUN echo "US/Central" > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
 
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONPATH /app:/app/coda
 
 RUN mkdir /app
