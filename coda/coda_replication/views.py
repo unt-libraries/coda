@@ -354,10 +354,7 @@ def queue(request, identifier=None):
         except ObjectDoesNotExist as e:
             return HttpResponseNotFound(e, content_type="text/plain")
         except ValidationError as e:
-            return HttpResponse(
-                e.message,
-                content_type="text/plain", status=409
-            )
+            return HttpResponse(e, content_type="text/plain", status=409)
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,

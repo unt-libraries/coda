@@ -996,9 +996,9 @@ def app_node(request, identifier=None):
         try:
             node = updateNode(request)
         except Node.DoesNotExist as e:
-            return HttpResponseNotFound(e)
+            return HttpResponseNotFound(str(e))
         except exceptions.BadNodeName as e:
-            return HttpResponseBadRequest(e)
+            return HttpResponseBadRequest(str(e))
 
         node.save()
         atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
