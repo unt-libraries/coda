@@ -34,13 +34,9 @@ def getFileList(url):
         for td in tds:
             anchors = td.find_all('a')
             for anchor in anchors:
-                try:
-                    # if anchor.contents and "Parent Directory" in contents:
-                    if anchor['href'][-1] == "/":
-                        continue
-                    fileList.append(anchor['href'])
-                except Exception as e:
-                    raise e
+                if anchor['href'][-1] == "/":
+                    continue
+                fileList.append(anchor['href'])
     return fileList
 
 
