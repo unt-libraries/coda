@@ -22,7 +22,8 @@ sys.path.append(os.path.join(BASE_DIR, 'coda/'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
 
 activate_env = os.path.join(ENV, 'bin/activate_this.py')
-exec(activate_env, dict(__file__=activate_env))
+with open(activate_env) as activate_f:
+    exec(compile(activate_f.read(), activate_env, 'exec'), dict(__file__=activate_env))
 
 from django.core.wsgi import get_wsgi_application  # noqa
 application = get_wsgi_application()
