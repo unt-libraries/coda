@@ -1,6 +1,6 @@
 import pytest
 from lxml import etree, objectify
-import mock
+from unittest import mock
 
 from coda_validate import views, factories
 from coda_validate.models import Validate

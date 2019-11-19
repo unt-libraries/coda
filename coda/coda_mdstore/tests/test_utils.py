@@ -4,7 +4,7 @@ from django.core.paginator import Page
 from django.conf import settings
 from lxml import etree, objectify
 from codalib import bagatom
-import mock
+from unittest import mock
 import pytest
 
 from coda_mdstore import factories, models, presentation, views, exceptions

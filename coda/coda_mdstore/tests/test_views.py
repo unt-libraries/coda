@@ -3,7 +3,7 @@ import json
 import urllib.error
 
 from lxml import objectify
-import mock
+from unittest import mock
 import pytest
 
 from django.core.urlresolvers import reverse
