@@ -11,7 +11,6 @@ from django.template.response import TemplateResponse
 
 from codalib.bagatom import TIME_FORMAT_STRING
 from coda_mdstore.models import Bag
-import collections
 
 try:
     MOST_RECENT_BAGGING_DATE = Bag.objects.latest(
@@ -47,7 +46,7 @@ def index(
 
     sites = []
     for section, site in sitemaps.items():
-        if isinstance(site, collections.Callable):
+        if callable(site):
             site = site()
         protocol = req_protocol if site.protocol is None else site.protocol
         sitemap_url = urlresolvers.reverse(
@@ -90,7 +89,7 @@ def sitemap(request, sitemaps, section=None,
     urls = []
     for site in maps:
         try:
-            if isinstance(site, collections.Callable):
+            if callable(site):
                 site = site()
             u = site.get_urls(page=page, site=req_site)
             urls.extend(u)
