@@ -6,16 +6,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.contrib.sites.models import Site  # noqa
-try:
-    # the json module was included in the stdlib in python 2.6
-    # http://docs.python.org/library/json.html
-    import json
-except ImportError:
-    # simplejson 2.0.9 is available for python 2.4+
-    # http://pypi.python.org/pypi/simplejson/2.0.9
-    # simplejson 1.7.3 is available for python 2.3+
-    # http://pypi.python.org/pypi/simplejson/1.7.3
-    import simplejson as json
+import json
 from datetime import datetime
 from lxml import etree
 import urllib.parse
@@ -336,7 +327,7 @@ def queue(request, identifier=None):
             id=loc,
             title=queueObject.ark,
         )
-        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
+        atomText = b'<?xml version="1.0"?>\n%b' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(
@@ -361,7 +352,7 @@ def queue(request, identifier=None):
             id='http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark),
             title=queueObject.ark,
         )
-        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
+        atomText = b'<?xml version="1.0"?>\n%b' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
@@ -384,7 +375,7 @@ def queue(request, identifier=None):
             author_uri=APP_AUTHOR.get('uri', None)
         )
 
-        atomText = b'<?xml version="1.0"?>\n%s' % etree.tostring(
+        atomText = b'<?xml version="1.0"?>\n%b' % etree.tostring(
             atomXML, pretty_print=True
         )
         resp = HttpResponse(atomText, content_type="application/atom+xml")
@@ -432,6 +423,6 @@ def queue_list(request):
         return HttpResponseBadRequest('Page does not exist.')
 
     feedText = etree.tostring(atomFeed, pretty_print=True)
-    feedText = b'<?xml version="1.0"?>\n %s' % feedText
+    feedText = b'<?xml version="1.0"?>\n %b' % feedText
 
     return HttpResponse(feedText, content_type='application/atom+xml')

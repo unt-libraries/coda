@@ -1,7 +1,7 @@
 from django.db import models
 # this is quite silly:
 # from django.conf import settings
-# import simplejson
+# import json
 # try:
 #     status_choice_json = open(settings.STATUS_CHOICE_FILE_PATH).read()
 #     status_choice_dict = simplejson.loads(status_choice_json)
