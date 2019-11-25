@@ -733,7 +733,7 @@ def showNodeStatus(request, identifier=None):
     """
 
     if identifier:
-        node = Node.objects.get(node_name=identifier)
+        node = get_object_or_404(Node, node_name__exact=identifier)
         return render(
             request,
             'mdstore/node.html',

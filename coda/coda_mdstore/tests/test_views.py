@@ -672,6 +672,11 @@ class TestShowNodeStatusView:
 
         assert response.status_code == 200
 
+    def test_node_identifier_does_not_exist(self, rf):
+        request = rf.get('/')
+        with pytest.raises(http.Http404):
+            views.showNodeStatus(request, 'wrong_id')
+
     def test_single_node_context(self, client):
         # TODO: Update the URL ordering so that we can get the URL with
         #       reverse.
