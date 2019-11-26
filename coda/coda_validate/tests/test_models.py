@@ -9,9 +9,9 @@ from coda_validate.models import (
 
 class TestValidate:
 
-    def test_unicode(self):
+    def test_str(self):
         validate = factories.ValidateFactory.build()
-        assert unicode(validate) == validate.identifier
+        assert str(validate) == validate.identifier
 
 
 @pytest.mark.django_db

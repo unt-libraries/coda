@@ -1,10 +1,9 @@
 import os
 import re
-import urllib
-import urllib2
-import urlparse
+import urllib.request
+import urllib.parse
 
-from BeautifulSoup import BeautifulSoup as BSoup
+from bs4 import BeautifulSoup as BSoup
 from codalib import APP_AUTHOR
 from codalib.bagatom import (
     wrapAtom, ATOM, ATOM_NSMAP, BAG, BAG_NSMAP, TIME_FORMAT_STRING
@@ -16,11 +15,6 @@ from pypairtree import pairtree
 from . import exceptions
 from coda_mdstore.models import Bag, Bag_Info, Node, External_Identifier
 
-
-pairtreeCandidateList = [
-    "http://example.com/data3/coda-001/store/pairtree_root/",
-    "http://example.com/data4/coda-002/store/pairtree_root/",
-]
 XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml/"
 XHTML = "{%s}" % XHTML_NAMESPACE
 XHTML_NSMAP = {None: XHTML_NAMESPACE}
@@ -32,21 +26,17 @@ def getFileList(url):
     """
 
     fileList = []
-    handle = urllib2.urlopen(url)
+    handle = urllib.request.urlopen(url)
     soup = BSoup(handle)
-    trList = soup.findAll('tr')
+    trList = soup.find_all('tr')
     for tr in trList:
-        tds = tr.findAll('td')
+        tds = tr.find_all('td')
         for td in tds:
-            anchors = td.findAll('a')
+            anchors = td.find_all('a')
             for anchor in anchors:
-                try:
-                    # if anchor.contents and "Parent Directory" in contents:
-                    if anchor['href'][-1] == "/":
-                        continue
-                    fileList.append(anchor['href'])
-                except Exception, e:
-                    raise e
+                if anchor['href'][-1] == "/":
+                    continue
+                fileList.append(anchor['href'])
     return fileList
 
 
@@ -62,13 +52,13 @@ def getFileHandle(codaId, codaPath):
     codaPathParts = codaPath.split("/")
     for i in range(len(codaPathParts)):
         part = codaPathParts[i]
-        codaPathParts[i] = urllib.quote(part)
+        codaPathParts[i] = urllib.parse.quote(part)
     escapedCodaPath = "/".join(codaPathParts)
     nodeList = Node.objects.all()
     exceptionList = []
     for node in nodeList:
-        url_parts = urlparse.urlparse(node.node_url)
-        url = urlparse.urljoin(
+        url_parts = urllib.parse.urlparse(node.node_url)
+        url = urllib.parse.urljoin(
             "http://%s" % url_parts.hostname,
             os.path.join(
                 url_parts.path,
@@ -80,9 +70,9 @@ def getFileHandle(codaId, codaPath):
         )
         # urlList.append(url)
         try:
-            fileHandle = urllib2.urlopen(url)
+            fileHandle = urllib.request.urlopen(url)
             return fileHandle
-        except Exception, e:
+        except Exception as e:
             exceptionList.append(str(e))
             pass
     raise Exception(
@@ -195,7 +185,7 @@ def xmlToBagObject(codaXML):
         name = codaXML.xpath("*[local-name() = 'name']")[0].text.strip()
         bagObject = Bag.objects.get(Bag, name=name)
     # if we can't get the object, then we're just making a new one.
-    except Exception, e:
+    except Exception:
         bagObject = Bag()
     dateFormatString = "%Y-%m-%d"
     try:
@@ -211,7 +201,7 @@ def xmlToBagObject(codaXML):
     try:
         bagObject.size = int(codaXML.xpath(
             "*[local-name() = 'payloadSize']")[0].text.strip())
-    except Exception, e:
+    except Exception as e:
         return (None, None, "Unable to set 'size' attribute: %s" % (e,))
     try:
         bagObject.bagit_version = codaXML.xpath(
@@ -350,8 +340,8 @@ def updateNode(request):
     node_size = nodeXML.xpath("*[local-name() = 'size']")[0].text.strip()
     node_path = nodeXML.xpath("*[local-name() = 'path']")[0].text.strip()
     node_url = nodeXML.xpath("*[local-name() = 'url']")[0].text.strip()
-    node.node_capacity = long(node_capacity)
-    node.node_size = long(node_size)
+    node.node_capacity = int(node_capacity)
+    node.node_size = int(node_size)
     node.node_path = node_path
     node.node_name = node_name
     node.node_url = node_url
@@ -378,8 +368,8 @@ def createNode(request):
     node_path = nodeXML.xpath("*[local-name() = 'path']")[0].text.strip()
     node_url = nodeXML.xpath("*[local-name() = 'url']")[0].text.strip()
     node = Node()
-    node.node_capacity = long(node_capacity)
-    node.node_size = long(node_size)
+    node.node_capacity = int(node_capacity)
+    node.node_size = int(node_size)
     node.node_path = node_path
     node.node_name = node_name
     node.node_url = node_url

@@ -19,7 +19,7 @@ from django.views.generic import ListView
 from .models import Validate
 
 
-XML_HEADER = "<?xml version=\"1.0\"?>\n%s"
+XML_HEADER = b"<?xml version=\"1.0\"?>\n%s"
 
 
 class CorrectMimeTypeFeed(Atom1Feed):
@@ -336,7 +336,7 @@ def xmlToValidateObject(validateXML):
 
     entryRoot = etree.XML(validateXML)
     if entryRoot is None:
-        raise Exception("Unable to parse uploaded XML")
+        raise ValueError("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     validateXML = contentElement.xpath("*[local-name() = 'validate']")[0]
@@ -379,7 +379,7 @@ def xmlToUpdateValidateObject(validateXML):
 
     entryRoot = etree.XML(validateXML)
     if entryRoot is None:
-        raise Exception("Unable to parse uploaded XML")
+        raise ValueError("Unable to parse uploaded XML")
     # parse XML
     contentElement = entryRoot.xpath("*[local-name() = 'content']")[0]
     validateXML = contentElement.xpath("*[local-name() = 'validate']")[0]

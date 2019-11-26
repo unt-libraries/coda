@@ -1,9 +1,9 @@
 from datetime import datetime
 import json
-import urllib2
+import urllib.error
 
 from lxml import objectify
-import mock
+from unittest import mock
 import pytest
 
 from django.core.urlresolvers import reverse
@@ -183,7 +183,7 @@ class TestJSONStatsView:
             'node_capacity__sum': 1000000
         }
         mock_bag.objects.aggregate.return_value = {
-            'bagging_date__max': datetime(2015, 01, 01),
+            'bagging_date__max': datetime(2015, 1, 1),
             'pk__count': 50,
             'size__sum': 100000,
             'files__sum': 1000,
@@ -244,12 +244,12 @@ class TestRobotsView:
     def test_user_agent_is_all(self, rf):
         request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
-        assert 'User-agent: *' in response.content
+        assert b'User-agent: *' in response.content
 
     def test_disallow(self, rf):
         request = rf.get('/', HTTP_HOST="example.com")
         response = views.shooRobot(request)
-        assert 'Disallow: /' in response.content
+        assert b'Disallow: /' in response.content
 
 
 class TestBagHTMLView:
@@ -290,7 +290,7 @@ class TestBagHTMLView:
     @mock.patch('coda_mdstore.views.urlopen')
     def test_catches_urlerror(self, mock_urlopen, client):
         bag = FullBagFactory.create()
-        mock_urlopen.side_effect = urllib2.URLError('Fake Exception')
+        mock_urlopen.side_effect = urllib.error.URLError('Fake Exception')
 
         response = client.get(
             reverse('bag-detail', args=[bag.name]), HTTP_HOST="example.com")
@@ -370,7 +370,7 @@ class TestBagProxyView:
         response = views.bagProxy(request, 'ark:/00002/id', '/foo/bar')
 
         assert response.status_code == 404
-        assert response.content == "There is no bag with id 'ark:/00002/id'."
+        assert response.content == b"There is no bag with id 'ark:/00002/id'."
 
     def test_raises_http404_when_file_handle_is_false(self, rf):
         self.getFileHandle.return_value = False
@@ -531,13 +531,13 @@ class TestExternalIdentiferSearchJSON:
     def test_without_ark_parameter(self, rf):
         request = rf.get('/')
         response = views.externalIdentifierSearchJSON(request)
-        assert response.content == '[]'
+        assert response.content == b'[]'
 
     def test_with_invalid_ark_id(self, rf):
         request = rf.get('/', {'ark': 'ark:/67351/metadc000001'})
         response = views.externalIdentifierSearchJSON(request)
 
-        assert response.content == '[]'
+        assert response.content == b'[]'
         assert response['Content-Type'] == 'application/json'
 
     def test_with_valid_ark_id(self, rf):
@@ -591,60 +591,42 @@ class TestBagURLListView:
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_output_text(self):
-        assert 0
-
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_top_files_block(self):
-        # TODO: rename once implemented.
-        assert 0
-
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_path_is_not_unicode_safe(self):
-        assert 0
-
-    @pytest.mark.xfail(reason='Refactor is required.')
-    def test_returns_status_code_200(self):
-        assert 0
-
-
-class TestBagURLListScrapeView:
-    """
-    Tests for coda_mdstore.views.bagURLListScrape.
-    """
-
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        file_handle = mock.Mock()
-        file_handle.info().getheader.side_effect = ['text/plain', '255']
-
-        self.getFileHandle = mock.Mock(return_value=file_handle)
-        monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', self.getFileHandle)
-
-    def test_raises_not_found_when_object_not_found(self, rf):
+    def test_response_content(self, rf):
+        """Test the response contains the url and parsed paths from the mocked file handle."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
+        self.getFileHandle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        bag = FullBagFactory.create()
         request = rf.get('/')
-        response = views.bagURLListScrape(request, 'ark:/00001/id')
+        response = views.bagURLList(request, bag.name)
 
-        assert response.status_code == 404
-        assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00001/id'."
+        assert (b'https://coda/data/file02.txt\n'
+                b'https://coda/data/file01.txt') in response.content
+        assert response.status_code == 200
 
-    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
-                              'in scope.')
-    def test_raises_http404_file_handle_is_falsy(self, rf):
-        FullBagFactory.create()
-        self.getFileHandle.return_value = False
+    def test_response_content_has_topFiles(self, rf):
+        """Test topFiles are returned in the response."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
+        self.getFileHandle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        bag = FullBagFactory.create()
         request = rf.get('/')
+        # Mock file names found at the bag's root level.
+        with mock.patch('coda_mdstore.views.getFileList',
+                        return_value=['bagit.txt', 'bag-info.txt']):
+            response = views.bagURLList(request, bag.name)
 
-        with pytest.raises(http.Http404):
-            views.bagURLListScrape(request, 'ark:/00001/id')
-
-    @pytest.mark.xfail(reason='pairtreeCandidateList is not available '
-                              'in scope.')
-    def test_response_content(self):
-        assert 0
+        assert (b'https://coda/bag-info.txt\n'
+                b'https://coda/bagit.txt\n'
+                b'https://coda/data/file02.txt\n'
+                b'https://coda/data/file01.txt') in response.content
+        assert response.status_code == 200
 
 
 class TestBagFullTextSearchHTMLView:
@@ -689,6 +671,11 @@ class TestShowNodeStatusView:
         response = views.showNodeStatus(request, node.node_name)
 
         assert response.status_code == 200
+
+    def test_node_identifier_does_not_exist(self, rf):
+        request = rf.get('/')
+        with pytest.raises(http.Http404):
+            views.showNodeStatus(request, 'wrong_id')
 
     def test_single_node_context(self, client):
         # TODO: Update the URL ordering so that we can get the URL with

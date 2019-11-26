@@ -31,7 +31,7 @@ class Bag(models.Model):
     def oxum(self):
         return '{size}.{files}'.format(**vars(self))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -46,7 +46,7 @@ class Bag_Info(models.Model):
         help_text="Field Body"
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s:%s" % (self.bag_name, self.field_name)
 
     class Meta:
@@ -83,5 +83,5 @@ class External_Identifier(models.Model):
     class Meta:
         ordering = ['value']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.value

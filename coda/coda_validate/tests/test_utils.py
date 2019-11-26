@@ -1,5 +1,6 @@
 import pytest
 from lxml import etree, objectify
+from unittest import mock
 
 from coda_validate import views, factories
 from coda_validate.models import Validate
@@ -58,15 +59,17 @@ def test_xmlToValidateObject(validate_feed):
 
     assert validate_xml.identifier == validate.identifier
     assert validate_xml.last_verified == validate.last_verified.isoformat()
-    assert validate_xml.last_verified_status == str(validate.last_verified_status)
+    assert validate_xml.last_verified_status == validate.last_verified_status
     assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority.text == validate.priority
     assert validate_xml.server == validate.server
 
 
-@pytest.mark.xfail(reason='Exception will never be raised directly from the function.')
-def test_xmlToValidateObject_raises_exception():
-    assert 0
+@mock.patch('coda_validate.views.etree.XML', return_value=None)
+def test_xmlToValidateObject_raises_exception(mock_xml):
+    with pytest.raises(ValueError) as e:
+        views.xmlToValidateObject(mock_xml)
+    assert 'Unable to parse uploaded XML' in str(e)
 
 
 @pytest.mark.django_db
@@ -133,9 +136,11 @@ def test_xmlToUpdateValidateObject_sets_priority_to_zero(validate_feed):
     assert updated_validate.priority == 0
 
 
-@pytest.mark.xfail(reason='Exception will never be raised directly from the function.')
-def test_xmlToUpdateValidateObject_raises_exception():
-    assert 0
+@mock.patch('coda_validate.views.etree.XML', return_value=None)
+def test_xmlToUpdateValidateObject_raises_exception(mock_xml):
+    with pytest.raises(ValueError) as e:
+        views.xmlToUpdateValidateObject(mock_xml)
+    assert 'Unable to parse uploaded XML' in str(e)
 
 
 def test_validateToXML():
@@ -148,7 +153,7 @@ def test_validateToXML():
 
     assert validate_xml.identifier == validate.identifier
     assert validate_xml.last_verified == validate.last_verified.isoformat()
-    assert validate_xml.last_verified_status == str(validate.last_verified_status)
+    assert validate_xml.last_verified_status == validate.last_verified_status
     assert validate_xml.priority_change_date == validate.priority_change_date.isoformat()
     assert validate_xml.priority == validate.priority
     assert validate_xml.server == validate.server
