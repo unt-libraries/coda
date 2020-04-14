@@ -1,5 +1,5 @@
 BeautifulSoup4==4.8.1
-django==1.11.24
+django~=1.11.28
 httplib2==0.13.0
 lxml==4.2.6
 mysqlclient ==1.3.14
@@ -14,6 +14,6 @@ factory_boy
 sqlparse==0.3.0
 django-debug-toolbar==1.11
 
-git+https://github.com/unt-libraries/codalib@py3
-git+https://github.com/unt-libraries/django-premis-event-service@py3
+git+https://github.com/unt-libraries/codalib@master
+git+https://github.com/unt-libraries/django-premis-event-service@master
 git+https://github.com/unt-libraries/pypairtree
