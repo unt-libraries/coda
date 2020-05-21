@@ -504,7 +504,7 @@ def bagHTML(request, identifier):
             linked_events += this_page
             next_url = json_events.get('feed', {})
             next_url = next_url.get('link', [])
-            next_url = {l.get('rel'): l.get('href') for l in next_url}
+            next_url = {link.get('rel'): link.get('href') for link in next_url}
             next_url = next_url.get('next')
             if next_url:
                 try:
