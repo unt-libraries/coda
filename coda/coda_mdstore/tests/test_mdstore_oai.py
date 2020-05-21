@@ -270,7 +270,7 @@ def test_coda_bag_writer():
     element = etree.Element('root')
 
     oai.coda_bag_writer(element, metadata)
-    assert 'bag:codaXML' in etree.tostring(element)
+    assert b'bag:codaXML' in etree.tostring(element)
 
 
 @pytest.mark.django_db

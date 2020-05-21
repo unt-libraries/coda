@@ -1,19 +1,9 @@
-import codecs
 import copy
 import uuid
 
-from urllib2 import urlopen
-from urllib import urlencode
-try:
-    # the json module was included in the stdlib in python 2.6
-    # http://docs.python.org/library/json.html
-    import json
-except ImportError:
-    # simplejson 2.0.9 is available for python 2.4+
-    # http://pypi.python.org/pypi/simplejson/2.0.9
-    # simplejson 1.7.3 is available for python 2.3+
-    # http://pypi.python.org/pypi/simplejson/1.7.3
-    import simplejson as json
+from urllib.request import urlopen
+from urllib.parse import urlencode
+import json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
@@ -30,7 +20,7 @@ from coda_replication.models import QueueEntry
 from coda_validate.models import Validate
 from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
-from presentation import getFileList, getFileHandle, bagSearch, \
+from .presentation import getFileList, getFileHandle, bagSearch, \
     makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
     nodeEntry, createNode
 from dateutil import rrule
@@ -47,9 +37,7 @@ from django.core.urlresolvers import reverse
 from coda_mdstore import exceptions
 
 MAINTENANCE_MSG = settings.MAINTENANCE_MSG
-utf8_decoder = codecs.getdecoder("utf-8")
-latin_decoder = codecs.getdecoder("latin_1")
-XML_HEADER = "<?xml version=\"1.0\"?>\n%s"
+XML_HEADER = b"<?xml version=\"1.0\"?>\n%s"
 
 
 def prepare_graph_date_range():
@@ -210,42 +198,42 @@ class CustomFeed(Atom1Feed):
     mime_type = 'application/xml'
 
     def add_root_elements(self, handler):
-        handler.addQuickElement(u"title", self.feed['title'])
-        handler.startElement(u"author", {})
+        handler.addQuickElement("title", self.feed['title'])
+        handler.startElement("author", {})
         # add author subelements when not None nor ""
         if self.feed['author_name']:
-            handler.addQuickElement(u"name", self.feed['author_name'])
+            handler.addQuickElement("name", self.feed['author_name'])
         if self.feed['author_link']:
-            handler.addQuickElement(u"uri", self.feed['author_link'])
-        handler.endElement(u"author")
+            handler.addQuickElement("uri", self.feed['author_link'])
+        handler.endElement("author")
         handler.addQuickElement(
-            u"link", "", {u"rel": u"alternate", u"href": self.feed['link']}
+            "link", "", {"rel": "alternate", "href": self.feed['link']}
         )
         handler.addQuickElement(
-            u"link", "", {u"rel": u"self", u"href": self.feed['feed_url']}
+            "link", "", {"rel": "self", "href": self.feed['feed_url']}
         )
         # we always have a first and last element
         handler.addQuickElement(
-            u"link",
+            "link",
             "",
-            {u"rel": u"first", u"href": self.feed['link'] + '?p=1'}
+            {"rel": "first", "href": self.feed['link'] + '?p=1'}
         )
         handler.addQuickElement(
-            u"link",
+            "link",
             "",
             {
-                u"rel": u"last",
-                u"href": self.feed['link'] + '?p=%s' % self.feed['last_link']
+                "rel": "last",
+                "href": self.feed['link'] + '?p=%s' % self.feed['last_link']
             }
         )
         # put in prev/next links if they are indeed there.
         if self.feed.get('prev_link', None) is not None:
             handler.addQuickElement(
-                u"link",
+                "link",
                 "",
                 {
-                    u"rel": u"previous",
-                    u"href": '%s?p=%s' % (
+                    "rel": "previous",
+                    "href": '%s?p=%s' % (
                         self.feed['link'],
                         self.feed['prev_link']
                     )
@@ -253,23 +241,23 @@ class CustomFeed(Atom1Feed):
             )
         if self.feed.get('next_link', None) is not None:
             handler.addQuickElement(
-                u"link",
+                "link",
                 "",
                 {
-                    u"rel": u"next",
-                    u"href": '%s?p=%s' % (
+                    "rel": "next",
+                    "href": '%s?p=%s' % (
                         self.feed['link'],
                         self.feed['next_link']
                     )
                 }
             )
-        handler.addQuickElement(u"id", self.feed['id'])
+        handler.addQuickElement("id", self.feed['id'])
         if self.feed['subtitle'] is not None:
-            handler.addQuickElement(u"subtitle", self.feed['subtitle'])
+            handler.addQuickElement("subtitle", self.feed['subtitle'])
         for cat in self.feed['categories']:
-            handler.addQuickElement(u"category", "", {u"term": cat})
+            handler.addQuickElement("category", "", {"term": cat})
         if self.feed['feed_copyright'] is not None:
-            handler.addQuickElement(u"rights", self.feed['feed_copyright'])
+            handler.addQuickElement("rights", self.feed['feed_copyright'])
 
 
 class AtomSiteNewsFeed(Feed):
@@ -295,7 +283,7 @@ class AtomSiteNewsFeed(Feed):
             extra_dict.setdefault('next_link', cur_page.next_page_number())
         if cur_page.has_previous():
             extra_dict.setdefault('prev_link', cur_page.previous_page_number())
-        extra_dict.setdefault('last_link', str(d.num_pages))
+        extra_dict.setdefault('last_link', d.num_pages)
         return extra_dict
 
     def items(self, display):
@@ -498,7 +486,7 @@ def bagHTML(request, identifier):
     linked_events = []
     total_events = None
     try:
-        filters = {'linked_object_id': str(bag)}
+        filters = {'linked_object_id': bag}
         event_json_url = 'http://%s/event/search.json?%s' % (
             # TODO: Maybe this should be configurable?
             request.META.get('HTTP_HOST'),
@@ -516,7 +504,7 @@ def bagHTML(request, identifier):
             linked_events += this_page
             next_url = json_events.get('feed', {})
             next_url = next_url.get('link', [])
-            next_url = {l.get('rel'): l.get('href') for l in next_url}
+            next_url = {link.get('rel'): link.get('href') for link in next_url}
             next_url = next_url.get('next')
             if next_url:
                 try:
@@ -572,7 +560,7 @@ def bagURLList(request, identifier):
         if len(parts) > 1:
             pathList.append(parts[1])
         line = handle.readline()
-    # iterate top tiles and append to pathlist
+    # iterate top files and append to pathlist
     try:
         topFileHandle = getFileHandle(identifier, "")
         topFiles = getFileList(topFileHandle.url)
@@ -582,21 +570,18 @@ def bagURLList(request, identifier):
         pass
     # iterate pathlist and resolve a unicode path dependent on proxy mode
     for path in pathList:
-        # path = urllib2.quote(path)
-        try:
-            unipath = unicode(path)
-        except UnicodeDecodeError:
+        if isinstance(path, bytes):
             try:
-                unipath = utf8_decoder(path)[0]
+                path = path.decode()
             except UnicodeDecodeError:
-                unipath = latin_decoder(path)[0]
+                path = path.decode('latin-1')
         # CODA_PROXY_MODE is a settings variable
         if settings.CODA_PROXY_MODE:
             uni = '%sbag/%s/%s' % (
-                unicode(proxyRoot), unicode(identifier), unipath
+                proxyRoot, identifier, path
             )
         else:
-            uni = unicode(bag_root) + u"/" + unipath
+            uni = bag_root + "/" + path
         # throw the final path into a list
         transList.append(uni)
     outputText = "\n".join(reversed(transList))
@@ -626,7 +611,7 @@ def bagProxy(request, identifier, filePath):
             # Have a proxy server point the client to where to download
             # the file directly in order to bypass serving through Django.
             resp['X-REPROXY-URL'] = handle.geturl()
-            resp['ETag'] = '"%s"' % uuid.uuid4().get_hex()
+            resp['ETag'] = '"%s"' % uuid.uuid4().hex
         else:
             # Serve the data file through Django.
             resp.content = FileWrapper(handle)
@@ -748,7 +733,7 @@ def showNodeStatus(request, identifier=None):
     """
 
     if identifier:
-        node = Node.objects.get(node_name=identifier)
+        node = get_object_or_404(Node, node_name__exact=identifier)
         return render(
             request,
             'mdstore/node.html',
@@ -983,7 +968,7 @@ def app_node(request, identifier=None):
             )
         try:
             node.save()
-        except IntegrityError as e:
+        except IntegrityError:
             return HttpResponse(
                 "Conflict with already-existing resource.\n",
                 status=409, content_type="text/plain"

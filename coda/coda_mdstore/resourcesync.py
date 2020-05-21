@@ -1,4 +1,4 @@
-from urlparse import urlparse
+from urllib.parse import urlparse
 import warnings
 
 from django.contrib.sitemaps import Sitemap, views
@@ -16,7 +16,7 @@ try:
     MOST_RECENT_BAGGING_DATE = Bag.objects.latest(
         'bagging_date'
     ).bagging_date.strftime(TIME_FORMAT_STRING)
-except Exception, e:
+except Exception:
     MOST_RECENT_BAGGING_DATE = '2012-12-12T00:00:00Z'
 
 
@@ -45,7 +45,7 @@ def index(
     req_site = get_current_site(request)
 
     sites = []
-    for section, site in sitemaps.iteritems():
+    for section, site in sitemaps.items():
         if callable(site):
             site = site()
         protocol = req_protocol if site.protocol is None else site.protocol

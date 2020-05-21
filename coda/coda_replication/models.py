@@ -1,18 +1,5 @@
 from django.db import models
-# this is quite silly:
-# from django.conf import settings
-# import simplejson
-# try:
-#     status_choice_json = open(settings.STATUS_CHOICE_FILE_PATH).read()
-#     status_choice_dict = simplejson.loads(status_choice_json)
-#     terms = status_choice_dict["terms"]
-#     status_choices = []
-#     for term in terms:
-#         status_choices.append((term['name'], term['label']))
-# except Exception, e:
-#     raise e
 
-# lets do this instead...
 STATUS_CHOICES = [
     ('1', "Ready to Harvest"),
     ('2', "Currently Harvesting"),
@@ -75,7 +62,7 @@ class QueueEntry(models.Model):
 
     # and we can still have our cake like we want it.
     def oxum(self):
-        return u'%s.%s' % (self.bytes, self.files)
+        return '%s.%s' % (self.bytes, self.files)
     oxum = property(oxum)
 
     class Meta:
