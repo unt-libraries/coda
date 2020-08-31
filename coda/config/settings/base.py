@@ -74,7 +74,8 @@ DATABASES = {
         'HOST': get_secret("DB_HOST"),
         'PORT': get_secret("DB_PORT"),
         'OPTIONS': {
-            'init_command': 'SET default_storage_engine=MyISAM'
+            'init_command': 'SET default_storage_engine=MyISAM',
+            'sql_mode': 'traditional',
         }
     }
 }
@@ -93,6 +94,7 @@ TEMPLATES = [
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
                 'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -120,7 +122,8 @@ DJANGO_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.admindocs',
     'django.contrib.admin',
-    'django.contrib.humanize', ]
+    'django.contrib.humanize',
+    'django.contrib.messages', ]
 
 THIRD_PARTY_APPS = [
     'premis_event_service',
