@@ -6,7 +6,7 @@ from lxml import objectify
 from unittest import mock
 import pytest
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django import http
 

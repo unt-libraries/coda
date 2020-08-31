@@ -3,7 +3,7 @@ import json
 from lxml import objectify
 import pytest
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django import http
 
 from coda_validate import factories, views
