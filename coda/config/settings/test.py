@@ -1,6 +1,8 @@
 from .base import *  # noqa
 import os
+
 ALLOWED_HOSTS = ['example.com']
+
 SECRET_KEY = 'test-secret'
 
 SITE_ID = 1

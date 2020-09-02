@@ -123,7 +123,8 @@ DJANGO_APPS = [
     'django.contrib.admindocs',
     'django.contrib.admin',
     'django.contrib.humanize',
-    'django.contrib.messages', ]
+    'django.contrib.messages',
+]
 
 THIRD_PARTY_APPS = [
     'premis_event_service',
