@@ -85,7 +85,7 @@ def bagSearch(bagString):
     return a list of related bags
     """
 
-    bagList = Bag.objects.filter(bag_info__field_body__exact=bagString).distinct()
+    bagList = Bag.objects.filter(bag_info__field_body__search=bagString).distinct()
     if not bagList:
         bagList = Bag.objects.filter(name__search=bagString)
     return bagList
