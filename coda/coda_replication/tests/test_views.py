@@ -4,7 +4,7 @@ from lxml import objectify
 import pytest
 
 from django.core.paginator import Page
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django import http
 

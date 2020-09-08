@@ -3,7 +3,7 @@ import warnings
 
 from django.contrib.sitemaps import Sitemap, views
 from django.contrib.sites.shortcuts import get_current_site
-from django.core import urlresolvers
+from django.urls import reverse
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -49,7 +49,7 @@ def index(
         if callable(site):
             site = site()
         protocol = req_protocol if site.protocol is None else site.protocol
-        sitemap_url = urlresolvers.reverse(
+        sitemap_url = reverse(
             sitemap_url_name, kwargs={'section': section})
         absolute_url = '%s://%s%s' % (protocol, req_site.domain, sitemap_url)
         sites.append(absolute_url)

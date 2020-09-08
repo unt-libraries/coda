@@ -32,7 +32,7 @@ from datetime import datetime
 from django.contrib.sites.models import Site  # noqa
 from django.db import connection
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from coda_mdstore import exceptions
 
