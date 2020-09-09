@@ -556,6 +556,35 @@ class TestExternalIdentiferSearchJSON:
         assert content[0]['name'] == bag.name
         assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
 
+    def test_with_valid_ark_id_with_duplicates(self, rf):
+        bag = FullBagFactory.create()
+        bag_1 = FullBagFactory.create()
+
+        ext_id_1 = ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+        )
+        ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+        )
+        ExternalIdentifierFactory.create(
+            belong_to_bag=bag_1,
+            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+        )
+
+        request = rf.get('/', {'ark': ext_id_1.value})
+        response = views.externalIdentifierSearchJSON(request)
+        content = json.loads(response.content)
+
+        assert len(content) == 2
+        assert 'bagging_date' in content[0]
+        assert content[0]['name'] == bag.name
+        assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
+        assert 'bagging_date' in content[1]
+        assert content[1]['name'] == bag_1.name
+        assert content[1]['oxum'] == '{0}.{1}'.format(bag_1.size, bag_1.files)
+
 
 class TestBagURLListView:
     """

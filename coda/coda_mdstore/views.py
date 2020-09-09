@@ -675,16 +675,19 @@ def externalIdentifierSearchJSON(request):
 
     identifiers = (External_Identifier.objects
                                       .select_related('belong_to_bag')
-                                      .filter(value=ark)
-                                      .distinct())
-    data = [
-        {
-            'name': exid.belong_to_bag.name,
-            'oxum': exid.belong_to_bag.oxum,
-            'bagging_date': exid.belong_to_bag.bagging_date.strftime('%Y-%m-%d')
-        }
-        for exid in identifiers
-    ]
+                                      .filter(value=ark))
+    unique_identifiers = []
+    data = []
+    for bagInfoObject in identifiers:
+        bag = bagInfoObject.belong_to_bag
+        if bag not in unique_identifiers:
+            unique_identifiers.append(bag)
+            data.append(
+                {
+                    'name': bag.name,
+                    'oxum': bag.oxum,
+                    'bagging_date': bag.bagging_date.strftime('%Y-%m-%d')
+                })
 
     data = json.dumps(data, indent=4, sort_keys=True)
     return HttpResponse(data, content_type='application/json')
