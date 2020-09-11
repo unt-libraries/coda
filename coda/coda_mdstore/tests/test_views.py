@@ -587,9 +587,7 @@ class TestExternalIdentiferSearchJSON:
 
     def test_with_valid_ark_id_no_showAll(self, rf):
         bag = FullBagFactory.create(bagging_date='2015-01-01')
-#        bag.bagging_date = '2015-01-01'
         bag_1 = FullBagFactory.create(bagging_date='2020-01-01')
-#        bag_1.bagging_date = '2020-01-01'
         external_id = 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)
         ExternalIdentifierFactory.create(
             belong_to_bag=bag,
