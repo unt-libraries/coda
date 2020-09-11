@@ -556,24 +556,24 @@ class TestExternalIdentiferSearchJSON:
         assert content[0]['name'] == bag.name
         assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
 
-    def test_with_valid_ark_id_with_duplicates(self, rf):
+    def test_with_valid_ark_id_showAll_with_duplicates(self, rf):
         bag = FullBagFactory.create()
         bag_1 = FullBagFactory.create()
+        external_id = 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)
 
-        ext_id_1 = ExternalIdentifierFactory.create(
+        ExternalIdentifierFactory.create(
             belong_to_bag=bag,
-            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+            value=external_id
         )
         ExternalIdentifierFactory.create(
             belong_to_bag=bag,
-            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+            value=external_id
         )
         ExternalIdentifierFactory.create(
             belong_to_bag=bag_1,
-            value='ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+            value=external_id
         )
-
-        request = rf.get('/', {'ark': ext_id_1.value})
+        request = rf.get('/', {'ark': external_id, 'showAll': True})
         response = views.externalIdentifierSearchJSON(request)
         content = json.loads(response.content)
 
@@ -584,6 +584,29 @@ class TestExternalIdentiferSearchJSON:
         assert 'bagging_date' in content[1]
         assert content[1]['name'] == bag_1.name
         assert content[1]['oxum'] == '{0}.{1}'.format(bag_1.size, bag_1.files)
+
+    def test_with_valid_ark_id_no_showAll(self, rf):
+        bag = FullBagFactory.create(bagging_date='2015-01-01')
+#        bag.bagging_date = '2015-01-01'
+        bag_1 = FullBagFactory.create(bagging_date='2020-01-01')
+#        bag_1.bagging_date = '2020-01-01'
+        external_id = 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)
+        ExternalIdentifierFactory.create(
+            belong_to_bag=bag,
+            value=external_id
+        )
+        ExternalIdentifierFactory.create(
+            belong_to_bag=bag_1,
+            value=external_id
+        )
+        request = rf.get('/', {'ark': external_id})
+        response = views.externalIdentifierSearchJSON(request)
+        content = json.loads(response.content)
+
+        assert len(content) == 1
+        assert 'bagging_date' in content[0]
+        assert content[0]['name'] == bag_1.name
+        assert content[0]['oxum'] == '{0}.{1}'.format(bag_1.size, bag_1.files)
 
 
 class TestBagURLListView:

@@ -670,24 +670,44 @@ def externalIdentifierSearch(request, identifier=None):
 def externalIdentifierSearchJSON(request):
     """External_Identifier search formatted in JSON."""
     ark = request.GET.get('ark', '')
+    showAll = request.GET.get('showAll', False)
     if ('ark:/%d' % settings.ARK_NAAN) not in ark:
         ark = 'ark:/%d/%s' % (settings.ARK_NAAN, ark)
-
-    identifiers = (External_Identifier.objects
-                                      .select_related('belong_to_bag')
-                                      .filter(value=ark))
-    unique_identifiers = []
     data = []
-    for bagInfoObject in identifiers:
-        bag = bagInfoObject.belong_to_bag
-        if bag not in unique_identifiers:
-            unique_identifiers.append(bag)
-            data.append(
+    if not showAll:
+        identifiers = (External_Identifier.objects
+                                          .select_related('belong_to_bag')
+                                          .filter(value=ark)
+                                          .order_by('-belong_to_bag__bagging_date')
+                                          .first())
+        if identifiers:
+            data = [
                 {
-                    'name': bag.name,
-                    'oxum': bag.oxum,
-                    'bagging_date': bag.bagging_date.strftime('%Y-%m-%d')
-                })
+                    'name': identifiers.belong_to_bag.name,
+                    'oxum': identifiers.belong_to_bag.oxum,
+                    'bagging_date': identifiers.belong_to_bag.bagging_date.strftime('%Y-%m-%d')
+                }
+            ]
+
+    else:
+        identifiers = (External_Identifier.objects
+                                          .select_related('belong_to_bag')
+                                          .filter(value=ark)
+                                          .values_list('belong_to_bag__name',
+                                                       'belong_to_bag__size',
+                                                       'belong_to_bag__files',
+                                                       'belong_to_bag__bagging_date')
+                                          .distinct()
+                                          .order_by('-belong_to_bag__bagging_date'))
+
+        data = [
+            {
+                'name': exid[0],
+                'oxum': '%s.%s' % (exid[1], exid[2]),
+                'bagging_date': exid[3].strftime('%Y-%m-%d')
+            }
+            for exid in identifiers
+        ]
 
     data = json.dumps(data, indent=4, sort_keys=True)
     return HttpResponse(data, content_type='application/json')
