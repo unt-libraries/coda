@@ -754,7 +754,7 @@ def showNodeStatus(request, identifier=None):
             }
         )
     else:
-        nodes = Node.objects.all()
+        nodes = Node.objects.order_by('node_name')
         status_list = []
         total_capacity = 0
         total_size = 0
