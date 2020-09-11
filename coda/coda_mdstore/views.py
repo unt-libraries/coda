@@ -635,6 +635,7 @@ def externalIdentifierSearch(request, identifier=None):
             identifier = request.GET.get('ark')
             feed_id = request.path + identifier + '/'
         identifier = identifier[:-1] if identifier[-1] == '/' else identifier
+        bagInfoObjectList = External_Identifier.objects.none()
         if 'metadc' in identifier or 'metapth' in identifier:
             bagInfoObjectList = External_Identifier.objects.select_related('belong_to_bag').filter(
                 value=identifier
