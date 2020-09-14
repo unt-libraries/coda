@@ -670,22 +670,30 @@ def externalIdentifierSearch(request, identifier=None):
 def externalIdentifierSearchJSON(request):
     """External_Identifier search formatted in JSON."""
     ark = request.GET.get('ark', '')
+    showAll = request.GET.get('showAll', 'false')
     if ('ark:/%d' % settings.ARK_NAAN) not in ark:
         ark = 'ark:/%d/%s' % (settings.ARK_NAAN, ark)
-
+    data = []
     identifiers = (External_Identifier.objects
                                       .select_related('belong_to_bag')
                                       .filter(value=ark)
+                                      .order_by('-belong_to_bag__bagging_date')
+                                      .values_list('belong_to_bag__name',
+                                                   'belong_to_bag__size',
+                                                   'belong_to_bag__files',
+                                                   'belong_to_bag__bagging_date')
                                       .distinct())
-    data = [
-        {
-            'name': exid.belong_to_bag.name,
-            'oxum': exid.belong_to_bag.oxum,
-            'bagging_date': exid.belong_to_bag.bagging_date.strftime('%Y-%m-%d')
-        }
-        for exid in identifiers
-    ]
-
+    if identifiers:
+        if showAll.lower() != 'true':
+            identifiers = identifiers[:1]
+        data = [
+            {
+                'name': exid[0],
+                'oxum': '%s.%s' % (exid[1], exid[2]),
+                'bagging_date': exid[3].strftime('%Y-%m-%d')
+            }
+            for exid in identifiers
+        ]
     data = json.dumps(data, indent=4, sort_keys=True)
     return HttpResponse(data, content_type='application/json')
 
