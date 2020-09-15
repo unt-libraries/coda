@@ -32,6 +32,10 @@
             <td> <i class="icon-dashboard"></i> {{ filled }}</td>
         </tr>
         <tr>
+            <th>Status</th>
+            <td> <i class="icon-dashboard"></i> {{ node.get_status_display }}</td>
+        </tr>
+        <tr>
             <th>Last Updated</th>
             <td> <i class="icon-calendar"></i> {{ node.last_checked }}</td>
         </tr>

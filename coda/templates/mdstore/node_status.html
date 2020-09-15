@@ -27,6 +27,9 @@
                 Full
             </th>
             <th>
+                Status
+            </th>
+            <th>
                 Last Updated
             </th>
         </tr></thead>
@@ -38,6 +41,7 @@
 				<td> <i class="icon-hdd"></i> {{ status.node.node_size|filesizeformat }} </td>
 				<td> <i class="icon-hdd"></i> {{ status.available|filesizeformat }} </td>
 				<td> <i class="icon-dashboard"></i> {{ status.filled }}% </td>
+                                <td> <i class="icon-calendar"></i> {{ status.node.get_status_display }} </td>
 				<td> <i class="icon-calendar"></i> {{ status.node.last_checked }} </td>
 			</tr>
 		{% endfor %}
