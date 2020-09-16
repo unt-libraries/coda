@@ -557,8 +557,8 @@ class TestExternalIdentiferSearchJSON:
         assert content[0]['oxum'] == '{0}.{1}'.format(bag.size, bag.files)
 
     def test_with_valid_ark_id_showAll_with_duplicates(self, rf):
-        bag = FullBagFactory.create()
-        bag_1 = FullBagFactory.create()
+        bag = FullBagFactory.create(bagging_date='2020-01-01')
+        bag_1 = FullBagFactory.create(bagging_date='2015-01-01')
         external_id = 'ark:/%d/metadc000001' % (settings.ARK_NAAN,)
 
         ExternalIdentifierFactory.create(
@@ -780,13 +780,14 @@ class TestAppNode:
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_get_request_without_identifier_response_content(self, rf):
-        NodeFactory.create_batch(10)
+        NodeFactory.create_batch(7, status="1")
+        NodeFactory.create_batch(5, status="2")
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request)
         tree = objectify.fromstring(response.content)
 
         # Check that all of the Nodes are listed in the feed.
-        assert len(tree.entry) == 10
+        assert len(tree.entry) == 7
 
     def test_get_request_with_identifier_response(self, rf):
         node = NodeFactory.create()
