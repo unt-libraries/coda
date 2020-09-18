@@ -27,10 +27,10 @@
                 Full
             </th>
             <th>
-                Status
+                Last Updated
             </th>
             <th>
-                Last Updated
+                Status
             </th>
         </tr></thead>
 		{% for status in status_list %}
@@ -41,8 +41,8 @@
 				<td> <i class="icon-hdd"></i> {{ status.node.node_size|filesizeformat }} </td>
 				<td> <i class="icon-hdd"></i> {{ status.available|filesizeformat }} </td>
 				<td> <i class="icon-dashboard"></i> {{ status.filled }}% </td>
-                                <td> <i class="icon-calendar"></i> {{ status.node.get_status_display }} </td>
-				<td> <i class="icon-calendar"></i> {{ status.node.last_checked }} </td>
+                                <td> <i class="icon-calendar"></i> {{ status.node.last_checked }} </td>
+				<td> <span title="{{ status.node.status }}" class="disabled btn btn-block btn-mini btn-{% if status.node.status == "0" %}success{% else %}danger{% endif %}"> {{ status.node.get_status_display }}</span></td>
 			</tr>
 		{% endfor %}
 		<tr/>
