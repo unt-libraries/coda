@@ -71,8 +71,8 @@ class Node(models.Model):
     """
 
     STATUS_CHOICES = [
-        ('1', 'Active'),
-        ('2', 'Inactive'),
+        ('0', 'Active'),
+        ('1', 'Inactive'),
     ]
     node_name = models.CharField(
         max_length=255,
@@ -91,7 +91,7 @@ class Node(models.Model):
     last_checked = models.DateTimeField(
         help_text="Date node size last checked", blank=True)
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES,
+        max_length=1, choices=STATUS_CHOICES,
         help_text="The current status of the node", blank=True)
 
 

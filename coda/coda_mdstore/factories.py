@@ -112,5 +112,5 @@ class NodeFactory(factory.django.DjangoModelFactory):
     node_path = factory.Sequence(lambda n: '/foo/bar/node/{0}'.format(n))
     node_capacity = 1024 * 1000
     node_size = 512 * 900
-    status = fuzzy.FuzzyChoice(str(i) for i in range(1, 3))
+    status = fuzzy.FuzzyChoice(['0', '1'])
     last_checked = datetime.now()
