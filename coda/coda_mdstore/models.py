@@ -71,8 +71,8 @@ class Node(models.Model):
     """
 
     STATUS_CHOICES = [
-        ('0', 'Active'),
-        ('1', 'Inactive'),
+        ('0', 'Inactive'),
+        ('1', 'Active'),
     ]
     node_name = models.CharField(
         max_length=255,

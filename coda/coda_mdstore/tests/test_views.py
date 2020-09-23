@@ -780,8 +780,8 @@ class TestAppNode:
         assert response['Content-Type'] == 'application/atom+xml'
 
     def test_get_request_without_identifier_response_content(self, rf):
-        NodeFactory.create_batch(7, status="0")
-        NodeFactory.create_batch(5, status="1")
+        NodeFactory.create_batch(7, status="1")
+        NodeFactory.create_batch(5, status="0")
         request = rf.get('/', HTTP_HOST='example.com')
         response = views.app_node(request)
         tree = objectify.fromstring(response.content)
