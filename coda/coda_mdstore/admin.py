@@ -18,7 +18,7 @@ class BagAdmin(admin.ModelAdmin):
 
 
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ("node_url", "node_path", "node_capacity", "node_size")
+    list_display = ("node_url", "node_path", "node_capacity", "node_size", "status")
 
 
 class External_IdentifierAdmin(admin.ModelAdmin):

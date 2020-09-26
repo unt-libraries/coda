@@ -786,7 +786,7 @@ class TestAppNode:
         response = views.app_node(request)
         tree = objectify.fromstring(response.content)
 
-        # Check that all of the Nodes are listed in the feed.
+        # Check that all of the active Nodes are listed in the feed.
         assert len(tree.entry) == 7
 
     def test_get_request_with_identifier_response(self, rf):
@@ -808,6 +808,7 @@ class TestAppNode:
         assert tree.content.node.capacity == node.node_capacity
         assert tree.content.node.path == node.node_path
         assert tree.content.node.url == node.node_url
+        assert tree.content.node.status == node.status
 
     def test_get_request_with_identifier_raises_exception(self, rf):
         request = rf.get('/')
