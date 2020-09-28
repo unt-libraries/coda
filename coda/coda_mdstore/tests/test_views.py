@@ -808,7 +808,7 @@ class TestAppNode:
         assert tree.content.node.capacity == node.node_capacity
         assert tree.content.node.path == node.node_path
         assert tree.content.node.url == node.node_url
-        assert tree.content.node.status == node.status
+        assert tree.content.node.status == node.get_status_display()
 
     def test_get_request_with_identifier_raises_exception(self, rf):
         request = rf.get('/')
