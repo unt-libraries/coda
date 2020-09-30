@@ -171,7 +171,8 @@ class TestNodeEntry:
         assert xml_obj.content.node.path == node.node_path
         assert xml_obj.content.node.url == node.node_url
         assert xml_obj.content.node.last_checked == node_last_checked
-        assert xml_obj.content.node.countchildren() == 6
+        assert xml_obj.content.node.status == node.get_status_display()
+        assert xml_obj.content.node.countchildren() == 7
 
     def test_xml_id(self):
         node = factories.NodeFactory.build()

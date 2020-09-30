@@ -70,6 +70,10 @@ class Node(models.Model):
     This model defines a storage node for the mdstore
     """
 
+    STATUS_CHOICES = [
+        ('0', 'Inactive'),
+        ('1', 'Active'),
+    ]
     node_name = models.CharField(
         max_length=255,
         help_text="The name of the node",
@@ -86,6 +90,9 @@ class Node(models.Model):
         help_text="The current size of files on disk (in bytes)", blank=True)
     last_checked = models.DateTimeField(
         help_text="Date node size last checked", blank=True)
+    status = models.CharField(
+        max_length=1, choices=STATUS_CHOICES,
+        help_text="The current status of the node", blank=True)
 
 
 class External_Identifier(models.Model):

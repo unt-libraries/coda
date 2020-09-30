@@ -754,7 +754,7 @@ def showNodeStatus(request, identifier=None):
             }
         )
     else:
-        nodes = Node.objects.all()
+        nodes = Node.objects.order_by('node_name')
         status_list = []
         total_capacity = 0
         total_size = 0
@@ -938,7 +938,7 @@ def app_node(request, identifier=None):
         return resp
     # FEED
     elif request.method == 'GET':
-        nodes = Node.objects.all()
+        nodes = Node.objects.filter(status='1')
         paginator = Paginator(nodes, max(1, len(nodes)))
         if len(request.GET):
             page = request.GET.get('page')

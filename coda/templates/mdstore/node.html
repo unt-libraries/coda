@@ -35,5 +35,9 @@
             <th>Last Updated</th>
             <td> <i class="icon-calendar"></i> {{ node.last_checked }}</td>
         </tr>
+        <tr>
+	    <th>Status</th>
+	    <td> <span title="{{ node.status }}" class="disabled btn btn-primary btn-{% if node.status == "0" %}danger{% else %}success{% endif %}">{{ node.get_status_display }}</span></td>
+        </tr>
 	</table>
 {% endblock %}
