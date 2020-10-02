@@ -622,7 +622,7 @@ class TestBagURLListView:
 
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', self.getFileHandle)
+            'coda_mdstore.presentation.getFileHandle', self.getFileHandle)
 
     @pytest.mark.xfail(reason='The response content does not match other '
                               'responses.')
@@ -668,7 +668,7 @@ class TestBagURLListView:
         bag = FullBagFactory.create()
         request = rf.get('/')
         # Mock file names found at the bag's root level.
-        with mock.patch('coda_mdstore.views.getFileList',
+        with mock.patch('coda_mdstore.presentation.getFileList',
                         return_value=['bagit.txt', 'bag-info.txt']):
             response = views.bagURLList(request, bag.name)
 

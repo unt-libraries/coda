@@ -91,6 +91,52 @@ def bagSearch(bagString):
     return bagList
 
 
+def getAllBagFiles(identifier, proxyRoot, CODA_PROXY_MODE):
+    """"
+    Return a list of links to all of the data files for a bag.
+    """
+    pathList = []
+    transList = []
+
+    handle = getFileHandle(identifier, "manifest-md5.txt")
+    if not handle:
+        return
+    bag_root = handle.url.rsplit('/', 1)[0]
+    line = handle.readline()
+    # iterate over handle and append urls to pathlist
+    while line:
+        line = line.strip()
+        parts = line.split(None, 1)
+        if len(parts) > 1:
+            pathList.append(parts[1])
+        line = handle.readline()
+    # iterate top files and append to pathlist
+    try:
+        topFileHandle = getFileHandle(identifier, "")
+        topFiles = getFileList(topFileHandle.url)
+        for topFile in topFiles:
+            pathList.append(topFile)
+    except:
+        pass
+    # iterate pathlist and resolve a unicode path dependent on proxy mode
+    for path in pathList:
+        if isinstance(path, bytes):
+            try:
+                path = path.decode()
+            except UnicodeDecodeError:
+                path = path.decode('latin-1')
+        # CODA_PROXY_MODE is a settings variable
+        if CODA_PROXY_MODE:
+            uni = '%sbag/%s/%s' % (
+                proxyRoot, identifier, path
+            )
+        else:
+            uni = bag_root + "/" + path
+        # throw the final path into a list
+        transList.append(uni)
+    return transList
+
+
 def makeBagAtomFeed(bagObjectList, id, title):
     """
     Given an iterable of bags, make an ATOM feed xml representation of it
