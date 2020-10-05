@@ -571,7 +571,7 @@ def download_files(request, identifier):
     transList = getAllBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
     if not transList:
         raise Http404
-    return render(request, 'mdstore/file_download.html', {'outputText': reversed(transList)})
+    return render(request, 'mdstore/bag_files_download.html', {'outputText': reversed(transList)})
 
 
 def bagProxy(request, identifier, filePath):

@@ -1,0 +1,15 @@
+{% extends "mdstore/base.html" %}
+{% block content %}
+{% load humanize %}
+<table>
+    {%for item in outputText%}
+        <tr>
+            <td>
+                <a href="item" download>{{ item }}</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
+{% endblock %}
