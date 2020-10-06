@@ -622,7 +622,7 @@ class TestBagURLListView:
 
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(
-            'coda_mdstore.presentation.getFileHandle', self.getFileHandle)
+            'coda_mdstore.views.getFileHandle', self.getFileHandle)
 
     @pytest.mark.xfail(reason='The response content does not match other '
                               'responses.')
@@ -668,7 +668,7 @@ class TestBagURLListView:
         bag = FullBagFactory.create()
         request = rf.get('/')
         # Mock file names found at the bag's root level.
-        with mock.patch('coda_mdstore.presentation.getFileList',
+        with mock.patch('coda_mdstore.views.getFileList',
                         return_value=['bagit.txt', 'bag-info.txt']):
             response = views.bagURLList(request, bag.name)
 
@@ -677,6 +677,21 @@ class TestBagURLListView:
                 b'https://coda/data/file02.txt\n'
                 b'https://coda/data/file01.txt') in response.content
         assert response.status_code == 200
+
+    def test_response_with_bagfiles(self, rf):
+        """"Test response content with bagfiles kwargs."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
+        self.getFileHandle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        bag = FullBagFactory.create()
+        request = rf.get('/')
+        response = views.bagURLList(request, bag.name, bagfiles='bagfiles')
+        assert b'<a' in response.content
+        assert b'https://coda/data/file02.txt</a>' in response.content
+        assert b'https://coda/data/file01.txt</a>' in response.content
 
 
 class TestBagFullTextSearchHTMLView:

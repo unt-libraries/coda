@@ -20,7 +20,7 @@ from coda_replication.models import QueueEntry
 from coda_validate.models import Validate
 from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
-from .presentation import getAllBagFiles, getFileHandle, bagSearch, \
+from .presentation import getFileList, getFileHandle, bagSearch, \
     makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
     nodeEntry, createNode
 from dateutil import rrule
@@ -532,46 +532,66 @@ def bagHTML(request, identifier):
     )
 
 
-def bagURLList(request, identifier):
+def bagURLList(request, identifier, bagfiles=None):
     """
     Return a list of URLS in the bag
     """
 
     # assign the proxy url
     proxyRoot = "http://%s/" % request.META.get('HTTP_HOST')
-    # attempt to grab a bag
+    pathList = []
+    transList = []
+    # attempt to grab a bag,
     try:
         Bag.objects.get(name=identifier)
     except Bag.DoesNotExist:
         return HttpResponseNotFound(
             "There is no bag with id {0}.".format(identifier)
         )
-    transList = getAllBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    if not transList:
+    handle = getFileHandle(identifier, "manifest-md5.txt")
+    if not handle:
         raise Http404
+    bag_root = handle.url.rsplit('/', 1)[0]
+    line = handle.readline()
+    # iterate over handle and append urls to pathlist
+    while line:
+        line = line.strip()
+        parts = line.split(None, 1)
+        if len(parts) > 1:
+            pathList.append(parts[1])
+        line = handle.readline()
+    # iterate top files and append to pathlist
+    try:
+        topFileHandle = getFileHandle(identifier, "")
+        topFiles = getFileList(topFileHandle.url)
+        for topFile in topFiles:
+            pathList.append(topFile)
+    except:
+        pass
+    # iterate pathlist and resolve a unicode path dependent on proxy mode
+    for path in pathList:
+        if isinstance(path, bytes):
+            try:
+                path = path.decode()
+            except UnicodeDecodeError:
+                path = path.decode('latin-1')
+        # CODA_PROXY_MODE is a settings variable
+        if settings.CODA_PROXY_MODE:
+            uni = '%sbag/%s/%s' % (
+                proxyRoot, identifier, path
+            )
+        else:
+            uni = bag_root + "/" + path
+        # throw the final path into a list
+        transList.append(uni)
+
+    if bagfiles:
+        return render(request, 'mdstore/bag_files_download.html',
+                      {'outputText': reversed(transList)})
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")
     resp.status_code = 200
     return resp
-
-
-def download_files(request, identifier):
-    """
-    Return a list of URLS in the bag for download
-    """
-    # assign the proxy url
-    proxyRoot = "http://%s/" % request.META.get('HTTP_HOST')
-    # attempt to grab a bag
-    try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id {0}.".format(identifier)
-        )
-    transList = getAllBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    if not transList:
-        raise Http404
-    return render(request, 'mdstore/bag_files_download.html', {'outputText': reversed(transList)})
 
 
 def bagProxy(request, identifier, filePath):
