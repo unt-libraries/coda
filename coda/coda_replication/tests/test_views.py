@@ -102,18 +102,16 @@ class TestQueueSearch:
 
     def test_filtering_by_status(self, client):
         status = '2'
-        entries = factories.QueueEntryFactory.create_batch(100)
-
-        # Make sure at least one QueueFactory with the status exists.
-        entries_with_status = factories.QueueEntryFactory.create_batch(1, status=status)
-        entries += entries_with_status
+        status_count = 5
+        factories.QueueEntryFactory.create_batch(status_count, status=status)
+        factories.QueueEntryFactory.create_batch(7, status='1')
 
         response = client.get(
             reverse('replication-search'),
             {'status': status})
 
         results = response.context['entries']
-        assert sum(q.status == status for q in entries) == len(results.object_list)
+        assert len(results.object_list) == status_count
 
     def test_sorting_by_size(self, client):
         """
