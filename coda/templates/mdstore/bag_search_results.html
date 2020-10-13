@@ -28,6 +28,9 @@
                 <th>
                     ATOM
                 </th>
+                <th>
+                    Links
+                </th>
                 <th style="text-align:right;">
                     Size
                 </th>
@@ -49,6 +52,9 @@
                     </td>
                     <td class="data" style="vertical-align:middle">
                         <i class="icon-globe"></i> <a href="http://{{ request.META.HTTP_HOST }}/APP/bag/{{ entry.name }}">ATOM</a>
+                    </td>
+                    <td class="data" style="vertical-align:middle">
+                        <i class="icon-globe"></i> <a href="http://{{ request.META.HTTP_HOST }}/bag/{{ entry.name }}/links/">links</a>
                     </td>
                     <td class="data" style="vertical-align:middle; text-align:right;">
                        {{ entry.size|filesizeformat }}
