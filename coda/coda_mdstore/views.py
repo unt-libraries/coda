@@ -532,7 +532,7 @@ def bagHTML(request, identifier):
     )
 
 
-def bagURLList(request, identifier, bagfiles=None):
+def bagURLList(request, identifier, html=False):
     """
     Return a list of URLS in the bag
     """
@@ -585,9 +585,10 @@ def bagURLList(request, identifier, bagfiles=None):
         # throw the final path into a list
         transList.append(uni)
 
-    if bagfiles:
+    if html:
         return render(request, 'mdstore/bag_files_download.html',
                       {'outputText': reversed(transList)})
+
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")
     resp.status_code = 200

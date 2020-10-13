@@ -33,7 +33,7 @@ def test_bagURLList():
 
 
 def test_bagURLList_with_bagfiles():
-    assert resolve('/bag/ark:/%d/coda2/bagfiles' % settings.ARK_NAAN).func == views.bagURLList
+    assert resolve('/bag/ark:/%d/coda2/links/' % settings.ARK_NAAN).func == views.bagURLList
 
 
 def test_bagProxy():
