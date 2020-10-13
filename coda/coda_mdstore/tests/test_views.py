@@ -678,8 +678,8 @@ class TestBagURLListView:
                 b'https://coda/data/file01.txt') in response.content
         assert response.status_code == 200
 
-    def test_response_with_bagfiles(self, rf):
-        """"Test response content with bagfiles kwargs."""
+    def test_response_with_links(self, rf):
+        """"Test response content for links with html kwarg."""
         self.getFileHandle.return_value.url = 'https://coda/testurl'
         # Mock what gets read from the manifest file.
         self.getFileHandle.return_value.readline.side_effect = [

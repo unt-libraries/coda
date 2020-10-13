@@ -587,7 +587,7 @@ def bagURLList(request, identifier, html=False):
 
     if html:
         return render(request, 'mdstore/bag_files_download.html',
-                      {'outputText': reversed(transList)})
+                      {'links': sorted(transList)})
 
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")

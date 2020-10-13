@@ -9,7 +9,7 @@ urlpatterns = [
     re_path(r'^APP/bag/(?P<identifier>.+?)/$', views.app_bag, name='app-bag-detail'),
     re_path(
         r'^bag/(?P<identifier>ark:\/\d+\/.+?)/links/$', views.bagURLList,
-        kwargs={'html': True}, name='bag-urls'
+        kwargs={'html': True}, name='bag-links'
     ),
     re_path(r'^bag/(?P<identifier>.+?)/$', views.bagHTML, name='bag-detail'),
     re_path(r'^bag/(?P<identifier>ark:\/\d+\/.+?).urls$', views.bagURLList, name='bag-urls'),

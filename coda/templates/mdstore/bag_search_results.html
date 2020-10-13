@@ -42,19 +42,19 @@
             {% for entry in entries.object_list %}
                 <tr>
                     <td class="data" style="vertical-align:middle">
-                        <i class="icon-tag"></i> <a href="http://{{ request.META.HTTP_HOST }}/bag/{{ entry.name }}/">{{ entry.name }}</a>
+                        <i class="icon-tag"></i> <a href="{% url 'bag-detail' identifier=entry.name %}">{{ entry.name }}</a>
                     </td>
                     <td class="data" style="vertical-align:middle">
                         <i class="icon-calendar"></i> {{ entry.bagging_date }}</a>
                     </td>
                     <td class="data" style="vertical-align:middle">
-                        <i class="icon-globe"></i> <a href="http://{{ request.META.HTTP_HOST }}/bag/{{ entry.name }}.urls">urls</a>
+                        <i class="icon-globe"></i> <a href="{% url 'bag-urls' identifier=entry.name %}">urls</a>
                     </td>
                     <td class="data" style="vertical-align:middle">
-                        <i class="icon-globe"></i> <a href="http://{{ request.META.HTTP_HOST }}/APP/bag/{{ entry.name }}">ATOM</a>
+                        <i class="icon-globe"></i> <a href="{% url 'app-bag-detail' identifier=entry.name %}">ATOM</a>
                     </td>
                     <td class="data" style="vertical-align:middle">
-                        <i class="icon-globe"></i> <a href="http://{{ request.META.HTTP_HOST }}/bag/{{ entry.name }}/links/">links</a>
+                        <i class="icon-globe"></i> <a href="{% url 'bag-links' identifier=entry.name %}">links</a>
                     </td>
                     <td class="data" style="vertical-align:middle; text-align:right;">
                        {{ entry.size|filesizeformat }}
