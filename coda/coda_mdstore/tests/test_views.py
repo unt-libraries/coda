@@ -689,9 +689,9 @@ class TestBagURLListView:
         bag = FullBagFactory.create()
         request = rf.get('/')
         response = views.bagURLList(request, bag.name, html=True)
-        assert (b'<a href="https://coda/data/file02.txt"> '
+        assert (b'<a href="https://coda/data/file02.txt">'
                 b'https://coda/data/file02.txt</a><br>') in response.content
-        assert (b'<a href="https://coda/data/file01.txt"> '
+        assert (b'<a href="https://coda/data/file01.txt">'
                 b'https://coda/data/file01.txt</a><br>') in response.content
 
 
