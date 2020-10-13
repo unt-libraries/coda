@@ -334,7 +334,7 @@ class TestBagProxyView:
 
         # The mocked value that getFileHandle will return.
         file_handle = mock.Mock()
-        file_handle.info().getheader.side_effect = ['text/plain', '255']
+        file_handle.info().get.side_effect = ['text/plain', '255']
         file_handle.geturl.return_value = 'http://example.com/direct-file.txt'
 
         self.getFileHandle = mock.Mock(return_value=file_handle)
@@ -618,7 +618,7 @@ class TestBagURLListView:
 
         # The mocked value that getFileHandle will return.
         file_handle = mock.Mock()
-        file_handle.info().getheader.side_effect = ['text/plain', '255']
+        file_handle.info().get.side_effect = ['text/plain', '255']
 
         self.getFileHandle = mock.Mock(return_value=file_handle)
         monkeypatch.setattr(

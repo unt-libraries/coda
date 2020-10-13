@@ -604,9 +604,9 @@ def bagProxy(request, identifier, filePath):
     handle = getFileHandle(identifier, filePath)
     if handle:
         resp = HttpResponse(
-            content_type=handle.info().getheader('Content-Type')
+            content_type=handle.info().get('Content-Type')
         )
-        resp['Content-Length'] = handle.info().getheader('Content-Length')
+        resp['Content-Length'] = handle.info().get('Content-Length')
         if getattr(settings, 'REPROXY', False):
             # Have a proxy server point the client to where to download
             # the file directly in order to bypass serving through Django.
