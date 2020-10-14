@@ -678,6 +678,22 @@ class TestBagURLListView:
                 b'https://coda/data/file01.txt') in response.content
         assert response.status_code == 200
 
+    def test_response_with_links(self, rf):
+        """"Test response content for links with html kwarg."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
+        self.getFileHandle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        bag = FullBagFactory.create()
+        request = rf.get('/')
+        response = views.bagURLList(request, bag.name, html=True)
+        assert (b'<a href="https://coda/data/file02.txt">'
+                b'https://coda/data/file02.txt</a><br>') in response.content
+        assert (b'<a href="https://coda/data/file01.txt">'
+                b'https://coda/data/file01.txt</a><br>') in response.content
+
 
 class TestBagFullTextSearchHTMLView:
     """

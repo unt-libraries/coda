@@ -4,8 +4,9 @@
 <!-- MAIN HEADER BUTTON GROUP -->
 <div class="btn-group">
     <a class="btn btn-large btn-primary">{{ bag }}</a>
-    <a class="btn btn-large btn-warning" href="{{ request.build_absolute_uri|slice:":-1" }}.urls">URLS</a>
-    <a class="btn btn-large btn-danger" href="http://{{ request.META.HTTP_HOST }}/APP/bag/{{ bag }}">ATOM</a>
+    <a class="btn btn-large btn-warning" href="{% url 'bag-urls' identifier=bag %}">URLS</a>
+    <a class="btn btn-large btn-danger" href="{% url 'app-bag-detail' identifier=bag %}">ATOM</a>
+    <a class="btn btn-large btn-success" href="{% url 'bag-links' identifier=bag %}">Links</a>
 </div>
 <!-- BAG INFO HEADER -->
 <h3 class="main"><i class="icon-white icon-briefcase"></i> Bag Info Details:</h3>
