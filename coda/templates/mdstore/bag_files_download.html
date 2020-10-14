@@ -1,6 +1,6 @@
 {% extends "mdstore/base.html" %}
 {% block content %}
-    {%for item in links%}
+    {% for item in links %}
         <a href="{{ item }}">{{ item }}</a><br>
     {% endfor %}
 {% endblock %}
