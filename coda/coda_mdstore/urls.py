@@ -11,6 +11,10 @@ urlpatterns = [
         r'^bag/(?P<identifier>ark:\/\d+\/.+?)/links/$', views.bagURLList,
         kwargs={'html': True}, name='bag-links'
     ),
+    re_path(
+        r'^bag/(?P<identifier>ark:\/\d+\/.+?)/download/$', views.bagURLList,
+        kwargs={'download': True}, name='bag-downloads'
+    ),
     re_path(r'^bag/(?P<identifier>.+?)/$', views.bagHTML, name='bag-detail'),
     re_path(r'^bag/(?P<identifier>ark:\/\d+\/.+?).urls$', views.bagURLList, name='bag-urls'),
     re_path(

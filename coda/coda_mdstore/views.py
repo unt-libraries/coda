@@ -1,11 +1,16 @@
 import copy
 import uuid
+import os
+from zipfile import ZipFile
+from io import BytesIO, StringIO
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
 import json
+
+from wsgiref.util import FileWrapper
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
-    HttpResponseNotFound
+    HttpResponseNotFound, FileResponse
 from django.shortcuts import get_object_or_404, render
 from wsgiref.util import FileWrapper
 from django.db import IntegrityError
@@ -532,7 +537,7 @@ def bagHTML(request, identifier):
     )
 
 
-def bagURLList(request, identifier, html=False):
+def bagURLList(request, identifier, html=False, download=False):
     """
     Return a list of URLS in the bag
     """
@@ -588,6 +593,26 @@ def bagURLList(request, identifier, html=False):
     if html:
         return render(request, 'mdstore/bag_files_download.html',
                       {'links': sorted(transList)})
+
+    if download:
+        urls = transList
+        zip_file = 'bag.zip'
+
+        zipObj = ZipFile(zip_file, 'w')
+        for url in urls:
+            filename = os.path.basename(url)
+            with open(filename, 'wb+') as file_obj:
+                res = urlopen(url)
+                file_obj.write(res.read())
+                zipObj.write(filename)
+            os.remove(filename)
+
+        zipObj.close()
+
+        response = FileResponse(FileWrapper(open(zip_file, 'rb')), content_type='application/x-zip-compressed')
+        response['Content-Disposition'] = 'attachment; filename="{0}"'.format(zip_file)
+        return response
+
 
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")
