@@ -2,7 +2,7 @@ import copy
 import uuid
 import os
 from zipfile import ZipFile
-from io import BytesIO, StringIO
+from io import BytesIO
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
@@ -10,9 +10,8 @@ import json
 
 from wsgiref.util import FileWrapper
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
-    HttpResponseNotFound, FileResponse
+    HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
-from wsgiref.util import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
@@ -595,24 +594,18 @@ def bagURLList(request, identifier, html=False, download=False):
                       {'links': sorted(transList)})
 
     if download:
-        urls = transList
         zip_file = 'bag.zip'
-
-        zipObj = ZipFile(zip_file, 'w')
-        for url in urls:
-            filename = os.path.basename(url)
-            with open(filename, 'wb+') as file_obj:
+        archive = BytesIO()
+        with ZipFile(archive, 'w') as zipObj:
+            for url in transList:
+                filename = os.path.basename(url)
                 res = urlopen(url)
-                file_obj.write(res.read())
-                zipObj.write(filename)
-            os.remove(filename)
+                zipObj.writestr(filename, res.read())
 
-        zipObj.close()
-
-        response = FileResponse(FileWrapper(open(zip_file, 'rb')), content_type='application/x-zip-compressed')
+        response = StreamingHttpResponse(FileWrapper(open(zip_file, 'rb')),
+                                         content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename="{0}"'.format(zip_file)
         return response
-
 
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")
