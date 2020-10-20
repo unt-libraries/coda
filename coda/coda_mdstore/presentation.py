@@ -95,15 +95,14 @@ def file_chunk_generator(url):
 
 def zip_file_streamer(urls):
     """
-    Stream zip file
+    Stream downloadable zipped file using zipstream
     """
     zip_obj = zipstream.ZipFile(mode='w', compression=ZIP_DEFLATED)
     for url in urls:
         filename = os.path.basename(url)
         zip_obj.write_iter(filename, file_chunk_generator(url))
 
-    # Each call will iterate the generator we wrote for each file
-    # one at a time until all files are completed.
+    # Each call will iterate the generator one at a time until all files are completed.
     for chunk in zip_obj:
         yield chunk
     zip_obj.close()

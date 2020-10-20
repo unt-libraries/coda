@@ -4,11 +4,10 @@ import uuid
 from urllib.request import urlopen
 from urllib.parse import urlencode
 import json
-
-from wsgiref.util import FileWrapper
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
     HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
+from wsgiref.util import FileWrapper
 from django.db import IntegrityError
 from django.db.models import Sum, Count, Max, Min
 from django.conf import settings
