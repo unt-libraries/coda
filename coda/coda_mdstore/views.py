@@ -1,8 +1,5 @@
 import copy
 import uuid
-import os
-from zipfile import ZipFile
-from io import BytesIO
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
@@ -26,7 +23,7 @@ from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
 from .presentation import getFileList, getFileHandle, bagSearch, \
     makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
-    nodeEntry, createNode
+    nodeEntry, createNode, zip_file_streamer
 from dateutil import rrule
 from datetime import datetime
 # for historical reasons that are not entirely clear, the tests for
@@ -594,17 +591,10 @@ def bagURLList(request, identifier, html=False, download=False):
                       {'links': sorted(transList)})
 
     if download:
-        zip_file = 'bag.zip'
-        archive = BytesIO()
-        with ZipFile(archive, 'w') as zipObj:
-            for url in transList:
-                filename = os.path.basename(url)
-                res = urlopen(url)
-                zipObj.writestr(filename, res.read())
-
-        response = StreamingHttpResponse(FileWrapper(open(zip_file, 'rb')),
+        zip_filename = 'bag-' + identifier.replace('/', '_') + '.zip'
+        response = StreamingHttpResponse(zip_file_streamer(transList),
                                          content_type='application/x-zip-compressed')
-        response['Content-Disposition'] = 'attachment; filename="{0}"'.format(zip_file)
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return response
 
     outputText = "\n".join(reversed(transList))
