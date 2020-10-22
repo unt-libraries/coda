@@ -704,7 +704,7 @@ class TestBagURLListView:
             b'']
         bag = FullBagFactory.create()
         request = rf.get('/')
-        zip_filename = 'bag-' + bag.name.replace('/', '_') + '.zip'
+        zip_filename = bag.name.split('/')[-1] + '.zip'
         response = views.bagURLList(request, bag.name, download=True)
         assert response.get('Content-Disposition') == 'attachment; filename=%s' % zip_filename
 

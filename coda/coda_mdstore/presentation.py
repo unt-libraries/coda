@@ -4,7 +4,6 @@ import urllib.request
 import urllib.parse
 import requests
 import zipstream
-from zipfile import ZIP_DEFLATED
 
 from bs4 import BeautifulSoup as BSoup
 from codalib import APP_AUTHOR
@@ -93,19 +92,20 @@ def file_chunk_generator(url):
         yield chunk
 
 
-def zip_file_streamer(urls):
+def zip_file_streamer(urls, identifier):
     """
     Stream downloadable zipped file using zipstream
     """
-    zip_obj = zipstream.ZipFile(mode='w', compression=ZIP_DEFLATED)
-    for url in urls:
-        filename = os.path.basename(url)
-        zip_obj.write_iter(filename, file_chunk_generator(url))
+    with zipstream.ZipFile(mode='w') as zip_obj:
+        for url in urls:
+            meta_id = identifier.split('/')[-1]
+            filename = '%s/%s' % (meta_id, url.split(meta_id, 1)[-1])
 
-    # Each call will iterate the generator one at a time until all files are completed.
-    for chunk in zip_obj:
-        yield chunk
-    zip_obj.close()
+            zip_obj.write_iter(filename, file_chunk_generator(url))
+
+        # Each call will iterate the generator one at a time until all files are completed.
+        for chunk in zip_obj:
+            yield chunk
 
 
 def bagSearch(bagString):

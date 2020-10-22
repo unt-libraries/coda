@@ -590,9 +590,9 @@ def bagURLList(request, identifier, html=False, download=False):
                       {'links': sorted(transList)})
 
     if download:
-        zip_filename = 'bag-' + identifier.replace('/', '_') + '.zip'
-        response = StreamingHttpResponse(zip_file_streamer(transList),
-                                         content_type='application/x-zip-compressed')
+        zip_filename = identifier.split('/')[-1] + '.zip'
+        response = StreamingHttpResponse(zip_file_streamer(transList, identifier),
+                                         content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
         return response
 
