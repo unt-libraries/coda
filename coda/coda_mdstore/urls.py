@@ -12,7 +12,7 @@ urlpatterns = [
         kwargs={'html': True}, name='bag-links'
     ),
     re_path(
-        r'^bag/(?P<identifier>ark:\/\d+\/.+?).zip$', views.bagURLList,
+        r'^bag/(?P<identifier>ark:\/\d+\/.+).zip$', views.bagURLList,
         kwargs={'download': True}, name='bag-download'
     ),
     re_path(r'^bag/(?P<identifier>.+?)/$', views.bagHTML, name='bag-detail'),

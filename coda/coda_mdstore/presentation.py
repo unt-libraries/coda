@@ -92,13 +92,12 @@ def file_chunk_generator(url):
         yield chunk
 
 
-def zip_file_streamer(urls, identifier):
+def zip_file_streamer(urls, identifier, meta_id):
     """
-    Stream downloadable zipped file using zipstream
+    Stream zipped file using zipstream
     """
     with zipstream.ZipFile(mode='w') as zip_obj:
         for url in urls:
-            meta_id = identifier.split('/')[-1]
             filename = '%s/%s' % (meta_id, url.split(meta_id, 1)[-1])
 
             zip_obj.write_iter(filename, file_chunk_generator(url))
