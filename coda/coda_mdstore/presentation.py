@@ -92,7 +92,7 @@ def file_chunk_generator(url):
         yield chunk
 
 
-def zip_file_streamer(urls, identifier, meta_id):
+def zip_file_streamer(urls, meta_id):
     """
     Stream zipped file using zipstream
     """
