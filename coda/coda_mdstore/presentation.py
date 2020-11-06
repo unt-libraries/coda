@@ -2,6 +2,8 @@ import os
 import re
 import urllib.request
 import urllib.parse
+import requests
+import zipstream
 
 from bs4 import BeautifulSoup as BSoup
 from codalib import APP_AUTHOR
@@ -77,6 +79,32 @@ def getFileHandle(codaId, codaPath):
     raise Exception(
         "Unable to get handle for id %s at path %s" % (codaId, codaPath)
     )
+
+
+def file_chunk_generator(url):
+    """
+    Download a file and stream it
+    """
+    r = requests.get(url, stream=True)
+    if r.status_code != 200:
+        return
+    for chunk in r.iter_content(1024):
+        yield chunk
+
+
+def zip_file_streamer(urls, meta_id):
+    """
+    Stream zipped file using zipstream
+    """
+    with zipstream.ZipFile(mode='w') as zip_obj:
+        for url in urls:
+            filename = '%s/%s' % (meta_id, url.split(meta_id, 1)[-1])
+
+            zip_obj.write_iter(filename, file_chunk_generator(url))
+
+        # Each call will iterate the generator one at a time until all files are completed.
+        for chunk in zip_obj:
+            yield chunk
 
 
 def bagSearch(bagString):

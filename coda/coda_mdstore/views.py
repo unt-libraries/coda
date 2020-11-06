@@ -5,7 +5,7 @@ from urllib.request import urlopen
 from urllib.parse import urlencode
 import json
 from django.http import HttpResponse, Http404, HttpResponseBadRequest, \
-    HttpResponseNotFound
+    HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from wsgiref.util import FileWrapper
 from django.db import IntegrityError
@@ -22,7 +22,7 @@ from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
 from .presentation import getFileList, getFileHandle, bagSearch, \
     makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
-    nodeEntry, createNode
+    nodeEntry, createNode, zip_file_streamer
 from dateutil import rrule
 from datetime import datetime
 # for historical reasons that are not entirely clear, the tests for
@@ -532,7 +532,7 @@ def bagHTML(request, identifier):
     )
 
 
-def bagURLList(request, identifier, html=False):
+def bagURLList(request, identifier, html=False, download=False):
     """
     Return a list of URLS in the bag
     """
@@ -588,6 +588,14 @@ def bagURLList(request, identifier, html=False):
     if html:
         return render(request, 'mdstore/bag_files_download.html',
                       {'links': sorted(transList)})
+
+    if download:
+        meta_id = identifier.split('/')[-1]
+        zip_filename = meta_id + '.zip'
+        response = StreamingHttpResponse(zip_file_streamer(transList, meta_id),
+                                         content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return response
 
     outputText = "\n".join(reversed(transList))
     resp = HttpResponse(outputText, content_type="text/plain")

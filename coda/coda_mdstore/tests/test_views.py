@@ -694,6 +694,20 @@ class TestBagURLListView:
         assert (b'<a href="https://coda/data/file01.txt">'
                 b'https://coda/data/file01.txt</a><br>') in response.content
 
+    def test_response_download_zipped_bag(self, rf):
+        """Test response has zipped bag file attached with download kwarg."""
+        self.getFileHandle.return_value.url = 'https://coda/testurl'
+        # Mock what gets read from the manifest file.
+        self.getFileHandle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        bag = FullBagFactory.create()
+        request = rf.get('/')
+        zip_filename = bag.name.split('/')[-1] + '.zip'
+        response = views.bagURLList(request, bag.name, download=True)
+        assert response.get('Content-Disposition') == 'attachment; filename=%s' % zip_filename
+
 
 class TestBagFullTextSearchHTMLView:
     """

@@ -13,6 +13,7 @@ pytest-flake8
 factory_boy
 sqlparse==0.3.0
 django-debug-toolbar==1.11
+zipstream>=1.1.4
 
 git+https://github.com/unt-libraries/codalib
 git+https://github.com/unt-libraries/django-premis-event-service@2.0.0
