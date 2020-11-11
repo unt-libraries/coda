@@ -611,3 +611,33 @@ def test_getFileList(mock_urlopen):
     mock_urlopen.return_value = text
     filelist = presentation.getFileList('https://coda/testurl')
     assert ['bag-info.txt', 'manifest-md5.txt', 'bagit.txt'] == filelist
+
+
+@mock.patch('requests.get')
+def test_file_chunk_generator(mock_get):
+    """Test chunks of data is generated."""
+    url = 'www.example.com'
+    mock_data = ['This', 'is', 'to', 'test', 'streaming', 'data.']
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.iter_content.return_value = mock_data
+    chunk = list(file_chunk_generator(url))
+    assert chunk == mock_data
+    mock_get.assert_called_once_with(url, stream=True)
+
+
+@mock.patch('subjects.dummy.file_chunk_generator')
+@mock.patch('subjects.dummy.zipstream.ZipFile')
+def test_zip_file_streamer(mock_zip_file, mock_gen):
+    """Test files are streamed."""
+    urls = [
+        'http://www.example.com/coda123/manifest-md5.txt',
+        'http://www.example.com/coda123/bagit.txt',
+        'http://www.example.com/coda123/bag-info.txt'
+    ]
+    meta_id = 'coda123'
+    data = ['Test', 'Streaming', 'Data']
+    mock_zip_file.return_value.__enter__.return_value.write_iter.return_value = data
+    chunk = list(zip_file_streamer(urls, meta_id))
+    # assert chunk  == data
+    assert mock_gen.call_count == 3
+    assert mock_zip_file.call_count == 1
