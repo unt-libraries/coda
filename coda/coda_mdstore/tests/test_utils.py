@@ -625,8 +625,8 @@ def test_file_chunk_generator(mock_get):
     mock_get.assert_called_once_with(url, stream=True)
 
 
-@mock.patch('presentation.file_chunk_generator')
-@mock.patch('presentation.zipstream.ZipFile')
+@mock.patch('coda_mdstore.presentation.file_chunk_generator')
+@mock.patch('coda_mdstore.presentation.zipstream.ZipFile')
 def test_zip_file_streamer(mock_zip_file, mock_gen):
     """Test files are streamed."""
     urls = [
