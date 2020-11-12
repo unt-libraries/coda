@@ -620,13 +620,13 @@ def test_file_chunk_generator(mock_get):
     mock_data = ['This', 'is', 'to', 'test', 'streaming', 'data.']
     mock_get.return_value.status_code = 200
     mock_get.return_value.iter_content.return_value = mock_data
-    chunk = list(file_chunk_generator(url))
+    chunk = list(presentation.file_chunk_generator(url))
     assert chunk == mock_data
     mock_get.assert_called_once_with(url, stream=True)
 
 
-@mock.patch('subjects.dummy.file_chunk_generator')
-@mock.patch('subjects.dummy.zipstream.ZipFile')
+@mock.patch('presentation.file_chunk_generator')
+@mock.patch('presentation.zipstream.ZipFile')
 def test_zip_file_streamer(mock_zip_file, mock_gen):
     """Test files are streamed."""
     urls = [
@@ -637,7 +637,7 @@ def test_zip_file_streamer(mock_zip_file, mock_gen):
     meta_id = 'coda123'
     data = ['Test', 'Streaming', 'Data']
     mock_zip_file.return_value.__enter__.return_value.write_iter.return_value = data
-    chunk = list(zip_file_streamer(urls, meta_id))
+    chunk = list(presentation.zip_file_streamer(urls, meta_id))
     # assert chunk  == data
     assert mock_gen.call_count == 3
     assert mock_zip_file.call_count == 1
