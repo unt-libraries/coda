@@ -626,8 +626,7 @@ def test_file_chunk_generator(mock_get):
 
 
 @mock.patch('coda_mdstore.presentation.file_chunk_generator')
-@mock.patch('coda_mdstore.presentation.zipstream.ZipFile')
-def test_zip_file_streamer(mock_zip_file, mock_gen):
+def test_zip_file_streamer(mock_gen):
     """Test files are streamed."""
     urls = [
         'http://www.example.com/coda123/manifest-md5.txt',
@@ -635,9 +634,12 @@ def test_zip_file_streamer(mock_zip_file, mock_gen):
         'http://www.example.com/coda123/bag-info.txt'
     ]
     meta_id = 'coda123'
-    data = ['Test', 'Streaming', 'Data']
-    mock_zip_file.return_value.__enter__.return_value.write_iter.return_value = data
+    mock_data_1 = [b'Test', b'manifest', b'data']
+    mock_data_2 = [b'Test', b'bagit', b'data']
+    mock_data_3 = [b'Test', b'baginfo', b'data']
+    mock_gen.side_effect = [iter(mock_data_1), iter(mock_data_2), iter(mock_data_3)]
     chunk = list(presentation.zip_file_streamer(urls, meta_id))
-    # assert chunk  == data
+    for data in mock_data_1, mock_data_2, mock_data_3:
+        for val in data:
+            assert val in chunk
     assert mock_gen.call_count == 3
-    assert mock_zip_file.call_count == 1
