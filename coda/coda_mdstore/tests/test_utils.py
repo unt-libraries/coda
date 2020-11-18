@@ -611,3 +611,45 @@ def test_getFileList(mock_urlopen):
     mock_urlopen.return_value = text
     filelist = presentation.getFileList('https://coda/testurl')
     assert ['bag-info.txt', 'manifest-md5.txt', 'bagit.txt'] == filelist
+
+
+@mock.patch('requests.get')
+def test_file_chunk_generator(mock_get):
+    """Test chunks of data is generated."""
+    url = 'www.example.com'
+    mock_data = ['This', 'is', 'to', 'test', 'streaming', 'data.']
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.iter_content.return_value = mock_data
+    chunk = list(presentation.file_chunk_generator(url))
+    assert chunk == mock_data
+    mock_get.assert_called_once_with(url, stream=True)
+
+
+@mock.patch('requests.get')
+def test_file_chunk_generator_with_bad_url(mock_get):
+    """Test empty generator is returned when a bad url is given."""
+    url = 'www.example.com'
+    mock_get.return_value.status_code = 404
+    chunk = list(presentation.file_chunk_generator(url))
+    assert chunk == []
+    mock_get.assert_called_once_with(url, stream=True)
+
+
+@mock.patch('coda_mdstore.presentation.file_chunk_generator')
+def test_zip_file_streamer(mock_gen):
+    """Test files are streamed."""
+    urls = [
+        'http://www.example.com/coda123/manifest-md5.txt',
+        'http://www.example.com/coda123/bagit.txt',
+        'http://www.example.com/coda123/bag-info.txt'
+    ]
+    meta_id = 'coda123'
+    mock_data_1 = [b'Test1', b'manifest', b'data1']
+    mock_data_2 = [b'Test2', b'bagit', b'data2']
+    mock_data_3 = [b'Test3', b'baginfo', b'data3']
+    mock_gen.side_effect = [iter(mock_data_1), iter(mock_data_2), iter(mock_data_3)]
+    chunk = list(presentation.zip_file_streamer(urls, meta_id))
+    for data in mock_data_1, mock_data_2, mock_data_3:
+        for val in data:
+            assert val in chunk
+    assert mock_gen.call_count == 3
