@@ -8,12 +8,12 @@ urlpatterns = [
     re_path(r'^APP/bag/$', views.app_bag, name='app-bag-list'),
     re_path(r'^APP/bag/(?P<identifier>.+?)/$', views.app_bag, name='app-bag-detail'),
     re_path(
-        r'^bag/(?P<identifier>ark:\/\d+\/.+?)/links/$', views.bagURLList,
-        kwargs={'html': True}, name='bag-links'
+        r'^bag/(?P<identifier>ark:\/\d+\/.+?)/links/$', views.bagURLLinks,
+        name='bag-links'
     ),
     re_path(
-        r'^bag/(?P<identifier>ark:\/\d+\/.+).zip$', views.bagURLList,
-        kwargs={'download': True}, name='bag-download'
+        r'^bag/(?P<identifier>ark:\/\d+\/.+).zip$', views.bagDownload,
+        name='bag-download'
     ),
     re_path(r'^bag/(?P<identifier>.+?)/$', views.bagHTML, name='bag-detail'),
     re_path(r'^bag/(?P<identifier>ark:\/\d+\/.+?).urls$', views.bagURLList, name='bag-urls'),

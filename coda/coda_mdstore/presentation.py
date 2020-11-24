@@ -81,6 +81,50 @@ def getFileHandle(codaId, codaPath):
     )
 
 
+def generateBagFiles(identifier, proxyRoot, proxyMode):
+    pathList = []
+    transList = []
+    handle = getFileHandle(identifier, "manifest-md5.txt")
+    if not handle:
+        return 'Http404'
+    bag_root = handle.url.rsplit('/', 1)[0]
+    line = handle.readline()
+    # iterate over handle and append urls to pathlist
+    while line:
+        line = line.strip()
+        parts = line.split(None, 1)
+        if len(parts) > 1:
+            pathList.append(parts[1])
+        line = handle.readline()
+    # iterate top files and append to pathlist
+    try:
+        topFileHandle = getFileHandle(identifier, "")
+        topFiles = getFileList(topFileHandle.url)
+        for topFile in topFiles:
+            pathList.append(topFile)
+    except:
+        pass
+    # iterate pathlist and resolve a unicode path dependent on proxy mode
+    for path in pathList:
+        if isinstance(path, bytes):
+            try:
+                path = path.decode()
+            except UnicodeDecodeError:
+                path = path.decode('latin-1')
+
+        # CODA_PROXY_MODE is a settings variable
+        if proxyMode:
+            uni = '%sbag/%s/%s' % (
+                proxyRoot, identifier, path
+            )
+        else:
+            uni = bag_root + "/" + path
+        # throw the final path into a list
+        transList.append(uni)
+
+    return transList
+
+
 def file_chunk_generator(url):
     """
     Download a file and stream it
