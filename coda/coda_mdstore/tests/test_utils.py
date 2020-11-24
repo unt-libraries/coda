@@ -653,3 +653,80 @@ def test_zip_file_streamer(mock_gen):
         for val in data:
             assert val in chunk
     assert mock_gen.call_count == 3
+
+
+class TestGenerateBagFiles:
+    """
+        Tests for coda_mdstore.presentation.generateBagFiles.
+    """
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_file_handle_error(self, mock_handle):
+        mock_handle.return_value = None
+        identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
+        transList = presentation.generateBagFiles(identifier=identifier,
+                                                  proxyRoot='',
+                                                  proxyMode=True)
+        assert transList == 'Http404'
+
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_bag_files_with_proxyroot(self, mock_handle):
+        mock_handle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        identifier = 'ark:/%d/coda1' % settings.ARK_NAAN
+        transList = presentation.generateBagFiles(identifier=identifier,
+                                                  proxyRoot='https://example.com/',
+                                                  proxyMode=True)
+        assert transList == ['https://example.com/bag/ark:/67531/coda1/data/file01.txt',
+                             'https://example.com/bag/ark:/67531/coda1/data/file02.txt']
+        assert mock_handle.call_count == 2
+
+    @mock.patch('coda_mdstore.presentation.getFileList')
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_bag_files_with_topfiles_bagroot(self, mock_handle, mock_file_list):
+        mock_file_list.return_value = ['bagit.txt', 'bag-info.txt']
+        mock_handle.return_value.url = 'https://coda/testurl'
+        mock_handle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
+        transList = presentation.generateBagFiles(identifier=identifier,
+                                                  proxyRoot='https://example.com/',
+                                                  proxyMode=False)
+        assert transList == ['https://coda/data/file01.txt',
+                             'https://coda/data/file02.txt',
+                             'https://coda/bagit.txt',
+                             'https://coda/bag-info.txt']
+        assert mock_handle.call_count == 2
+        assert mock_file_list.call_count == 1
+
+
+@pytest.mark.django_db
+class TestGetFileHandle:
+    """
+        Tests for coda_mdstore.presentation.getFileHandle.
+    """
+    @mock.patch('urllib.request.urlopen')
+    @mock.patch('urllib.parse.urljoin')
+    def test_getFileHandle(self, mock_url_join, mock_url_open):
+        factories.NodeFactory.create()
+        codaId = 'ark:/67531/coda1s9ns'
+        codaPath = 'manifest.txt'
+        url = 'http://example.com/coda-01/store/pairtree_root/co/' \
+              'da/1s/9n/s/coda1s9ns/manifest-md5.txt'
+        mock_url_join.return_value = url
+        mock_url_open.return_value.url = url
+        fileHandle = presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
+        assert fileHandle.url == url
+        mock_url_open.assert_called_once_with(url)
+        mock_url_join.assert_called_once()
+
+    def test_getFileHandle_no_node(self):
+        codaId = 'ark:/67531/coda1s9ns'
+        codaPath = 'manifest.txt'
+        with pytest.raises(Exception) as exc:
+            presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
+            assert str(exc.value) == 'Unable to get handle for id %s at path %s'\
+                   % (codaId, codaPath)

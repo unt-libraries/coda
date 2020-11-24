@@ -612,100 +612,72 @@ class TestBagURLListView:
     Tests for coda_mdstore.views.bagURLList.
     """
 
-    @pytest.fixture(autouse=True)
-    def setup_fixtures(self, monkeypatch):
-        self.bag = FullBagFactory.create()
-
-        # The mocked value that getFileHandle will return.
-        file_handle = mock.Mock()
-        file_handle.info().get.side_effect = ['text/plain', '255']
-
-        self.getFileHandle = mock.Mock(return_value=file_handle)
-        monkeypatch.setattr(
-            'coda_mdstore.views.getFileHandle', self.getFileHandle)
-
-    @pytest.mark.xfail(reason='The response content does not match other '
-                              'responses.')
     def test_raises_not_found_when_object_not_found(self, rf):
+        identifier = 'ark:/00002/id'
         request = rf.get('/')
-        response = views.bagURLList(request, 'ark:/00002/id')
-
+        response = views.bagURLList(request, identifier)
         assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == "There is no bag with id 'ark:/00002/id'."
+        assert response.content == 'There is no bag with id {0}.' \
+            .format(identifier).encode()
 
-    def test_raises_http404_file_handle_is_falsy(self, rf):
-        self.getFileHandle.return_value = False
+    @mock.patch('coda_mdstore.views.generateBagFiles')
+    def test_raises_http404_file_handle_is_falsy(self, mock_bag_files, rf):
+        mock_bag_files.return_value = 'Http404'
         bag = FullBagFactory.create()
         request = rf.get('/')
-
         with pytest.raises(http.Http404):
             views.bagURLList(request, bag.name)
 
-    def test_response_content(self, rf):
-        """Test the response contains the url and parsed paths from the mocked file handle."""
-        self.getFileHandle.return_value.url = 'https://coda/testurl'
-        # Mock what gets read from the manifest file.
-        self.getFileHandle.return_value.readline.side_effect = [
-            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
-            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
-            b'']
+    @mock.patch('coda_mdstore.views.generateBagFiles')
+    def test_response_content(self, mock_bag_files, rf):
+        mock_bag_files.return_value = [
+            'https://coda/data/file01.txt',
+            'https://coda/data/file02.txt',
+            'https://coda/bagit.txt']
         bag = FullBagFactory.create()
         request = rf.get('/')
         response = views.bagURLList(request, bag.name)
-
-        assert (b'https://coda/data/file02.txt\n'
-                b'https://coda/data/file01.txt') in response.content
         assert response.status_code == 200
-
-    def test_response_content_has_topFiles(self, rf):
-        """Test topFiles are returned in the response."""
-        self.getFileHandle.return_value.url = 'https://coda/testurl'
-        # Mock what gets read from the manifest file.
-        self.getFileHandle.return_value.readline.side_effect = [
-            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
-            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
-            b'']
-        bag = FullBagFactory.create()
-        request = rf.get('/')
-        # Mock file names found at the bag's root level.
-        with mock.patch('coda_mdstore.views.getFileList',
-                        return_value=['bagit.txt', 'bag-info.txt']):
-            response = views.bagURLList(request, bag.name)
-
-        assert (b'https://coda/bag-info.txt\n'
-                b'https://coda/bagit.txt\n'
+        assert (b'https://coda/bagit.txt\n'
                 b'https://coda/data/file02.txt\n'
                 b'https://coda/data/file01.txt') in response.content
-        assert response.status_code == 200
 
-    def test_response_with_links(self, rf):
-        """"Test response content for links with html kwarg."""
-        self.getFileHandle.return_value.url = 'https://coda/testurl'
-        # Mock what gets read from the manifest file.
-        self.getFileHandle.return_value.readline.side_effect = [
-            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
-            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
-            b'']
+
+class TestBagLinks:
+    """
+        Tests for coda_mdstore.views.bagURLLinks.
+    """
+    @mock.patch('coda_mdstore.views.generateBagFiles')
+    def test_response_with_links(self, mock_files, rf):
+        """Test response content for links with html kwarg."""
+        mock_files.return_value = [
+            'https://coda/data/file01.txt',
+            'https://coda/data/file02.txt',
+        ]
         bag = FullBagFactory.create()
         request = rf.get('/')
-        response = views.bagURLList(request, bag.name, html=True)
+        response = views.bagURLLinks(request, bag.name)
         assert (b'<a href="https://coda/data/file02.txt">'
                 b'https://coda/data/file02.txt</a><br>') in response.content
         assert (b'<a href="https://coda/data/file01.txt">'
                 b'https://coda/data/file01.txt</a><br>') in response.content
 
-    def test_response_download_zipped_bag(self, rf):
+
+class TestBagDownload:
+    """
+        Tests for coda_mdstore.views.bagDownload.
+    """
+    @mock.patch('coda_mdstore.views.generateBagFiles')
+    def test_response_download_zipped_bag(self, mock_files, rf):
         """Test response has zipped bag file attached with download kwarg."""
-        self.getFileHandle.return_value.url = 'https://coda/testurl'
-        # Mock what gets read from the manifest file.
-        self.getFileHandle.return_value.readline.side_effect = [
-            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
-            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
-            b'']
+        mock_files.return_value = [
+            'https://coda/data/file01.txt',
+            'https://coda/data/file02.txt',
+        ]
         bag = FullBagFactory.create()
-        request = rf.get('/')
         zip_filename = bag.name.split('/')[-1] + '.zip'
-        response = views.bagURLList(request, bag.name, download=True)
+        request = rf.get('/')
+        response = views.bagDownload(request, bag.name)
         assert response.get('Content-Disposition') == 'attachment; filename=%s' % zip_filename
 
 
