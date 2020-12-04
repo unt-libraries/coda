@@ -6,6 +6,7 @@ from lxml import etree, objectify
 from codalib import bagatom
 from unittest import mock
 import pytest
+from urllib.error import URLError
 
 from coda_mdstore import factories, models, presentation, views, exceptions
 from coda_mdstore.tests import CODA_XML
@@ -663,10 +664,11 @@ class TestGenerateBagFiles:
     def test_file_handle_error(self, mock_handle):
         mock_handle.return_value = None
         identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
-        transList = presentation.generateBagFiles(identifier=identifier,
-                                                  proxyRoot='',
-                                                  proxyMode=True)
-        assert transList == 'Http404'
+        with pytest.raises(Exception) as exc:
+            presentation.generateBagFiles(identifier=identifier,
+                                          proxyRoot='',
+                                          proxyMode=True)
+            assert str(exc.value) == 'Unable to get handle for id %s' % (identifier)
 
     @mock.patch('coda_mdstore.presentation.getFileHandle')
     def test_bag_files_with_proxyroot(self, mock_handle):
@@ -709,19 +711,22 @@ class TestGetFileHandle:
         Tests for coda_mdstore.presentation.getFileHandle.
     """
     @mock.patch('urllib.request.urlopen')
-    @mock.patch('urllib.parse.urljoin')
-    def test_getFileHandle(self, mock_url_join, mock_url_open):
-        factories.NodeFactory.create()
+    def test_getFileHandle(self, mock_urlopen):
+        """Test file handle of first node object with valid node_url is returned."""
+        factories.NodeFactory.create_batch(3)
         codaId = 'ark:/67531/coda1s9ns'
-        codaPath = 'manifest.txt'
-        url = 'http://example.com/coda-01/store/pairtree_root/co/' \
-              'da/1s/9n/s/coda1s9ns/manifest-md5.txt'
-        mock_url_join.return_value = url
-        mock_url_open.return_value.url = url
+        codaPath = 'manifest-md5.txt'
+        url = 'http://example.com/coda-001/store/pairtree_root/co/da/' \
+              '1s/9n/s/coda1s9ns/manifest-md5.txt'
+
+        mock_url_obj = mock.Mock()
+        mock_url_obj.url = url
+        # Raise exception for the first node object url and return mock objects for the rest.
+        mock_urlopen.side_effect = [URLError('Unknown host'), mock_url_obj, mock.Mock()]
+
         fileHandle = presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
         assert fileHandle.url == url
-        mock_url_open.assert_called_once_with(url)
-        mock_url_join.assert_called_once()
+        assert mock_urlopen.call_count == 2
 
     def test_getFileHandle_no_node(self):
         codaId = 'ark:/67531/coda1s9ns'

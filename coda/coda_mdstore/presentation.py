@@ -82,18 +82,23 @@ def getFileHandle(codaId, codaPath):
 
 
 def generateBagFiles(identifier, proxyRoot, proxyMode):
+    """
+    Return list of files in the bag
+    """
     pathList = []
     transList = []
     handle = getFileHandle(identifier, "manifest-md5.txt")
     if not handle:
-        return 'Http404'
+        raise Exception(
+            "Unable to get handle for id %s" % (identifier)
+        )
     bag_root = handle.url.rsplit('/', 1)[0]
     line = handle.readline()
     # iterate over handle and append urls to pathlist
     while line:
         line = line.strip()
         parts = line.split(None, 1)
-        if len(parts) > 1:
+        if len(parts) == 2:
             pathList.append(parts[1])
         line = handle.readline()
     # iterate top files and append to pathlist

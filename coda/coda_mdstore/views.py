@@ -538,16 +538,12 @@ def bagURLList(request, identifier):
     """
 
     # assign the proxy url
-    proxyRoot = "http://%s/" % request.META.get('HTTP_HOST')
+    proxyRoot = request.build_absolute_uri('/')
     # attempt to grab a bag,
+    get_object_or_404(Bag, name__exact=identifier)
     try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id {0}.".format(identifier)
-        )
-    transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    if transList == 'Http404':
+        transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
+    except Exception:
         raise Http404
 
     outputText = "\n".join(reversed(transList))
@@ -561,18 +557,13 @@ def bagURLLinks(request, identifier):
         Return links to URLS in the bag
     """
     # assign the proxy url
-    proxyRoot = "http://%s/" % request.META.get('HTTP_HOST')
+    proxyRoot = request.build_absolute_uri('/')
     # attempt to grab a bag,
+    get_object_or_404(Bag, name__exact=identifier)
     try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id {0}.".format(identifier)
-        )
-    transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    if transList == 'Http404':
+        transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
+    except Exception:
         raise Http404
-
     return render(request, 'mdstore/bag_files_download.html',
                   {'links': sorted(transList)})
 
@@ -582,18 +573,13 @@ def bagDownload(request, identifier):
         Return a downloadable bag zipped file.
     """
     # assign the proxy url
-    proxyRoot = "http://%s/" % request.META.get('HTTP_HOST')
+    proxyRoot = request.build_absolute_uri('/')
     # attempt to grab a bag,
+    get_object_or_404(Bag, name__exact=identifier)
     try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id {0}.".format(identifier)
-        )
-    transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    if transList == 'Http404':
+        transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
+    except Exception:
         raise Http404
-
     meta_id = identifier.split('/')[-1]
     zip_filename = meta_id + '.zip'
     response = StreamingHttpResponse(zip_file_streamer(transList, meta_id),

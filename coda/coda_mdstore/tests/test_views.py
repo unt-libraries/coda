@@ -615,14 +615,12 @@ class TestBagURLListView:
     def test_raises_not_found_when_object_not_found(self, rf):
         identifier = 'ark:/00002/id'
         request = rf.get('/')
-        response = views.bagURLList(request, identifier)
-        assert isinstance(response, http.HttpResponseNotFound)
-        assert response.content == 'There is no bag with id {0}.' \
-            .format(identifier).encode()
+        with pytest.raises(http.Http404):
+            views.bagURLList(request, identifier)
 
     @mock.patch('coda_mdstore.views.generateBagFiles')
     def test_raises_http404_file_handle_is_falsy(self, mock_bag_files, rf):
-        mock_bag_files.return_value = 'Http404'
+        mock_bag_files.side_effect = Exception()
         bag = FullBagFactory.create()
         request = rf.get('/')
         with pytest.raises(http.Http404):
