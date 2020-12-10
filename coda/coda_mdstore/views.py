@@ -593,12 +593,7 @@ def bagProxy(request, identifier, filePath):
     Attempt to proxy a file from within the given bag
     """
 
-    try:
-        Bag.objects.get(name=identifier)
-    except Bag.DoesNotExist:
-        return HttpResponseNotFound(
-            "There is no bag with id '%s'." % identifier
-        )
+    get_object_or_404(Bag, name__exact=identifier)
     handle = getFileHandle(identifier, filePath)
     if handle:
         resp = HttpResponse(
