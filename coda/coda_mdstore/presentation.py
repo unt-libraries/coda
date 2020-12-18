@@ -96,7 +96,7 @@ def zip_file_streamer(urls, meta_id):
     """
     Stream zipped file using zipstream
     """
-    with zipstream.ZipFile(mode='w') as zip_obj:
+    with zipstream.ZipFile(mode='w', allowZip64=True) as zip_obj:
         for url in urls:
             filename = '%s/%s' % (meta_id, url.split(meta_id, 1)[-1])
 
