@@ -367,10 +367,8 @@ class TestBagProxyView:
 
     def test_raises_not_found_when_object_not_found(self, rf):
         request = rf.get('/')
-        response = views.bagProxy(request, 'ark:/00002/id', '/foo/bar')
-
-        assert response.status_code == 404
-        assert response.content == b"There is no bag with id 'ark:/00002/id'."
+        with pytest.raises(http.Http404):
+            views.bagProxy(request, 'ark:/00002/id', '/foo/bar')
 
     def test_raises_http404_when_file_handle_is_false(self, rf):
         self.getFileHandle.return_value = False
