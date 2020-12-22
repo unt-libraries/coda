@@ -22,6 +22,10 @@ XHTML = "{%s}" % XHTML_NAMESPACE
 XHTML_NSMAP = {None: XHTML_NAMESPACE}
 
 
+class FileHandleError(Exception):
+    pass
+
+
 def getFileList(url):
     """
     Use BeautifulSoup to get a List of Files
@@ -76,9 +80,54 @@ def getFileHandle(codaId, codaPath):
         except Exception as e:
             exceptionList.append(str(e))
             pass
-    raise Exception(
+    raise FileHandleError(
         "Unable to get handle for id %s at path %s" % (codaId, codaPath)
     )
+
+
+def generateBagFiles(identifier, proxyRoot, proxyMode):
+    """
+    Return list of files in the bag
+    """
+    pathList = []
+    transList = []
+    handle = getFileHandle(identifier, "manifest-md5.txt")
+    bag_root = handle.url.rsplit('/', 1)[0]
+    line = handle.readline()
+    # iterate over handle and append urls to pathlist
+    while line:
+        line = line.strip()
+        parts = line.split(None, 1)
+        if len(parts) == 2:
+            pathList.append(parts[1])
+        line = handle.readline()
+    # iterate top files and append to pathlist
+    try:
+        topFileHandle = getFileHandle(identifier, "")
+        topFiles = getFileList(topFileHandle.url)
+        for topFile in topFiles:
+            pathList.append(topFile)
+    except FileHandleError:
+        pass
+    # iterate pathlist and resolve a unicode path dependent on proxy mode
+    for path in pathList:
+        if isinstance(path, bytes):
+            try:
+                path = path.decode()
+            except UnicodeDecodeError:
+                path = path.decode('latin-1')
+
+        # CODA_PROXY_MODE is a settings variable
+        if proxyMode:
+            uni = '%sbag/%s/%s' % (
+                proxyRoot, identifier, path
+            )
+        else:
+            uni = bag_root + "/" + path
+        # throw the final path into a list
+        transList.append(uni)
+
+    return transList
 
 
 def file_chunk_generator(url):

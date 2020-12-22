@@ -6,6 +6,7 @@ from lxml import etree, objectify
 from codalib import bagatom
 from unittest import mock
 import pytest
+from urllib.error import URLError
 
 from coda_mdstore import factories, models, presentation, views, exceptions
 from coda_mdstore.tests import CODA_XML
@@ -653,3 +654,88 @@ def test_zip_file_streamer(mock_gen):
         for val in data:
             assert val in chunk
     assert mock_gen.call_count == 3
+
+
+class TestGenerateBagFiles:
+    """
+        Tests for coda_mdstore.presentation.generateBagFiles.
+    """
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_file_handle_error(self, mock_handle):
+        mock_handle.side_effect = presentation.FileHandleError()
+        identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
+        with pytest.raises(presentation.FileHandleError) as exc:
+            presentation.generateBagFiles(identifier=identifier,
+                                          proxyRoot='',
+                                          proxyMode=True)
+            assert str(exc.value) == 'Unable to get handle for id %s' % (identifier)
+
+    @mock.patch('coda_mdstore.presentation.getFileList')
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_bag_files_with_proxyroot(self, mock_handle, mock_file_list):
+        mock_file_list.return_value = ['bagit.txt', 'bag-info.txt']
+        mock_handle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        identifier = 'ark:/%d/coda1' % settings.ARK_NAAN
+        transList = presentation.generateBagFiles(identifier=identifier,
+                                                  proxyRoot='https://example.com/',
+                                                  proxyMode=True)
+        assert transList == ['https://example.com/bag/ark:/67531/coda1/data/file01.txt',
+                             'https://example.com/bag/ark:/67531/coda1/data/file02.txt',
+                             'https://example.com/bag/ark:/67531/coda1/bagit.txt',
+                             'https://example.com/bag/ark:/67531/coda1/bag-info.txt']
+        assert mock_handle.call_count == 2
+
+    @mock.patch('coda_mdstore.presentation.getFileList')
+    @mock.patch('coda_mdstore.presentation.getFileHandle')
+    def test_bag_files_with_topfiles_bagroot(self, mock_handle, mock_file_list):
+        mock_file_list.return_value = ['bagit.txt', 'bag-info.txt']
+        mock_handle.return_value.url = 'https://coda/testurl'
+        mock_handle.return_value.readline.side_effect = [
+            b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
+            b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
+            b'']
+        identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
+        transList = presentation.generateBagFiles(identifier=identifier,
+                                                  proxyRoot='https://example.com/',
+                                                  proxyMode=False)
+        assert transList == ['https://coda/data/file01.txt',
+                             'https://coda/data/file02.txt',
+                             'https://coda/bagit.txt',
+                             'https://coda/bag-info.txt']
+        assert mock_handle.call_count == 2
+        assert mock_file_list.call_count == 1
+
+
+@pytest.mark.django_db
+class TestGetFileHandle:
+    """
+        Tests for coda_mdstore.presentation.getFileHandle.
+    """
+    @mock.patch('urllib.request.urlopen')
+    def test_getFileHandle(self, mock_urlopen):
+        """Test file handle of first node object with valid node_url is returned."""
+        factories.NodeFactory.create_batch(3)
+        codaId = 'ark:/67531/coda1s9ns'
+        codaPath = 'manifest-md5.txt'
+        url = 'http://example.com/coda-001/store/pairtree_root/co/da/' \
+              '1s/9n/s/coda1s9ns/manifest-md5.txt'
+
+        mock_url_obj = mock.Mock()
+        mock_url_obj.url = url
+        # Raise exception for the first node object url and return mock objects for the rest.
+        mock_urlopen.side_effect = [URLError('Unknown host'), mock_url_obj, mock.Mock()]
+
+        fileHandle = presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
+        assert fileHandle.url == url
+        assert mock_urlopen.call_count == 2
+
+    def test_getFileHandle_no_node(self):
+        codaId = 'ark:/67531/coda1s9ns'
+        codaPath = 'manifest.txt'
+        with pytest.raises(presentation.FileHandleError) as exc:
+            presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
+            assert str(exc.value) == 'Unable to get handle for id %s at path %s'\
+                   % (codaId, codaPath)
