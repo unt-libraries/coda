@@ -13,7 +13,7 @@ from django import http
 from coda_mdstore import views, models, exceptions
 from coda_mdstore.factories import FullBagFactory, NodeFactory, ExternalIdentifierFactory
 from coda_mdstore.tests import CODA_XML
-
+from coda_mdstore.presentation import FileHandleError
 
 pytestmark = pytest.mark.django_db()
 
@@ -618,7 +618,7 @@ class TestBagURLListView:
 
     @mock.patch('coda_mdstore.views.generateBagFiles')
     def test_raises_http404_file_handle_is_falsy(self, mock_bag_files, rf):
-        mock_bag_files.side_effect = Exception()
+        mock_bag_files.side_effect = FileHandleError()
         bag = FullBagFactory.create()
         request = rf.get('/')
         with pytest.raises(http.Http404):

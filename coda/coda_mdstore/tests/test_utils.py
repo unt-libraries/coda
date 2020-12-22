@@ -662,9 +662,9 @@ class TestGenerateBagFiles:
     """
     @mock.patch('coda_mdstore.presentation.getFileHandle')
     def test_file_handle_error(self, mock_handle):
-        mock_handle.return_value = None
+        mock_handle.side_effect = presentation.FileHandleError()
         identifier = 'ark:/%d/coda2' % settings.ARK_NAAN
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(presentation.FileHandleError) as exc:
             presentation.generateBagFiles(identifier=identifier,
                                           proxyRoot='',
                                           proxyMode=True)
@@ -731,7 +731,7 @@ class TestGetFileHandle:
     def test_getFileHandle_no_node(self):
         codaId = 'ark:/67531/coda1s9ns'
         codaPath = 'manifest.txt'
-        with pytest.raises(Exception) as exc:
+        with pytest.raises(presentation.FileHandleError) as exc:
             presentation.getFileHandle(codaId=codaId, codaPath=codaPath)
             assert str(exc.value) == 'Unable to get handle for id %s at path %s'\
                    % (codaId, codaPath)

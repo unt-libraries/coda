@@ -22,7 +22,7 @@ from .models import Bag, Bag_Info, Node, External_Identifier
 from codalib import APP_AUTHOR, bagatom
 from .presentation import getFileHandle, bagSearch, \
     makeBagAtomFeed, createBag, updateBag, objectsToXML, updateNode, \
-    nodeEntry, createNode, zip_file_streamer, generateBagFiles
+    nodeEntry, createNode, zip_file_streamer, generateBagFiles, FileHandleError
 from dateutil import rrule
 from datetime import datetime
 # for historical reasons that are not entirely clear, the tests for
@@ -543,7 +543,7 @@ def bagURLList(request, identifier):
     get_object_or_404(Bag, name__exact=identifier)
     try:
         transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    except Exception:
+    except FileHandleError:
         raise Http404
 
     outputText = "\n".join(reversed(transList))
@@ -562,7 +562,7 @@ def bagURLLinks(request, identifier):
     get_object_or_404(Bag, name__exact=identifier)
     try:
         transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    except Exception:
+    except FileHandleError:
         raise Http404
     return render(request, 'mdstore/bag_files_download.html',
                   {'links': sorted(transList)})
@@ -578,7 +578,7 @@ def bagDownload(request, identifier):
     get_object_or_404(Bag, name__exact=identifier)
     try:
         transList = generateBagFiles(identifier, proxyRoot, settings.CODA_PROXY_MODE)
-    except Exception:
+    except FileHandleError:
         raise Http404
     meta_id = identifier.split('/')[-1]
     zip_filename = meta_id + '.zip'

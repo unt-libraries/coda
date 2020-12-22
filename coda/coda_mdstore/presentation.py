@@ -22,6 +22,10 @@ XHTML = "{%s}" % XHTML_NAMESPACE
 XHTML_NSMAP = {None: XHTML_NAMESPACE}
 
 
+class FileHandleError(Exception):
+    pass
+
+
 def getFileList(url):
     """
     Use BeautifulSoup to get a List of Files
@@ -76,7 +80,7 @@ def getFileHandle(codaId, codaPath):
         except Exception as e:
             exceptionList.append(str(e))
             pass
-    raise Exception(
+    raise FileHandleError(
         "Unable to get handle for id %s at path %s" % (codaId, codaPath)
     )
 
@@ -87,11 +91,10 @@ def generateBagFiles(identifier, proxyRoot, proxyMode):
     """
     pathList = []
     transList = []
-    handle = getFileHandle(identifier, "manifest-md5.txt")
-    if not handle:
-        raise Exception(
-            "Unable to get handle for id %s" % (identifier)
-        )
+    try:
+        handle = getFileHandle(identifier, "manifest-md5.txt")
+    except FileHandleError:
+        raise FileHandleError("Unable to get handle for id %s" % (identifier))
     bag_root = handle.url.rsplit('/', 1)[0]
     line = handle.readline()
     # iterate over handle and append urls to pathlist
