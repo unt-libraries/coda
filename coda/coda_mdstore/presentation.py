@@ -91,10 +91,7 @@ def generateBagFiles(identifier, proxyRoot, proxyMode):
     """
     pathList = []
     transList = []
-    try:
-        handle = getFileHandle(identifier, "manifest-md5.txt")
-    except FileHandleError:
-        raise FileHandleError("Unable to get handle for id %s" % (identifier))
+    handle = getFileHandle(identifier, "manifest-md5.txt")
     bag_root = handle.url.rsplit('/', 1)[0]
     line = handle.readline()
     # iterate over handle and append urls to pathlist
@@ -110,7 +107,7 @@ def generateBagFiles(identifier, proxyRoot, proxyMode):
         topFiles = getFileList(topFileHandle.url)
         for topFile in topFiles:
             pathList.append(topFile)
-    except:
+    except FileHandleError:
         pass
     # iterate pathlist and resolve a unicode path dependent on proxy mode
     for path in pathList:

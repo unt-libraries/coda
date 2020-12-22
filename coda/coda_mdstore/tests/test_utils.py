@@ -670,8 +670,10 @@ class TestGenerateBagFiles:
                                           proxyMode=True)
             assert str(exc.value) == 'Unable to get handle for id %s' % (identifier)
 
+    @mock.patch('coda_mdstore.presentation.getFileList')
     @mock.patch('coda_mdstore.presentation.getFileHandle')
-    def test_bag_files_with_proxyroot(self, mock_handle):
+    def test_bag_files_with_proxyroot(self, mock_handle, mock_file_list):
+        mock_file_list.return_value = ['bagit.txt', 'bag-info.txt']
         mock_handle.return_value.readline.side_effect = [
             b'192e635b17a9c2aea6181f0f87cab05d  data/file01.txt',
             b'18b7c500ef8bacf7b2151f83d28e7ca1  data/file02.txt',
@@ -681,7 +683,9 @@ class TestGenerateBagFiles:
                                                   proxyRoot='https://example.com/',
                                                   proxyMode=True)
         assert transList == ['https://example.com/bag/ark:/67531/coda1/data/file01.txt',
-                             'https://example.com/bag/ark:/67531/coda1/data/file02.txt']
+                             'https://example.com/bag/ark:/67531/coda1/data/file02.txt',
+                             'https://example.com/bag/ark:/67531/coda1/bagit.txt',
+                             'https://example.com/bag/ark:/67531/coda1/bag-info.txt']
         assert mock_handle.call_count == 2
 
     @mock.patch('coda_mdstore.presentation.getFileList')
