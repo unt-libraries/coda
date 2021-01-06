@@ -12,7 +12,7 @@ RUN mkdir /app
 WORKDIR /app
 
 RUN apt-get update -qq && \
-    apt-get install -y  mariadb-server mariadb-client libmariadbclient-dev libssl-dev
+    apt-get install -y  mariadb-server mariadb-client libmariadbclient-dev libssl-dev netcat
 
 ADD requirements.txt /app/
 RUN pip install -r requirements.txt
