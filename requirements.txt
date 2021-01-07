@@ -1,7 +1,7 @@
 BeautifulSoup4==4.8.1
 django==2.2.*
 httplib2==0.18.0
-lxml==4.2.6
+lxml==4.6.2
 mysqlclient==1.3.14
 python-dateutil==2.8.0
 requests==2.20.0
