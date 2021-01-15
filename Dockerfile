@@ -11,8 +11,7 @@ ENV PYTHONPATH /app:/app/coda
 RUN mkdir /app
 WORKDIR /app
 
-RUN apt-get update -qq && \
-    apt-get install -y  mariadb-server mariadb-client libmariadbclient-dev libssl-dev netcat
+RUN apt-get update -qq && apt-get install -y mysql-client netcat
 
 ADD requirements.txt /app/
 RUN pip install -r requirements.txt
