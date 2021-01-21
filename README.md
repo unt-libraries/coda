@@ -22,7 +22,7 @@ Create a `secrets.json`.
 $ cp secrets.json.template secrets.json
 ```
 
-Warm up the MySQL database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
+Warm up the MariaDB database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
 ```sh
 $ docker-compose up -d db
 ```
