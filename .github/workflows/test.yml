@@ -3,11 +3,11 @@ name: Test coda
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  # Label of the container job
+  container-job:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        python: [3.6, 3.7, 3.8, 3.9]
+    # Docker Hub image that `container-job` executes in
+    container: python:3.7-stretch
 
     services:
       mariadb:
