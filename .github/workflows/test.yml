@@ -4,27 +4,32 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python: [3.6, 3.7, 3.8, 3.9]
 
-    env:
-      DB_HOST=localhost
-      DB_MYSQL_USER=test
-      DB_PASSWORD=''
-      PYTHONPATH=$PWD/coda
+    services:
+      mariadb:
+        image: mariadb:10.3
+        ports: 
+          - 3306
+        env:
+          MYSQL_USER: root
+          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: coda_local
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Setup MySQL
+      - name: Verify MariaDB connection
+        env:
+          PORT: ${{ job.services.mariadb.ports[3306] }}
         run: |
-          mysql -e 'create database coda_local;'
+          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+            sleep 1
+          done      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
