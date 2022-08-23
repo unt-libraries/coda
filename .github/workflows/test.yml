@@ -10,23 +10,22 @@ jobs:
     container: python:3.7-stretch
 
     services:
-      mariadb:
+      mysql:
         image: mariadb:10.3
         ports: 
           - 3306
         env:
-          MYSQL_USER: root
-          MYSQL_PASSWORD: 'root'
+          MYSQL_USER: coda_user
+          MYSQL_PASSWORD: coda_pass
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: coda_local
-          MYSQL_HOST: localhost
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
 
     steps:
       - uses: actions/checkout@v2
       - name: Verify MariaDB connection
         env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
+          PORT: ${{ job.services.mysql.ports[3306] }}
         run: |
           while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
             sleep 1
