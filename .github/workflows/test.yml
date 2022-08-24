@@ -28,6 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8
           pip install -r requirements.txt
+          mysql -e 'create database coda_local;'
           cp secrets.json.template secrets.json
       - name: Lint with flake8
         run: |
