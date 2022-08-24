@@ -23,8 +23,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Verify coda_local DB exists
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "SHOW DATABASES LIKE 'coda_local'"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
