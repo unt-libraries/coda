@@ -37,7 +37,7 @@ jobs:
           # flake8 coda --count --exit-zero --max-line-length=99 --statistics
       - name: Set pythonpath
         run: |
-          echo "PYTHONPATH=$PWD/coda"
+          echo "::set-env name=PYTHONPATH::$PWD"
       - name: Run the tests
         env:
           DB_CONNECTION: mysql
