@@ -42,6 +42,7 @@ jobs:
           DBPASSWORD: root
           DBHOST: 127.0.0.1
           DBPORT: $
+          PYTHONPATH: $PWD/coda
       - name: Run the tests
         run: |
             py.test
