@@ -15,8 +15,6 @@ jobs:
         ports: 
           - 3306
         env:
-          MYSQL_USER: coda_user
-          MYSQL_PASSWORD: coda_pass
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: coda_local
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
@@ -37,6 +35,20 @@ jobs:
           # flake8 coda --count --exit-zero --max-line-length=99 --statistics
       - name: Run migrations
         run: python manage.py migrate
+        env: 
+          DBENGINE: django.db.backends.mysql
+          DBNAME: coda_local
+          DBUSER: root
+          DBPASSWORD: root
+          DBHOST: 127.0.0.1
+          DBPORT: $
       - name: Run the tests
         run: |
             py.test
+        env: 
+          DBENGINE: django.db.backends.mysql
+          DBNAME: coda_local
+          DBUSER: root
+          DBPASSWORD: root
+          DBHOST: 127.0.0.1
+          DBPORT: $
