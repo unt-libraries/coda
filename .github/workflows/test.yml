@@ -3,40 +3,24 @@ name: Test coda
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  # Label of the container job
+  container-job:
     runs-on: ubuntu-20.04
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        database-name:
-          - coda_local
-        database-password:
-          - root
-        database-user:
-          - root
-        database-host:
-          - 127.0.0.1
-        database-port:
-          - 3306
+    # Docker Hub image that `container-job` executes in
+    container: python:3.7-stretch
+
     services:
       mysql:
         image: mariadb:10.3
         ports: 
           - 3306
         env:
-          MYSQL_DB: ${{ matrix.database-name }}
-          MYSQL_USER: ${{ matrix.database-user }}
-          MYSQL_PASSWORD: ${{ matrix.database-password }}
-
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: coda_local
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -49,35 +33,8 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero will still allow the tests to pass, with these types of errors as warnings.
           # flake8 coda --count --exit-zero --max-line-length=99 --statistics
-      - name: Setup test database
-        env:
-          MYSQL_DB_NAME: ${{ matrix.database-name }}
-          MYSQL_USER: ${{ matrix.database-user }}
-          MYSQL_PASSWORD: ${{ matrix.database-password }}
-          MYSQL_DB_HOST: ${{ matrix.database-host }}
-          MYSQL_DB_PORT: ${{ matrix.database-port }}
-          MYSQL_DB: ${{ matrix.database-name }}
+      - name: Set pythonpath
         run: |
-          export DATABASE_URL=mysql://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-          export SECRET_KEY=test-secret-key
-          export DEBUG=1
-      - name: Run migrations
-        run: |
-          export DATABASE_URL=mysql://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-          export SECRET_KEY=test-secret-key
-          export DEBUG=1
-          export ALLOWED_HOSTS=localhost
-          export GITHUB_WORKFLOW=True
-          export MODE=workflow
-          python manage.py makemigrations
-          python manage.py migrate
+          echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
       - name: Run the tests
-        run: |
-            pytest
-        env: 
-          DATABASE_URL: mysql://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-          SECRET_KEY: test-secret-key
-          DEBUG: 1
-          ALLOWED_HOSTS: localhost
-          GITHUB_WORKFLOW: True
-          MODE: workflow
+        run: pytest
