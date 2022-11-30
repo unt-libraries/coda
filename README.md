@@ -59,6 +59,40 @@ $ docker-compose build
 $ docker-compose up -d app
 ```
 
+#### Developing with Podman and Podman-Compose
+
+[Install or Enable Podman](https://podman.io/getting-started/installation).
+
+[Install Podman Compose](https://github.com/containers/podman-compose).
+```sh
+$ sudo dnf install podman-compose
+```
+
+Clone the repository.
+```sh
+$ git clone https://github.com/unt-libraries/coda.git
+$ cd coda
+```
+
+Warm up the database. 
+```sh
+$ sudo podman-compose up -d db
+```
+
+Start the app and run the migrations.
+```sh
+$ sudo podman-compose up -d
+
+$ sudo podman-compose run --rm web ./manage.py migrate
+
+$ sudo podman-compose run --rm web ./manage.py createsuperuser
+```
+
+To check the app after you have completed the migrations.
+```sh
+$ sudo podman-compose up -d app
+```
+
 ## Running the tests
 
 The db container must already be running, or the tests will probably
@@ -70,4 +104,9 @@ $ docker-compose run --rm test --create-db
 
 # Subsequent runs
 $ docker-compose run --rm test 
+```
+
+For podman
+```sh
+$ sudo podman-compose run --rm test
 ```
