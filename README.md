@@ -61,36 +61,17 @@ $ docker-compose up -d app
 
 #### Developing with Podman and Podman-Compose
 
+Similar to docker and docker-compose, you will need to install, clone the repository and create a `secrets.json`.
+
 [Install or Enable Podman](https://podman.io/getting-started/installation).
 
 [Install Podman Compose](https://github.com/containers/podman-compose).
+
+If you have SELinux, you may need to temporarily add `:Z` to the base volumes in the docker-compose.yml. It will look like `.:/app/:Z`. You may also need to use `sudo` for your podman-compose commands.
+
+The rest of the steps are also similar. You will want to replace the word docker with podman. You will need to add one step before migrating:
 ```sh
-$ sudo dnf install podman-compose
-```
-
-Clone the repository.
-```sh
-$ git clone https://github.com/unt-libraries/coda.git
-$ cd coda
-```
-
-Warm up the database. 
-```sh
-$ sudo podman-compose up -d db
-```
-
-Start the app and run the migrations.
-```sh
-$ sudo podman-compose up -d
-
-$ sudo podman-compose run --rm web ./manage.py migrate
-
-$ sudo podman-compose run --rm web ./manage.py createsuperuser
-```
-
-To check the app after you have completed the migrations.
-```sh
-$ sudo podman-compose up -d app
+$ podman-compose up -d
 ```
 
 ## Running the tests
@@ -108,5 +89,5 @@ $ docker-compose run --rm test
 
 For podman
 ```sh
-$ sudo podman-compose run --rm test
+$ podman-compose run --rm test
 ```
