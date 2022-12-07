@@ -1,0 +1,17 @@
+name: Test coda
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  PROJECT_NAME: coda
+
+jobs:
+  container-job:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Start the app
+        run: docker-compose up -d app
+      - name: Run the tests
+        run: docker-compose run --rm test --create-db

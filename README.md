@@ -1,4 +1,4 @@
-# Coda [![Build Status](https://travis-ci.org/unt-libraries/coda.svg?branch=master)](https://travis-ci.org/unt-libraries/coda)
+# Coda [![Build Status](https://github.com/unt-libraries/coda/actions/workflow/test.yml/badge.svg?branch=master)](https://github.com/unt-libraries/coda/actions)
 
 
 ## Developing
@@ -59,6 +59,21 @@ $ docker-compose build
 $ docker-compose up -d app
 ```
 
+#### Developing with Podman and Podman-Compose
+
+Similar to docker and docker-compose, you will need to install, clone the repository and create a `secrets.json`.
+
+[Install or Enable Podman](https://podman.io/getting-started/installation).
+
+[Install Podman Compose](https://github.com/containers/podman-compose).
+
+If you have SELinux, you may need to temporarily add `:Z` to the base volumes in the docker-compose.yml. It will look like `.:/app/:Z`. You may also need to use `sudo` for your podman-compose commands.
+
+The rest of the steps are also similar. You will want to replace the word `docker` with `podman`. You will need to add one step before migrating:
+```sh
+$ podman-compose up -d
+```
+
 ## Running the tests
 
 The db container must already be running, or the tests will probably
@@ -70,4 +85,9 @@ $ docker-compose run --rm test --create-db
 
 # Subsequent runs
 $ docker-compose run --rm test 
+```
+
+For podman
+```sh
+$ podman-compose run --rm test
 ```
