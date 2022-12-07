@@ -69,7 +69,7 @@ Similar to docker and docker-compose, you will need to install, clone the reposi
 
 If you have SELinux, you may need to temporarily add `:Z` to the base volumes in the docker-compose.yml. It will look like `.:/app/:Z`. You may also need to use `sudo` for your podman-compose commands.
 
-The rest of the steps are also similar. You will want to replace the word docker with podman. You will need to add one step before migrating:
+The rest of the steps are also similar. You will want to replace the word `docker` with `podman`. You will need to add one step before migrating:
 ```sh
 $ podman-compose up -d
 ```
