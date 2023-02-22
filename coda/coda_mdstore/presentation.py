@@ -33,7 +33,7 @@ def getFileList(url):
 
     fileList = []
     handle = urllib.request.urlopen(url)
-    soup = BSoup(handle)
+    soup = BSoup(handle, 'lxml')
     trList = soup.find_all('tr')
     for tr in trList:
         tds = tr.find_all('td')
