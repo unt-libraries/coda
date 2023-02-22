@@ -107,6 +107,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Let the view know if we are in "proxy mode" or not.
 # this uses the coda instance as a reverse proxy for the archival storage nodes
 # setting to false sends requests directly to the archival servers.
