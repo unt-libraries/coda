@@ -101,6 +101,8 @@ def queue_search(request):
         if request.GET['sort'] == 'size':
             sort = request.GET['sort']
             queue = queue.order_by('bytes')
+    else:
+        queue = queue.order_by('ark')
     if request.GET.get('identifier'):
         # filter by identifier, if it doesn't exist, return empty queryset
         identifier = request.GET.get('identifier')
@@ -161,7 +163,7 @@ def queue_search_JSON(request):
         queue = queue.filter(ark=args['identifier'])
     if queue.count() != 0:
         # paginate 20 per page
-        paginated_entries = paginate_entries(request, queue, num_per_page=20)
+        paginated_entries = paginate_entries(request, queue.order_by('ark'), num_per_page=20)
         # prepare a results set and then append each event to it as a dict
         rel_links = []
         entries = []
