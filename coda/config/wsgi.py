@@ -4,7 +4,7 @@ WSGI config for coda project.
 It exposes the WSGI callable as a module-level variable named ``application``.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
+https://docs.djangoproject.com/en/4.1/howto/deployment/wsgi/
 """
 
 import os
@@ -14,7 +14,7 @@ import site
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 ENV = os.path.join(BASE_DIR, 'env')
-SITE_PACKAGES = os.path.join(ENV, '/lib/python3.7/site-packages')
+SITE_PACKAGES = os.path.join(ENV, '/lib64/python3.9/site-packages')
 
 site.addsitedir(SITE_PACKAGES)
 sys.path.append(os.path.join(BASE_DIR, 'coda/'))
