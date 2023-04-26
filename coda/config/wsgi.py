@@ -19,7 +19,7 @@ SITE_PACKAGES = os.path.join(ENV, '/lib64/python3.9/site-packages')
 site.addsitedir(SITE_PACKAGES)
 sys.path.append(os.path.join(BASE_DIR, 'coda/'))
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.test')
 
 activate_env = os.path.join(ENV, 'bin/activate_this.py')
 with open(activate_env) as activate_f:
