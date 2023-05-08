@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Get our secrets from a file outside of version control.
 # This helps to keep the settings files generic.
-with open(os.path.join(PROJECT_ROOT, "secrets.json")) as f:
+with open(os.path.join(PROJECT_ROOT, 'secrets.json')) as f:
     secrets = json.loads(f.read())
 
 
@@ -16,11 +16,11 @@ def get_secret(setting, secrets=secrets):
     try:
         return secrets[setting]
     except KeyError:
-        error_msg = "The {0} setting is not set.".format(setting)
+        error_msg = 'The {0} setting is not set.'.format(setting)
         raise ImproperlyConfigured(error_msg)
 
 
-DEBUG = get_secret('SECRET_KEY')
+DEBUG = get_secret('DEBUG')
 
 TEST_SITE = get_secret('TEST_SITE')
 
@@ -28,7 +28,7 @@ ADMINS = get_secret('ADMINS')
 
 ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
 
-MAINTENANCE_MSG = get_secret("MAINTENANCE_MSG")
+MAINTENANCE_MSG = get_secret('MAINTENANCE_MSG')
 
 TIME_ZONE = 'America/Chicago'
 
@@ -46,7 +46,7 @@ STATICFILES_DIRS = [
 
 SITE_ID = get_secret('SITE_ID')
 
-SECRET_KEY = get_secret("SECRET_KEY")
+SECRET_KEY = get_secret('SECRET_KEY')
 
 TEMPLATES = [
     {
@@ -133,3 +133,10 @@ try:
     REPROXY = get_secret('REPROXY')
 except ImproperlyConfigured:
     REPROXY = False
+
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True
+    }
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
