@@ -3,6 +3,14 @@ import pytest
 from coda_mdstore import factories
 
 
+@pytest.fixture(autouse=True)
+def set_debug_to_false(settings):
+    settings.DEBUG = False
+    settings.DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: False
+    }
+
+
 @pytest.mark.django_db
 class TestAtomSiteNewsFeed:
 
