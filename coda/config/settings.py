@@ -92,7 +92,7 @@ DATABASES = {
         'HOST': get_secret('DB_HOST'),
         'PORT': get_secret('DB_PORT'),
         'OPTIONS': {
-            'init_command': 'SET default_storage_engine=MyISAM; SET sql_mode=STRICT_TRANS_TABLES;'
+            'init_command': 'SET default_storage_engine=MyISAM, sql_mode="STRICT_TRANS_TABLES"'
         }
     }
 }
