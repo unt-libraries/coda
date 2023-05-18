@@ -1,5 +1,5 @@
 # vim: set ft=conf
-FROM python:3.7-stretch
+FROM python:3.9
 
 RUN echo "US/Central" > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
@@ -11,7 +11,7 @@ ENV PYTHONPATH /app:/app/coda
 RUN mkdir /app
 WORKDIR /app
 
-RUN apt-get update -qq && apt-get install -y mysql-client netcat
+RUN apt-get update -qq && apt-get install -y default-mysql-client netcat
 
 ADD requirements.txt /app/
 RUN pip install -r requirements.txt

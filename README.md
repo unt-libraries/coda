@@ -1,4 +1,4 @@
-# Coda [![Build Status](https://github.com/unt-libraries/coda/actions/workflow/test.yml/badge.svg?branch=master)](https://github.com/unt-libraries/coda/actions)
+# Coda [![Build Status](https://github.com/unt-libraries/coda/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/unt-libraries/coda/actions)
 
 
 ## Developing

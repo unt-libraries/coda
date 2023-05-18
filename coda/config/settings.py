@@ -1,41 +1,14 @@
-# Base settings for coda
 import os
 import json
 from datetime import timedelta
 from django.core.exceptions import ImproperlyConfigured
 
-# Absolute path to the settings module
-SETTINGS_ROOT = os.path.dirname(__file__)
 
-# Absolute path to the config app
-CONFIG_ROOT = os.path.dirname(SETTINGS_ROOT)
-
-# Absolute path to the site directory
-SITE_ROOT = os.path.dirname(CONFIG_ROOT)
-
-# Absolute path to the root of the project
-PROJECT_ROOT = os.path.dirname(SITE_ROOT)
-
-
-# Compose a path from the project root
-def _project_path(path):
-    return os.path.join(CONFIG_ROOT, path)
-
-
-project_path = _project_path
-
-
-# Compose path from the site root
-def _site_path(path):
-    return os.path.join(SITE_ROOT, path)
-
-
-site_path = _site_path
-
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Get our secrets from a file outside of version control.
 # This helps to keep the settings files generic.
-with open(os.path.join(PROJECT_ROOT, "secrets.json")) as f:
+with open(os.path.join(PROJECT_ROOT, 'secrets.json')) as f:
     secrets = json.loads(f.read())
 
 
@@ -43,13 +16,19 @@ def get_secret(setting, secrets=secrets):
     try:
         return secrets[setting]
     except KeyError:
-        error_msg = "The {0} setting is not set.".format(setting)
+        error_msg = 'The {0} setting is not set.'.format(setting)
         raise ImproperlyConfigured(error_msg)
 
 
-DEBUG = True
+DEBUG = get_secret('DEBUG')
 
-MAINTENANCE_MSG = get_secret("MAINTENANCE_MSG")
+TEST_SITE = get_secret('TEST_SITE')
+
+ADMINS = get_secret('ADMINS')
+
+ALLOWED_HOSTS = get_secret('ALLOWED_HOSTS')
+
+MAINTENANCE_MSG = get_secret('MAINTENANCE_MSG')
 
 TIME_ZONE = 'America/Chicago'
 
@@ -57,33 +36,23 @@ LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-STATIC_URL = '/static/'
+STATIC_URL = get_secret('STATIC_URL')
+
+STATIC_ROOT = get_secret('STATIC_ROOT')
 
 STATICFILES_DIRS = [
-    os.path.join(SITE_ROOT, 'static')]
+    os.path.join(PROJECT_ROOT, 'coda', 'static')]
 
 
-SECRET_KEY = get_secret("SECRET_KEY")
+SITE_ID = get_secret('SITE_ID')
 
-DATABASES = {
-    'default': {
-        'NAME': get_secret("DB_NAME"),
-        'USER': get_secret("DB_USER"),
-        'ENGINE': 'django.db.backends.mysql',
-        'PASSWORD': get_secret("DB_PASSWORD"),
-        'HOST': get_secret("DB_HOST"),
-        'PORT': get_secret("DB_PORT"),
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=MyISAM; SET sql_mode=STRICT_TRANS_TABLES;'
-        }
-    }
-}
+SECRET_KEY = get_secret('SECRET_KEY')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            site_path('templates'),
+            os.path.join(PROJECT_ROOT, 'coda', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -107,10 +76,26 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Let the view know if we are in "proxy mode" or not.
 # this uses the coda instance as a reverse proxy for the archival storage nodes
 # setting to false sends requests directly to the archival servers.
 CODA_PROXY_MODE = False
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': get_secret('DB_NAME'),
+        'USER': get_secret('DB_USER'),
+        'PASSWORD': get_secret('DB_PASSWORD'),
+        'HOST': get_secret('DB_HOST'),
+        'PORT': get_secret('DB_PORT'),
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=MyISAM, sql_mode="STRICT_TRANS_TABLES"'
+        }
+    }
+}
 
 DJANGO_APPS = [
     'django.contrib.auth',
@@ -148,3 +133,10 @@ try:
     REPROXY = get_secret('REPROXY')
 except ImproperlyConfigured:
     REPROXY = False
+
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True
+    }
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
