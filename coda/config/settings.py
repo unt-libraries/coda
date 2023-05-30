@@ -140,3 +140,5 @@ if DEBUG:
     }
     INSTALLED_APPS += ['debug_toolbar']
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = get_secret('UPLOAD_MAX')
