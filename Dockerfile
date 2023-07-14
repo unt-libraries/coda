@@ -11,7 +11,7 @@ ENV PYTHONPATH /app:/app/coda
 RUN mkdir /app
 WORKDIR /app
 
-RUN apt-get update -qq && apt-get install -y default-mysql-client netcat
+RUN apt-get update -qq && apt-get install -y default-mysql-client netcat-openbsd
 
 ADD requirements.txt /app/
 RUN pip install -r requirements.txt
