@@ -1,5 +1,5 @@
 BeautifulSoup4==4.8.1
-django~=4.1.2
+django~=4.2.0
 httplib2==0.19.0
 lxml==4.9.1
 mysqlclient~=2.0.1
@@ -16,5 +16,5 @@ django-debug-toolbar~=3.8.0
 zipstream>=1.1.4
 
 git+https://github.com/unt-libraries/codalib
-git+https://github.com/unt-libraries/django-premis-event-service.git@master
+git+https://github.com/unt-libraries/django-premis-event-service.git@dependabot/pip/django-4.1.10
 git+https://github.com/unt-libraries/pypairtree
