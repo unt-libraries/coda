@@ -16,5 +16,5 @@ django-debug-toolbar~=3.8.0
 zipstream>=1.1.4
 
 git+https://github.com/unt-libraries/codalib
-git+https://github.com/unt-libraries/django-premis-event-service.git@dependabot/pip/django-4.1.10
+git+https://github.com/unt-libraries/django-premis-event-service.git@master
 git+https://github.com/unt-libraries/pypairtree
