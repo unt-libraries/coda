@@ -1,7 +1,7 @@
 version: '2'
 services:
     db:
-        image: mariadb:10.3
+        image: mariadb:10.4
         command: --sql_mode="only_full_group_by"
         environment:
             - MYSQL_ROOT_PASSWORD=root

@@ -1,5 +1,5 @@
 BeautifulSoup4==4.8.1
-django~=4.1.2
+django~=4.2.0
 httplib2==0.19.0
 lxml==4.9.1
 mysqlclient~=2.0.1
