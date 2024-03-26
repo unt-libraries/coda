@@ -410,16 +410,16 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(validateObject)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % (
-                request.META['HTTP_HOST'], validateObject.identifier
+            id='%s://%s/APP/validate/%s/' % (
+                request.scheme, request.META['HTTP_HOST'], validateObject.identifier
             ),
             title=validateObject.identifier,
         )
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
         resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 201
-        resp['Location'] = 'http://%s/APP/validate/%s/' % \
-            (request.META['HTTP_HOST'], validateObject.identifier)
+        resp['Location'] = '%s://%s/APP/validate/%s/' % \
+            (request.scheme, request.META['HTTP_HOST'], validateObject.identifier)
     elif request.method == 'HEAD':
         resp = HttpResponse(content_type="application/atom+xml")
         resp.status_code = 200
@@ -432,7 +432,7 @@ def app_validate(request, identifier=None):
             paginator=Paginator(validates, 20),
             objectToXMLFunction=validateToXML,
             feedId=request.path[1:],
-            webRoot='http://%s' % request.META.get('HTTP_HOST'),
+            webRoot='%s://%s' % (request.scheme, request.META.get('HTTP_HOST')),
             title="validate Entry Feed",
             idAttr="identifier",
             nameAttr="identifier",
@@ -453,8 +453,8 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(returnValidate)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % (
-                request.META['HTTP_HOST'], identifier
+            id='%s://%s/APP/validate/%s/' % (
+                request.scheme, request.META['HTTP_HOST'], identifier
             ),
             title=identifier,
         )
@@ -473,8 +473,8 @@ def app_validate(request, identifier=None):
         validateObjectXML = validateToXML(returnValidate)
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % (
-                request.META['HTTP_HOST'], identifier
+            id='%s://%s/APP/validate/%s/' % (
+                request.scheme, request.META['HTTP_HOST'], identifier
             ),
             title=identifier,
             author=APP_AUTHOR.get('name', None),
@@ -496,8 +496,8 @@ def app_validate(request, identifier=None):
         validate_object.delete()
         atomXML = wrapAtom(
             xml=validateObjectXML,
-            id='http://%s/APP/validate/%s/' % (
-                request.META['HTTP_HOST'], identifier
+            id='%s://%s/APP/validate/%s/' % (
+                request.scheme, request.META['HTTP_HOST'], identifier
             ),
             title=identifier,
         )

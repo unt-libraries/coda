@@ -19,7 +19,7 @@
                 {% if k == 'Contact-Email' %}
                     <i class="icon-envelope"></i> <a href="mailto:{{ v }}">{{ v }}</a>
                 {% elif k == 'External-Identifier' %}
-                    <i class="icon-globe"></i> <a href="http://texashistory.unt.edu/{{ v }}">{{ v }}</a>
+                    <i class="icon-globe"></i> <a href="https://texashistory.unt.edu/{{ v }}">{{ v }}</a>
                 {% elif k == 'Payload-Oxum' %}
                     <i class="icon-hdd"></i> {{ payload_oxum_size }} bytes, <i class="icon-file-alt"></i> {{ payload_oxum_file_count }} files
                 {% elif k == 'Bagging-Date' %}
@@ -48,7 +48,7 @@
 <!-- EVENTS HEADER -->
 {% if linked_events|length > 0 %}
 
-<h3><i class="icon-link icon-large"></i>There are <a href="http://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ total_events }} premis events</a> associated with {{ bag }}:</h3>
+<h3><i class="icon-link icon-large"></i>There are <a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/search/?linked_object_id={{ bag }}">{{ total_events }} premis events</a> associated with {{ bag }}:</h3>
 
 
 <table class="table table-striped">
@@ -67,18 +67,18 @@
 
     <tr>
 
-        <td><i class="icon-tag"></i><a href="http://{{ request.META.HTTP_HOST }}/event/{{ event.identifier }}"> {{ event.identifier }}</a></td>
+        <td><i class="icon-tag"></i><a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/{{ event.identifier }}"> {{ event.identifier }}</a></td>
 
 
         <td>{{ event.date }}</td>
 
 
-        <td>{% if event.outcome|slice:"53:" == 'success' %} <a href="http://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-success">Success</span></a>{% else %} <a href="http://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-important">Failure</span></a>{% endif %}
+	<td>{% if event.outcome|slice:"53:" == 'success' %} <a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-success">Success</span></a>{% else %} <a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/search/?outcome={{ event.outcome|urlencode }}"><span class="label label-important">Failure</span></a>{% endif %}
         </td>
 
         <td><i class="icon-link"></i> {{ event.linked_objects }}</td>
 
-        <td><i class="icon-asterisk"></i> <a href="http://{{ request.META.HTTP_HOST }}/event/search/?type={{ event.event_type|urlencode }}"> {{ event.event_type }}</a></td>
+	<td><i class="icon-asterisk"></i> <a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/search/?type={{ event.event_type|urlencode }}"> {{ event.event_type }}</a></td>
 
     </tr>
 

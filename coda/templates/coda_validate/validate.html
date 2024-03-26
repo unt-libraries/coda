@@ -67,7 +67,7 @@ $(document).ready(function() {
 </div>
 <div class="row">
     <div class="span6">
-        <a class="btn btn-success btn-large" href="http://{{ request.META.HTTP_HOST }}/APP/validate/{{ validate.identifier }}/">
+        <a class="btn btn-success btn-large" href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/{{ validate.identifier }}/">
             ATOMPUB <i class="icon-rss"></i>
         </a>
     </div>

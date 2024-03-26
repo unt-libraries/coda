@@ -3,8 +3,8 @@
     <rs:md capability="changelist" modified="{{ MOST_RECENT_BAGGING_DATE }}"/>
 {% for url in urlset %}
 <url>
-	<loc>http://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}</loc>
+	<loc>{{ request.scheme }}://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}</loc>
 	<rs:md hash="oxum: {{ url.size }}.{{ url.files }}"/>
-	<rs:ln href="http://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}.urls" rel="alternate" type="text/x-checkm"/>
+	<rs:ln href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/bag/{{ url.name }}.urls" rel="alternate" type="text/x-checkm"/>
 </url>{% endfor %}
 </sitemapindex>

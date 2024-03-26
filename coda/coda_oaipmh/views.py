@@ -19,7 +19,7 @@ def index(request):
     siteBaseURL = baseURL
     if baseURL[-1] != '/':
         baseURL = baseURL + '/'
-    identifyDict['baseURL'] = "http://" + baseURL + "oai/"
+    identifyDict['baseURL'] = request.scheme + "://" + baseURL + "oai/"
     serverBase = mdstore_oai.OAIInterface(
         identifyDict=identifyDict,
         domain=siteBaseURL

@@ -15,7 +15,7 @@
     <!--BEGIN CODE MARKUP-->
     <div id="highlight-python"><pre>
     # to get only the events which have failed, use the 'outcome' url argument
-    $ curl "{{ request.META.HTTP_HOST }}/event/search.json?event_outcome=http://purl.org/net/untl/vocabularies/eventOutcomes/%23failure"
+    $ curl "{{ request.scheme }}://{{ request.META.HTTP_HOST }}/event/search.json?event_outcome=http://purl.org/net/untl/vocabularies/eventOutcomes/%23failure"
     [
         {
             "date": "2013-05-13 14:27:29",
@@ -102,19 +102,19 @@
     <!--BEGIN CODE MARKUP-->
     <div id="highlight-python"><pre>
 # To submit a new bag via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/bag/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/bag/
 
 # To get the bag records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/bag/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/bag/
 
 # To get the data of a particular bag
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
 
 # To update the contents of a bag
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+$ curl -s -X PUT --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
 
 # To delete a particular bag
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/bag/ark:/67531/metapth123/
 
 # here's a simple example of what a bag xml looks like
 &lt;?xml version="1.0"?&gt;
@@ -195,19 +195,19 @@ An event is an action to a bag.
 <!--BEGIN CODE MARKUP-->
 <div id="highlight-python"><pre>
 # To update the contents of an event
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+$ curl -s -X PUT --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
 
 # To get the data of a particular event
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
 
 # To submit a new event via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/event/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/event/
 
 # To get the event records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/event/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/event/
 
 # To delete a particular event
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4dfc888522036bbc4490/
 
 # here's a simple example of what an event xml looks like
 &lt;?xml version="1.0"?&gt;
@@ -242,25 +242,25 @@ $ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/event/9ee2cbd3cc3b4d
     <!--BEGIN CODE MARKUP-->
     <div id="highlight-python"><pre>
 # To update the contents of a queue entry
-$ curl -s -X PUT --data-binary @queue.xml http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+$ curl -s -X PUT --data-binary @queue.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
 
 # To get the data of a particular queue entry
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
 
 # To submit a new queue entry via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/queue/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/
 
 # To get the queue collection
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/queue/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/
 
 # To delete a particular queue entry
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/ark:/67531/coda8xbb/
 
 # here's a simple example of what an queue xml looks like
 &lt;?xml version="1.0"?&gt;
 &lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
   &lt;title&gt;ark:/67531/coda4fnk&lt;/title&gt;
-  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/ark:/67531/coda4fnk/&lt;/id&gt;
+  &lt;id&gt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}/ark:/67531/coda4fnk/&lt;/id&gt;
   &lt;updated&gt;2013-06-17T17:11:29Z&lt;/updated&gt;
   &lt;content type="application/xml"&gt;
     &lt;queueEntry xmlns="http://digital2.library.unt.edu/coda/queuexml/"&gt;
@@ -280,19 +280,19 @@ An agent creates events.
 <!--BEGIN CODE MARKUP-->
 <div id="highlight-python"><pre>
 # To get the data of a particular agent
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
 
 # To get the agent records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/agent/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/agent/
 
 # To update the contents of a agent
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+$ curl -s -X PUT --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
 
 # To submit a new agent via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/agent/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/agent/
 
 # To delete a particular agent
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/agent/codaMigration/
 
 # Here's what an agent xml looks like
 &lt;?xml version="1.0"?&gt;
@@ -310,25 +310,25 @@ A node is a physical storage location.
 <!--BEGIN CODE MARKUP-->
 <div id="highlight-python"><pre>
 # To submit a new node via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/node/
 
 # To update the contents of a node
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+$ curl -s -X PUT --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
 
 # To delete a particular node
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/node/ark:/67531/coda-001/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/node/ark:/67531/coda-001/
 
 # To get the node records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/node/
 
 # To get the data of a particular node
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/node/coda-001/
 
 # here's a simple example of what an node xml looks like
 &lt;?xml version="1.0"?&gt;
 &lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
   &lt;title&gt;coda-001&lt;/title&gt;
-  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/coda-001/&lt;/id&gt;
+  &lt;id&gt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}/coda-001/&lt;/id&gt;
   &lt;updated&gt;2013-06-13T19:06:49Z&lt;/updated&gt;
   &lt;content type="application/xml"&gt;
     &lt;node&gt;
@@ -349,14 +349,14 @@ The 'next' validation is represented as an XML feed of 1 entry.
 Accessing the 'next' validation looks something like this:
 <div id="highlight-python"><pre>
 # ask for the next item to be validated
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/validate/next/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/validate/next/
 
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us"&gt;
   &lt;title&gt;UNT Coda Validate App&lt;/title&gt;
-  &lt;link href="http://{{ request.META.HTTP_HOST }}/validate/next/" rel="alternate"&gt;&lt;/link&gt;
-  &lt;link href="http://{{ request.META.HTTP_HOST }}/validate/next/" rel="self"&gt;&lt;/link&gt;
-  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/validate/next/&lt;/id&gt;
+  &lt;link href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/validate/next/" rel="alternate"&gt;&lt;/link&gt;
+  &lt;link href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/validate/next/" rel="self"&gt;&lt;/link&gt;
+  &lt;id&gt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}/validate/next/&lt;/id&gt;
   &lt;updated&gt;2014-08-08T14:48:25Z&lt;/updated&gt;
   &lt;author&gt;
     &lt;name&gt;UNT Coda System&lt;/name&gt;
@@ -364,8 +364,8 @@ $ curl -s -X GET http://{{ request.META.HTTP_HOST }}/validate/next/
   &lt;subtitle&gt;The highest priority validation item&lt;/subtitle&gt;
   &lt;entry&gt;
     &lt;title&gt;ark:/67531/coda4pon&lt;/title&gt;
-    &lt;link href="http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/" rel="alternate"&gt;&lt;/link&gt;
-    &lt;id&gt;http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/&lt;/id&gt;
+    &lt;link href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/" rel="alternate"&gt;&lt;/link&gt;
+    &lt;id&gt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/&lt;/id&gt;
     &lt;summary type="html"&gt;Item was randomly selected and within the past year because there is no prioritized record.&lt;/summary&gt;
   &lt;/entry&gt;
 &lt;/feed&gt;
@@ -381,32 +381,32 @@ As you might guess, this implies that there is a set of rules which govern the v
 note: these rules can be filtered further by a specific server. To do so, ask for the next feed with a url structure like this:
 <div id="highlight-python"><pre>
 # filtering validation next feed
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/validate/next/&lt;server&gt;/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/validate/next/&lt;server&gt;/
 </pre></div>
 <h3>Validation Interface</h3>
 Retrieving the next item is all well and good, but it doesn't answer the question of how we will update the record on it's pass/fail result after the actual validation occurs.
 We of course extend the REST API /APP/ interface to allow updating records.
 <div id="highlight-python"><pre>
 # To submit a new validate via xml file
-$ curl -s -X POST --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/validate/
+$ curl -s -X POST --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/
 
 # The daemon will issue a PUT to update the status of the validation
-$ curl -s -X PUT --data-binary @entry.xml http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+$ curl -s -X PUT --data-binary @entry.xml {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
 
 # To delete a particular validate (we probably wont ever want to do this)
-$ curl -s -X DELETE http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+$ curl -s -X DELETE {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
 
 # To get all the validate records
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/validate/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/
 
 # To get the data of a particular validtation
-$ curl -s -X GET http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
+$ curl -s -X GET {{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda4pon/
 
 # here's a simple example of what a validation xml might look like
 &lt;?xml version="1.0"?&gt;
 &lt;entry xmlns="http://www.w3.org/2005/Atom"&gt;
   &lt;title&gt;ark:/67531/coda99wt&lt;/title&gt;
-  &lt;id&gt;http://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda99wt/&lt;/id&gt;
+  &lt;id&gt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/validate/ark:/67531/coda99wt/&lt;/id&gt;
   &lt;updated&gt;2014-08-08T20:18:08Z&lt;/updated&gt;
   &lt;content type="application/xml"&gt;
     &lt;validate xmlns:validate="http://digital2.library.unt.edu/coda/validatexml/"&gt;

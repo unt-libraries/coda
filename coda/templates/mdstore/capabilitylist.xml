@@ -4,11 +4,11 @@
   <rs:md capability="capabilitylist"
          modified="{{ MOST_RECENT_BAGGING_DATE }}"/>
   <url>
-      <loc>http://{{ request.META.HTTP_HOST }}/resourceindex.xml</loc>
+      <loc>{{ request.scheme }}://{{ request.META.HTTP_HOST }}/resourceindex.xml</loc>
       <rs:md capability="resourcelist"/>
   </url>
   <url>
-      <loc>http://{{ request.META.HTTP_HOST }}/changelist.xml</loc>
+      <loc>{{ request.scheme }}://{{ request.META.HTTP_HOST }}/changelist.xml</loc>
       <rs:md capability="changelist"/>
   </url>
 </urlset>

@@ -168,9 +168,6 @@ def makeDataRecord(
     bagInfoDict = {}
     for bagInfoObject in bagInfoObjectList:
         bagInfoDict[bagInfoObject.field_name] = bagInfoObject.field_body
-    stripdomain = domain
-    if stripdomain.startswith("http://"):
-        stripdomain = stripdomain[len("http://"):]
     dcDict = {}
     identifiers = [bagObject.name]
     if "External-Identifier" in bagInfoDict:

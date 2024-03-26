@@ -33,7 +33,7 @@
         <td><i class="icon-list-ol"></i> {{ record.queue_position }}</td>
     </tr>
 </table>
-<a class="btn btn-success btn-large" href="http://{{ request.META.HTTP_HOST }}/APP/queue/{{ record.ark }}/">
+<a class="btn btn-success btn-large" href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/APP/queue/{{ record.ark }}/">
     ATOMPUB <i class="icon-rss"></i>
 </a>
 {% endblock %}
