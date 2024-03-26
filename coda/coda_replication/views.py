@@ -179,21 +179,24 @@ def queue_search_JSON(request):
             [
                 {
                     'rel': 'self',
-                    'href': "http://%s%s?%s" % (
+                    'href': "%s://%s%s?%s" % (
+                        request.scheme,
                         request.META.get('HTTP_HOST'),
                         request.path, urllib.parse.urlencode(current_page_args)
                     )
                 },
                 {
                     'rel': 'first',
-                    'href': "http://%s%s?%s" % (
+                    'href': "%s://%s%s?%s" % (
+                        request.scheme,
                         request.META.get('HTTP_HOST'),
                         request.path, urllib.parse.urlencode(first_page_args)
                     )
                 },
                 {
                     'rel': 'last',
-                    'href': "http://%s%s?%s" % (
+                    'href': "%s://%s%s?%s" % (
+                        request.scheme,
                         request.META.get('HTTP_HOST'),
                         request.path, urllib.parse.urlencode(last_page_args)
                     )
@@ -206,7 +209,8 @@ def queue_search_JSON(request):
             rel_links.append(
                 {
                     'rel': 'previous',
-                    'href': "http://%s%s?%s" % (
+                    'href': "%s://%s%s?%s" % (
+                        request.scheme,
                         request.META.get('HTTP_HOST'),
                         request.path, urllib.parse.urlencode(args)
                     )
@@ -218,7 +222,8 @@ def queue_search_JSON(request):
             rel_links.append(
                 {
                     'rel': 'next',
-                    'href': "http://%s%s?%s" % (
+                    'href': "%s://%s%s?%s" % (
+                        request.scheme,
                         request.META.get('HTTP_HOST'),
                         request.path, urllib.parse.urlencode(args)
                     )
@@ -323,7 +328,7 @@ def queue(request, identifier=None):
             )
         identifier = queueObject.ark
         queueObjectXML = queueEntryToXML(queueObject)
-        loc = 'http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark)
+        loc = '%s://%s/%s/' % (request.scheme, request.META['HTTP_HOST'], queueObject.ark)
         atomXML = wrapAtom(
             xml=queueObjectXML,
             id=loc,
@@ -351,7 +356,7 @@ def queue(request, identifier=None):
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,
-            id='http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark),
+            id='%s://%s/%s/' % (request.scheme, request.META['HTTP_HOST'], queueObject.ark),
             title=queueObject.ark,
         )
         atomText = b'<?xml version="1.0"?>\n%b' % etree.tostring(
@@ -371,7 +376,7 @@ def queue(request, identifier=None):
         queueObjectXML = queueEntryToXML(queueObject)
         atomXML = wrapAtom(
             xml=queueObjectXML,
-            id='http://%s/%s/' % (request.META['HTTP_HOST'], queueObject.ark),
+            id='%s://%s/%s/' % (request.scheme, request.META['HTTP_HOST'], queueObject.ark),
             title=queueObject.ark,
             author=APP_AUTHOR.get('name', None),
             author_uri=APP_AUTHOR.get('uri', None)
@@ -415,7 +420,7 @@ def queue_list(request):
             objectToXMLFunction=queueEntryToXML,
             feedId=request.path[1:],
             title='Queue Entry Feed',
-            webRoot='http://{0}'.format(request.META['HTTP_HOST']),
+            webRoot='{0}://{1}'.format(request.scheme, request.META['HTTP_HOST']),
             idAttr='ark',
             nameAttr='ark',
             request=request,

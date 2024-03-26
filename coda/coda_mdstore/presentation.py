@@ -65,7 +65,7 @@ def getFileHandle(codaId, codaPath):
     for node in nodeList:
         url_parts = urllib.parse.urlparse(node.node_url)
         url = urllib.parse.urljoin(
-            "http://%s" % url_parts.hostname,
+            "%s://%s" % (url_parts.scheme, url_parts.hostname),
             os.path.join(
                 url_parts.path,
                 "store/pairtree_root",
@@ -386,7 +386,7 @@ def nodeEntry(node, webRoot=None):
     node_status.text = node.get_status_display()
     atomXML = wrapAtom(
         xml=nodeXML,
-        id='http://%s/node/%s/' % (webRoot, node.node_name),
+        id='%s/node/%s/' % (webRoot, node.node_name),
         title=node.node_name,
         author=APP_AUTHOR['name'],
         author_uri=APP_AUTHOR['uri'],

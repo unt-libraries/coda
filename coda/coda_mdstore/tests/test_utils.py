@@ -177,7 +177,7 @@ class TestNodeEntry:
 
     def test_xml_id(self):
         node = factories.NodeFactory.build()
-        web_root = 'example.com'
+        web_root = 'http://example.com'
 
         tree = presentation.nodeEntry(node, web_root)
         xml_obj = convert_etree(tree)
