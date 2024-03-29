@@ -16,6 +16,5 @@ django-debug-toolbar~=3.8.0
 zipstream>=1.1.4
 
 git+https://github.com/unt-libraries/codalib
-#TODO: Revert branch
-git+https://github.com/unt-libraries/django-premis-event-service.git@https-compatible
+git+https://github.com/unt-libraries/django-premis-event-service.git@master
 git+https://github.com/unt-libraries/pypairtree
