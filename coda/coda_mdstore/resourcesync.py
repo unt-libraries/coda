@@ -156,7 +156,6 @@ setattr(Sitemap, 'limit', 5000)
 
 class BaseSitemap(Sitemap):
     lastmod = None
-    protocol = 'http'
 
     def items(self):
         # return the list of all the bags sorted by bagging_date

@@ -487,7 +487,8 @@ def bagHTML(request, identifier):
     total_events = None
     try:
         filters = {'linked_object_id': bag}
-        event_json_url = 'http://%s/event/search.json?%s' % (
+        event_json_url = '%s://%s/event/search.json?%s' % (
+            request.scheme,
             # TODO: Maybe this should be configurable?
             request.META.get('HTTP_HOST'),
             urlencode(filters)
@@ -821,7 +822,7 @@ def app_bag(request, identifier=None):
                 objectToXMLFunction=objectsToXML,
                 feedId=request.path[1:],
                 title="Bag Feed",
-                webRoot='http://%s' % request.META['HTTP_HOST'],
+                webRoot='%s://%s' % (request.scheme, request.META['HTTP_HOST']),
                 idAttr="name",
                 request=request,
                 page=page,
@@ -840,8 +841,8 @@ def app_bag(request, identifier=None):
         # attempt to parse POST'd XML
         xml = request.body
         bagObject, bagInfos = createBag(xml)
-        loc = 'http://%s/APP/bag/%s/' % (
-            request.META['HTTP_HOST'], bagObject.name
+        loc = '%s://%s/APP/bag/%s/' % (
+            request.scheme, request.META['HTTP_HOST'], bagObject.name
         )
         returnXML = objectsToXML(bagObject)
         returnEntry = bagatom.wrapAtom(
@@ -924,7 +925,7 @@ def app_node(request, identifier=None):
             return HttpResponseNotFound(
                 "There is no node with name '%s'." % identifier
             )
-        atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
+        atomXML = nodeEntry(node, webRoot=request.scheme + '://' + request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
         resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200
@@ -943,7 +944,7 @@ def app_node(request, identifier=None):
                 objectToXMLFunction=bagatom.nodeToXML,
                 feedId=request.path[1:],
                 title="Node Feed",
-                webRoot='http://%s' % request.META['HTTP_HOST'],
+                webRoot='%s://%s' % (request.scheme, request.META['HTTP_HOST']),
                 idAttr="node_name",
                 nameAttr="node_name",
                 request=request,
@@ -975,10 +976,10 @@ def app_node(request, identifier=None):
                 "Conflict with already-existing resource.\n",
                 status=409, content_type="text/plain"
             )
-        loc = 'http://%s/APP/node/%s/' % (
-            request.META['HTTP_HOST'], node.node_name
+        loc = '%s://%s/APP/node/%s/' % (
+            request.scheme, request.META['HTTP_HOST'], node.node_name
         )
-        atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
+        atomXML = nodeEntry(node, webRoot=request.scheme + '://' + request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
         resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 201
@@ -994,7 +995,7 @@ def app_node(request, identifier=None):
             return HttpResponseBadRequest(str(e))
 
         node.save()
-        atomXML = nodeEntry(node, webRoot=request.META['HTTP_HOST'])
+        atomXML = nodeEntry(node, webRoot=request.scheme + '://' + request.META['HTTP_HOST'])
         atomText = XML_HEADER % etree.tostring(atomXML, pretty_print=True)
         resp = HttpResponse(atomText, content_type="application/atom+xml")
         resp.status_code = 200

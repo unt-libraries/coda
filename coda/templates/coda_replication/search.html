@@ -53,7 +53,7 @@
         {% for entry in entries.object_list %}
             <tr>
                 <td class="data" style="vertical-align:middle">
-                    <i class="icon-tag"></i> <a href='http://{{ request.META.HTTP_HOST }}/queue/{{ entry.ark }}'>{{ entry.ark }}</a>
+                    <i class="icon-tag"></i> <a href='{{ request.scheme }}://{{ request.META.HTTP_HOST }}/queue/{{ entry.ark }}'>{{ entry.ark }}</a>
                 </td>
                 <td class="data" style="vertical-align:middle">
                     <i class="icon-asterisk"></i>

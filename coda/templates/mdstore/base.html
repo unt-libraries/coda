@@ -33,7 +33,7 @@
         <div class="navbar navbar-inverse navbar-fixed navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container-fluid" style="padding-left: 40px;">
-                    <a class="brand" href="http://{{ request.META.HTTP_HOST }}"><img src="{% static 'css/coda-green.png' %}" width="18" height="18" alt="CODA" /> {{ site_title }}</a>
+                    <a class="brand" href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}"><img src="{% static 'css/coda-green.png' %}" width="18" height="18" alt="CODA" /> {{ site_title }}</a>
                     <ul class="nav pull-right">
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
