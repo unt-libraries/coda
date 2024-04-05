@@ -142,3 +142,4 @@ if DEBUG:
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = get_secret('UPLOAD_MAX')
+SECURE_PROXY_SSL_HEADER = get_secret('SECURE_PROXY_SSL_HEADER')
