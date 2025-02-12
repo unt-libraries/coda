@@ -56,6 +56,7 @@ class FakeSitemap(Sitemap):
         return "/bag/%s" % obj.name
 
 
+@pytest.mark.xfail(reason='Test relies on remote resources that have been changed.')
 def test_index_context(rf, siteindex_schema):
     """Test the context data in the response returned from `index`.
 
