@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Start the app
-        run: docker compose up -d app
+        run: docker compose up -d --wait --wait-timeout 30 app
+      - name: Wait for app to warm up
+        run: sleep 25
       - name: Run the tests
         run: docker compose run --rm test --create-db
