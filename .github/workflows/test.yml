@@ -7,11 +7,12 @@ env:
 
 jobs:
   container-job:
-    runs-on: ubuntu-20.04
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Start the app
-        run: docker-compose up -d app
+        run: docker compose up -d --wait --wait-timeout 30 app
+      - name: Wait for app to warm up
+        run: sleep 25
       - name: Run the tests
-        run: docker-compose run --rm test --create-db
+        run: docker compose run --rm test --create-db
