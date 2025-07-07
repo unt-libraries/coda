@@ -40,11 +40,20 @@ class TestAtomNextNewsFeed:
         feed.items('')
         assert 'Item was chosen because it is the oldest' in feed.reason
 
+    def test_items_chooses_unverified_validate(self):
+        factories.ValidateFactory.create_batch(1, last_verified_status='Unverified', priority=0)
+        factories.ValidateFactory.create_batch(19, last_verified_status='Passed', priority=0)
+
+        feed = views.AtomNextNewsFeed()
+        feed.items('')
+        assert 'Item was chosen because it is Unverified' in feed.reason
+
     def test_items_chooses_a_random_validate(self):
         # Make the last_verified time twice less than the validation period time
         # to ensure that we always randomly select a Validate object.
         last_verified = datetime.now() - (settings.VALIDATION_PERIOD * 2)
-        factories.ValidateFactory.create_batch(30, priority=0, last_verified=last_verified)
+        factories.ValidateFactory.create_batch(30, priority=0, last_verified=last_verified,
+                                               last_verified_status='Passed')
 
         feed = views.AtomNextNewsFeed()
         feed.items('')
@@ -52,7 +61,8 @@ class TestAtomNextNewsFeed:
 
     def test_items_chooses_unprioritized_validate(self):
         last_verified = datetime.now() + settings.VALIDATION_PERIOD
-        factories.ValidateFactory.create_batch(30, priority=0, last_verified=last_verified)
+        factories.ValidateFactory.create_batch(30, priority=0, last_verified=last_verified,
+                                               last_verified_status='Passed')
 
         feed = views.AtomNextNewsFeed()
         feed.items('')

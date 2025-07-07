@@ -63,31 +63,37 @@ class AtomNextNewsFeed(Feed):
         if v.exists():
             reason += 'Item was chosen because it is the \
 oldest prioritized.'
-        # if set is empty, go with any priority with last_verified older than
-        # settings.VALIDATION_PERIOD
         else:
-            # It might seem natural to use django's built-in random ordering,
-            # but that technique becomes slow when using large sets
-            # because 'order by ?' is very expensive against MySQL dbs.
-            # v = Validate.objects.all().filter(
-            #     last_verified__gte=datetime.datetime.now() -
-            #         settings.VALIDATION_PERIOD
-            # ).order_by('?')
-            # instead, let's do this:
-            # http://elpenia.wordpress.com/2010/05/11/getting-random-objects-from-a-queryset-in-django/
-            now = datetime.datetime.now()
+            # if nothing is prioritized, check for unverified status
             v = validations.filter(
-                last_verified__lte=now - settings.VALIDATION_PERIOD
-            )
+                last_verified_status='Unverified').order_by('last_verified')
             if v.exists():
-                random_slice = int(random.random() * v.count())
-                v = v[random_slice:]
-                reason += 'Item was randomly selected and within the \
-past year because there is no prioritized record.'
-            # if that set has no objects, pick the oldest verified item.
+                reason += 'Item was chosen because it is Unverified.'
             else:
-                v = validations.order_by('last_verified')
-                reason += 'Item was chosen because there \
+                # if set is empty, go with any priority with last_verified older than
+                # settings.VALIDATION_PERIOD
+                # It might seem natural to use django's built-in random ordering,
+                # but that technique becomes slow when using large sets
+                # because 'order by ?' is very expensive against MySQL dbs.
+                # v = Validate.objects.all().filter(
+                #     last_verified__gte=datetime.datetime.now() -
+                #         settings.VALIDATION_PERIOD
+                # ).order_by('?')
+                # instead, let's do this:
+                # http://elpenia.wordpress.com/2010/05/11/getting-random-objects-from-a-queryset-in-django/
+                now = datetime.datetime.now()
+                v = validations.filter(
+                    last_verified__lte=now - settings.VALIDATION_PERIOD
+                )
+                if v.exists():
+                    random_slice = int(random.random() * v.count())
+                    v = v[random_slice:]
+                    reason += 'Item was randomly selected and within the \
+past year because there is no prioritized record.'
+                # if that set has no objects, pick the oldest verified item.
+                else:
+                    v = validations.order_by('last_verified')
+                    reason += 'Item was chosen because there \
 is no prioritized record and it had not been validated in the longest \
 duration of time.'
         self.reason = reason
