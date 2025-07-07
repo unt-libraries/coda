@@ -66,9 +66,9 @@ oldest prioritized.'
         else:
             # if nothing is prioritized, check for unverified status
             v = validations.filter(
-                last_verified_status='Unverified').order_by('last_verified')
+                last_verified_status='Unverified').order_by('added')
             if v.exists():
-                reason += 'Item was chosen because it is Unverified.'
+                reason += 'Item was chosen because it is the oldest Unverified.'
             else:
                 # if set is empty, go with any priority with last_verified older than
                 # settings.VALIDATION_PERIOD
