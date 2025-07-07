@@ -6,10 +6,7 @@ To take advantage of the dev environment that is already configured, you need to
 
 Install [Docker](https://docs.docker.com/installation/)
 
-Install Docker Compose
-```sh
-$ pip install docker-compose
-```
+Install [Docker Compose](https://docs.docker.com/compose/install/)
 
 Clone the repository.
 ```sh
@@ -24,19 +21,19 @@ $ cp secrets.json.template secrets.json
 
 Warm up the MariaDB database. This only needs to be done when the database container doesn't exist yet. This will take ~15 seconds once the image has been pulled.
 ```sh
-$ docker-compose up -d db
+$ docker compose up -d db
 ```
 
 Start the app and run the migrations.
 ```sh
 # run the migrations
-$ docker-compose run --rm manage migrate
+$ docker compose run --rm manage migrate
 
 # start the app
-$ docker-compose up -d app
+$ docker compose up -d app
 
 # Optional: add a superuser in order to log in to the admin interface
-$ docker-compose run --rm manage createsuperuser
+$ docker compose run --rm manage createsuperuser
 ```
 
 The app should now be viewable at the default location of localhost:8787.
@@ -47,21 +44,21 @@ However, if the requirements files change, it is important that you rebuild the 
 
 ```sh
 # stop the app
-$ docker-compose stop
+$ docker compose stop
 
 # remove the app container
-$ docker-compose rm app test manage
+$ docker compose rm app test manage
 
 # rebuild the app, manage, and test containers
-$ docker-compose build 
+$ docker compose build
 
 # start the app
-$ docker-compose up -d app
+$ docker compose up -d app
 ```
 
 #### Developing with Podman and Podman-Compose
 
-Similar to docker and docker-compose, you will need to install, clone the repository and create a `secrets.json`.
+Similar to Docker and Docker Compose, you will need to install, clone the repository and create a `secrets.json`.
 
 [Install or Enable Podman](https://podman.io/getting-started/installation).
 
@@ -81,10 +78,10 @@ fail on the first run since the database needs time to warm up.
 
 ```sh
 # On the initial run or if the schema changes
-$ docker-compose run --rm test --create-db
+$ docker compose run --rm test --create-db
 
 # Subsequent runs
-$ docker-compose run --rm test 
+$ docker compose run --rm test
 ```
 
 For podman
