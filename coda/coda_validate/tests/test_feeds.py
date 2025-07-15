@@ -48,6 +48,7 @@ class TestAtomNextNewsFeed:
 
         feed = views.AtomNextNewsFeed()
         feed_queryset = feed.items('')
+        assert len(feed_queryset) == 1
         assert oldest[0].identifier == feed_queryset[0].identifier
         assert 'Item was chosen because it is the oldest Unverified' in feed.reason
 
