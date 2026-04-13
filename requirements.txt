@@ -6,7 +6,7 @@ mysqlclient~=2.0.1
 python-dateutil==2.8.0
 requests==2.32.4
 pyoai==2.5.0
-pytest==3.10.1
+pytest==9.0.3
 pytest-django>=3.4.1
 flake8<5.0.0
 pytest-flake8
